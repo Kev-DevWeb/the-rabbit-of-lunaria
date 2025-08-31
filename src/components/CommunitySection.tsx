@@ -44,8 +44,8 @@ const CommunitySection = () => {
   return (
     <section className="relative w-full h-screen flex items-center justify-center text-white bg-black">
       <div className="text-center max-w-4xl p-8 flex flex-col items-center justify-center relative" style={{ height: '100%' }}>
-        <h2 className="text-4xl font-bold font-cinzel-decorative community-title">La Madriguera de Lunaria</h2>
-        <p className="text-lg mt-4 community-text max-w-2xl mx-auto">
+        <h2 className="text-3xl md:text-4xl font-bold font-cinzel-decorative community-title">La Madriguera de Lunaria</h2>
+        <p className="text-base md:text-lg mt-4 community-text max-w-2xl mx-auto">
           Únete a nuestra comunidad en Lunaria, la madriguera mágica de la luna. Un espacio seguro y lleno de encanto para brujit@s, personas curiosas y pequeños babywitches que desean iniciar su camino mágico. Aquí podrás compartir experiencias, conocimiento, datos y sugerencias para seguir construyendo juntos un lugar donde la magia crece y todos aprendemos.
         </p>
         <div className="flex items-end justify-center w-full mt-12 gap-8 relative" style={{ minHeight: 160 }}>

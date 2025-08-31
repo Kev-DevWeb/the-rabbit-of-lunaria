@@ -54,8 +54,8 @@ const ServicesSection = () => {
   return (
     <section ref={sectionRef} className="relative w-full h-screen flex flex-col items-center justify-center text-white bg-transparent p-0 m-0">
       <div className="text-center max-w-3xl p-8 relative z-10">
-        <h2 className="text-4xl font-bold font-cinzel-decorative service-title">Lecturas de Tarot</h2>
-        <p className="text-lg mt-4 service-text">
+        <h2 className="text-3xl md:text-4xl font-bold font-cinzel-decorative service-title">Lecturas de Tarot</h2>
+        <p className="text-base md:text-lg mt-4 service-text">
           A través del tarot puedo ayudarte a establecer un canal con tu guardián espiritual.
           Recibe consejos, advertencias y la guía que necesitas para tu camino. También podemos explorar memorias de tu vida pasada para entender mejor tu presente.
         </p>
