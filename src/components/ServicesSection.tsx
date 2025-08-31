@@ -103,7 +103,7 @@ const ServicesSection = () => {
             </div>
           </div>
         </div>
-        <Link href="/citas" className="inline-block mt-10 px-8 py-3 bg-indigo-600 hover:bg-indigo-700 transition-colors rounded-full text-lg font-bold text-white shadow-xl">Agenda una cita</Link>
+        <Link href="/citas" className="hidden md:inline-block mt-10 px-8 py-3 bg-indigo-600 hover:bg-indigo-700 transition-colors rounded-full text-lg font-bold text-white shadow-xl">Agenda una cita</Link>
       </div>
     </section>
   );
