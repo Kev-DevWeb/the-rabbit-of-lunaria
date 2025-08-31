@@ -2,6 +2,7 @@
 import React, { useRef } from 'react';
 import Image from 'next/image';
 import { useGSAP } from '@gsap/react';
+import Link from 'next/link';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 gsap.registerPlugin(ScrollTrigger);
@@ -14,20 +15,25 @@ const ServicesSection = () => {
 
   useGSAP(() => {
     if (!sectionRef.current) return;
+    gsap.set(tableRef.current, { autoAlpha: 0, scale: 0.85, y: 50, zIndex: 0 });
+    gsap.set(mantelRef.current, { autoAlpha: 0, scale: 0.95, y: 32, zIndex: 1 });
+    gsap.set(cardsRef.current, { zIndex: 10 });
+
     const tl = gsap.timeline({
       scrollTrigger: {
         trigger: sectionRef.current,
-        start: 'top 80%', // cuando entra al viewport
-        toggleActions: 'restart none none reset',
-        // La animación se reinicia cada vez que vuelve a entrar
+        start: 'top bottom', // Cuando la parte superior de la sección toca la parte inferior de la ventana
+        end: 'bottom top',   // Cuando la parte inferior de la sección toca la parte superior de la ventana
+        toggleActions: 'play reverse play reverse',
+        // Ahora sí ejecuta animación tanto al bajar como al subir
       }
     });
-    tl.set(tableRef.current, { autoAlpha: 0, scale: 0.85, y: 50, zIndex: 0 })
-      .to(tableRef.current, { autoAlpha: 1, scale: 1, y: 0, duration: 0.6, ease: 'power3.out' }, 0.04)
-      .set(mantelRef.current, { autoAlpha: 0, scale: 0.95, y: 32, zIndex: 1 })
-      .to(mantelRef.current, { autoAlpha: 1, scale: 1, y: 0, duration: 0.7, ease: 'power2.out' }, 0.25)
-      .set(cardsRef.current, { zIndex: 10 })
-      .fromTo(
+
+    tl.to(tableRef.current, { autoAlpha: 1, scale: 1, y: 0, duration: 0.6, ease: 'power3.out' }, 0.04)
+      .to(mantelRef.current, { autoAlpha: 1, scale: 1, y: 0, duration: 0.7, ease: 'power2.out' }, 0.25);
+
+    if (cardsRef.current) {
+      tl.fromTo(
         cardsRef.current.querySelectorAll('.card-1, .card-2, .card-3'),
         { autoAlpha: 0, y: 85, scale: 0.94, rotate: -30 },
         {
@@ -41,6 +47,7 @@ const ServicesSection = () => {
         },
         0.58
       );
+    }
     return () => tl.scrollTrigger && tl.scrollTrigger.kill();
   }, []);
 
@@ -96,7 +103,7 @@ const ServicesSection = () => {
             </div>
           </div>
         </div>
-        <a href="/citas" className="inline-block mt-10 px-8 py-3 bg-indigo-600 hover:bg-indigo-700 transition-colors rounded-full text-lg font-bold text-white shadow-xl">Agenda una cita</a>
+        <Link href="/citas" className="inline-block mt-10 px-8 py-3 bg-indigo-600 hover:bg-indigo-700 transition-colors rounded-full text-lg font-bold text-white shadow-xl">Agenda una cita</Link>
       </div>
     </section>
   );

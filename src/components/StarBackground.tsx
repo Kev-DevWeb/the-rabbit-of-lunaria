@@ -70,7 +70,7 @@ const StarBackground = ({
   const particleOptions = {
     background: { color: { value: "#000" } },
     fpsLimit: 60,
-    particles: { number: { value: 130 }, color: { value: "#fff" }, opacity: { value: { min: 0.12, max: 0.65 } }, size: { value: { min: 1, max: 2.2 } }, move: { enable: true, speed: 0.2, direction: "none", straight: false } },
+    particles: { number: { value: 130 }, color: { value: "#fff" }, opacity: { value: { min: 0.12, max: 0.65 } }, size: { value: { min: 1, max: 2.2 } }, move: { enable: true, speed: 0.2, direction: "none" as const, straight: false } },
   };
 
   return (

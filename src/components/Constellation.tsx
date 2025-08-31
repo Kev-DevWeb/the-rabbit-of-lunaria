@@ -58,9 +58,15 @@ const constellations = {
   },
 };
 
-const Constellation = ({ name, className = "" }) => {
+type ConstellationName = "ursa-major" | "orion" | "cassiopeia" | "leo";
+type ConstellationProps = {
+  name: ConstellationName;
+  className?: string;
+};
+
+const Constellation = ({ name, className = "" }: ConstellationProps) => {
   const constellation = constellations[name];
-  const constellationRef = useRef(null);
+  const constellationRef = useRef<HTMLDivElement>(null);
 
   useGSAP(() => {
     if (constellationRef.current) {

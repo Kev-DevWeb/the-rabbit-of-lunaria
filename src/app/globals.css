@@ -74,3 +74,7 @@ h1, h2 {
     /* No longer needed here, will be animated directly */
 }
 
+.text-shadow {
+  text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
+}
+

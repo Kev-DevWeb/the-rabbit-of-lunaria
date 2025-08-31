@@ -4,13 +4,15 @@ import { getFirestore } from "firebase/firestore";
 
 // TODO: Reemplaza esto con tu objeto de configuración de Firebase
 // Puedes encontrarlo en la consola de Firebase, en Configuración del proyecto -> Tus apps -> Web
+// For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "TU_API_KEY",
-  authDomain: "TU_AUTH_DOMAIN",
-  projectId: "TU_PROJECT_ID",
-  storageBucket: "TU_STORAGE_BUCKET",
-  messagingSenderId: "TU_MESSAGING_SENDER_ID",
-  appId: "TU_APP_ID"
+  apiKey: "AIzaSyAZO5sQc-inY1GfcCNqQ_3ovjW8B8zynBo",
+  authDomain: "lunariarabbit.firebaseapp.com",
+  projectId: "lunariarabbit",
+  storageBucket: "lunariarabbit.firebasestorage.app",
+  messagingSenderId: "953994126619",
+  appId: "1:953994126619:web:0123a6b84f462fd488dfbe",
+  measurementId: "G-PM472KT27W"
 };
 
 // Inicializa Firebase
