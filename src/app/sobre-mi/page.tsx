@@ -1,52 +1,32 @@
-"use client";
-import { useState, useEffect } from 'react';
-import Header from "../../components/Header";
-import AppFooter from "../../components/AppFooter";
-import Constellation from "../../components/Constellation";
-import Particles, { initParticlesEngine } from "@tsparticles/react";
-import { loadSlim } from "@tsparticles/slim";
+import Header from "@/components/Header";
+import AppFooter from "@/components/AppFooter";
+import StarBackground from "@/components/StarBackground";
+
+// Ejemplo de constelación personalizada para sobre mí
+const SOBRE_MI_CONSTELLATION = [
+  { x: 120, y: 60, isBigStar: true },
+  { x: 180, y: 110 },
+  { x: 160, y: 180, isBigStar: true },
+  { x: 250, y: 140 },
+  { x: 200, y: 50 },
+  { x: 340, y: 90, isBigStar: true },
+];
 
 const SobreMiPage = () => {
-  const [init, setInit] = useState(false);
-
-  useEffect(() => {
-    initParticlesEngine(async (engine) => {
-      await loadSlim(engine);
-    }).then(() => {
-      setInit(true);
-    });
-  }, []);
-
-  const particleOptions = {
-    background: { color: { value: "#000" } },
-    fpsLimit: 60,
-    particles: {
-      number: { value: 150 },
-      color: { value: "#fff" },
-      opacity: { value: { min: 0.1, max: 0.7 } },
-      size: { value: { min: 1, max: 2.5 } },
-      move: { enable: true, speed: 0.2, direction: "none" as const, straight: false },
-    },
-  };
-
   return (
-    <div className="flex flex-col min-h-screen bg-black text-white">
-      {init && <Particles options={particleOptions} className="absolute inset-0 z-0" />}
-      <Constellation name="orion" />
-
-      <Header animate={false} />
-      <main className="container mx-auto px-8 pt-32 flex-grow relative z-10">
-        <h1 className="text-5xl font-bold mb-8">Sobre Mí</h1>
-        <div className="prose prose-invert max-w-none text-lg">
-          <p>
-            Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat.
-          </p>
-          <p>
-            Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+    <div className="bg-black">
+      <StarBackground constellation={SOBRE_MI_CONSTELLATION} width={420} height={280} />
+      <Header />
+      <main className="min-h-screen flex flex-col items-center justify-center text-white pt-32">
+        <div className="container mx-auto p-8 z-10 relative">
+          <h1 className="text-4xl font-bold text-center mb-4">Sobre Mí</h1>
+          <p className="mt-4 text-lg max-w-xl mx-auto text-center">
+            “Soy un pequeño brujito que recién comienza en el tarot y encuentra en esta herramienta espiritual una forma de guiar y aconsejar con cariño. Creé este sitio para seguir aprendiendo de quienes tienen más experiencia y, al mismo tiempo, para acompañar a quienes inician su propio camino mágico, enfrentando las mismas dudas que yo tuve cuando la información parecía escasa.
+Lunaria nace como un espacio seguro, sin prejuicios ni juicios, donde podamos apoyarnos y compartir la magia con libertad. Espero que este rincón lunar nos permita crecer juntos, recorrer el sendero del autoconocimiento y descubrir la belleza de ayudarnos mutuamente.”
           </p>
         </div>
       </main>
-      <AppFooter animate={true} />
+      <AppFooter />
     </div>
   );
 };

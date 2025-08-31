@@ -30,7 +30,7 @@ const cormorantGaramond = Cormorant_Garamond({
 });
 
 export const metadata: Metadata = {
-  title: "The Rabbit of Lunaria - Tarot",
+  title: "La madriguera de Lunaria - Tarot",
   description: "Lecturas de tarot y agendamiento de citas.",
 };
 

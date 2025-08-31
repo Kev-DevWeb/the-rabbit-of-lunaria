@@ -1,5 +1,7 @@
 "use client";
-import { motion } from "framer-motion";
+import { useGSAP } from "@gsap/react";
+import gsap from "gsap";
+import { useRef } from "react";
 
 const constellations = {
   "ursa-major": {
@@ -58,21 +60,59 @@ const constellations = {
 
 const Constellation = ({ name, className = "" }) => {
   const constellation = constellations[name];
+  const constellationRef = useRef(null);
+
+  useGSAP(() => {
+    if (constellationRef.current) {
+      const stars = constellationRef.current.querySelectorAll('.constellation-star');
+      const lines = constellationRef.current.querySelectorAll('.constellation-line');
+
+      gsap.set(constellationRef.current, { opacity: 0, scale: 0.8 });
+      gsap.to(constellationRef.current, {
+        opacity: 0.6,
+        scale: 1,
+        duration: 5,
+        ease: "power1.inOut",
+      });
+
+      stars.forEach((star) => {
+        gsap.to(star, {
+          opacity: 0.5,
+          scale: 0.8,
+          duration: 2 + Math.random() * 2,
+          repeat: -1,
+          yoyo: true,
+          ease: "power1.inOut",
+          delay: Math.random() * 2,
+        });
+      });
+
+      lines.forEach((line) => {
+        gsap.to(line, {
+          opacity: 0.5,
+          duration: 3 + Math.random() * 2,
+          repeat: -1,
+          yoyo: true,
+          ease: "power1.inOut",
+          delay: Math.random() * 3,
+        });
+      });
+    }
+  }, { scope: constellationRef });
 
   if (!constellation) {
-    return null; // Or a placeholder
+    return null;
   }
 
   return (
-    <motion.div
+    <div
+      ref={constellationRef}
       className={`absolute top-0 left-0 w-full h-full flex items-center justify-center ${className}`}
-      initial={{ opacity: 0, scale: 0.8 }}
-      animate={{ opacity: 0.4, scale: 1 }}
-      transition={{ duration: 5, repeat: Infinity, repeatType: "reverse", ease: "easeInOut" }}
     >
       <svg
         viewBox={constellation.viewBox}
         className="w-full h-full"
+        style={{ filter: 'drop-shadow(0 0 10px rgba(255, 255, 255, 0.3))' }}
       >
         <path
           d={constellation.path}
@@ -81,8 +121,6 @@ const Constellation = ({ name, className = "" }) => {
           strokeWidth="0.5"
           strokeLinecap="round"
           className="constellation-line"
-          animate={{ opacity: [0.5, 1, 0.5], filter: ['drop-shadow(0 0 0px rgba(255,255,255,0))', 'drop-shadow(0 0 6px rgba(255,255,255,0.6))', 'drop-shadow(0 0 0px rgba(255,255,255,0))'] }}
-          transition={{ duration: 3, repeat: Infinity, repeatType: "reverse", ease: "easeInOut", delay: Math.random() * 3 }}
         />
         {constellation.stars.map((star, index) => (
           <circle
@@ -92,12 +130,10 @@ const Constellation = ({ name, className = "" }) => {
             r={star.r}
             fill="white"
             className="constellation-star"
-            animate={{ opacity: [0.5, 1, 0.5], filter: ['drop-shadow(0 0 0px rgba(255,255,255,0))', 'drop-shadow(0 0 10px rgba(255,255,255,0.8))', 'drop-shadow(0 0 0px rgba(255,255,255,0))'] }}
-            transition={{ duration: 2, repeat: Infinity, repeatType: "reverse", ease: "easeInOut", delay: Math.random() * 2 }}
           />
         ))}
       </svg>
-    </motion.div>
+    </div>
   );
 };
 

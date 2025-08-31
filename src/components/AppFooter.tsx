@@ -15,7 +15,7 @@ const AppFooter = ({ animate = true }) => {
       animate={animate ? "visible" : "hidden"}
       transition={{ duration: 0.5, delay: animate ? 1 : 0 }}
     >
-      <p>&copy; 2025 The Rabbit of Lunaria. Todos los derechos reservados.</p>
+      <p>&copy; 2025 La madriguera de Lunaria. Todos los derechos reservados.</p>
     </motion.footer>
   );
 };

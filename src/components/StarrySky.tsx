@@ -1,187 +1,88 @@
 "use client";
-import { useEffect, useState } from "react";
+import { useRef } from 'react';
+import Image from 'next/image';
+import { useGSAP } from '@gsap/react';
+import gsap from 'gsap';
 import Particles, { initParticlesEngine } from "@tsparticles/react";
 import { loadSlim } from "@tsparticles/slim";
-import { motion } from "framer-motion";
-import type { Container } from "@tsparticles/engine";
-import Header from "./Header";
-import AppFooter from "./AppFooter";
-import Constellation from "./Constellation";
+import { useEffect, useState } from 'react';
 
-const SkyElements = ({ isVisible }) => {
-  const variants = {
-    hidden: { y: -20, opacity: 0 },
-    visible: { y: 0, opacity: 1 },
-  };
+// Sub-componentes de la cinemática
+const ForestScene = () => (
+  <div className="absolute inset-0 w-full h-full">
+    <Image src="/cabañanoche.jpg" alt="Cabaña en el bosque" layout="fill" objectFit="cover" className="z-0" />
+    <Image src="/siluetabosque.png" alt="Silueta del bosque" layout="fill" objectFit="cover" className="z-10" />
+    <div className="absolute inset-0 z-10" style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 40%)' }} />
+    <div className="absolute top-[60%] left-[65%] w-5 h-5 bg-orange-300 rounded-full z-20 lantern" style={{ boxShadow: '0 0 25px 15px rgba(255, 165, 0, 0.7)' }} />
+    <div className="absolute w-1 h-1 bg-yellow-200 rounded-full z-20 firefly1" style={{ top: '70%', left: '30%', boxShadow: '0 0 10px 5px rgba(255, 255, 0, 0.7)' }} />
+    <div className="absolute w-1 h-1 bg-yellow-200 rounded-full z-20 firefly2" style={{ top: '80%', left: '60%', boxShadow: '0 0 10px 5px rgba(255, 255, 0, 0.7)' }} />
+    <div className="absolute w-1 h-1 bg-yellow-200 rounded-full z-20 firefly3" style={{ top: '75%', left: '45%', boxShadow: '0 0 10px 5px rgba(255, 255, 0, 0.7)' }} />
+  </div>
+);
 
-  return (
-    <div className="absolute inset-0">
-      {/* Luna Gigante */}
-      <motion.div 
-        className="absolute top-1/4 left-1/2 -translate-x-1/2 w-24 h-24 bg-gray-200 rounded-full"
-        variants={variants} 
-        initial="hidden"
-        animate={isVisible ? "visible" : "hidden"} 
-        transition={{ type: "spring", duration: 2, delay: 1 }}
-      >
-        <div className="absolute bottom-full left-1/2 -translate-x-1/2 h-20 w-px bg-gray-400"></div>
-        {/* Conejo en la luna */}
-        <motion.div
-          className="absolute inset-0 flex items-center justify-center"
-          variants={{ hidden: { opacity: 0 }, visible: { opacity: 1 } }}
-          initial="hidden"
-          animate={isVisible ? "visible" : "hidden"}
-          transition={{ duration: 1, delay: 2.5 }} 
-        >
-          <img src="/rabbit.svg" alt="Silueta de conejo" className="w-1/2 h-1/2 object-contain" />
-        </motion.div>
-      </motion.div>
-
-      {/* Estrellas Colgantes */}
-      <motion.div 
-        className="absolute top-1/3 left-1/4 w-8 h-8 bg-yellow-300"
-        style={{ clipPath: "polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)" }}
-        variants={variants} 
-        initial="hidden"
-        animate={isVisible ? "visible" : "hidden"} 
-        transition={{ type: "spring", duration: 2, delay: 1.5 }}
-      >
-        <div className="absolute bottom-full left-1/2 -translate-x-1/2 h-24 w-px bg-gray-400"></div>
-      </motion.div>
-      <motion.div 
-        className="absolute top-1/2 left-3/4 w-6 h-6 bg-yellow-300"
-        style={{ clipPath: "polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%)" }}
-        variants={variants} 
-        initial="hidden"
-        animate={isVisible ? "visible" : "hidden"} 
-        transition={{ type: "spring", duration: 2, delay: 2 }}
-      >
-        <div className="absolute bottom-full left-1/2 -translate-x-1/2 h-32 w-px bg-gray-400"></div>
-      </motion.div>
+const HangingElements = () => (
+  <div className="absolute inset-0 w-full h-full pointer-events-none z-0">
+    <div className="absolute top-[20%] left-1/2 -translate-x-1/2 -translate-y-1/2 hanging-moon">
+      <div className="relative w-48 h-48" style={{ filter: 'drop-shadow(0 0 20px rgba(255, 255, 255, 0.5))' }}>
+        <Image src="/lunallena.svg" alt="Luna Llena" layout="fill" objectFit="contain" />
+        <div className="absolute inset-0 flex items-center justify-center">
+          <Image src="/rabbit.svg" alt="Silueta de conejo" width={80} height={80} />
+        </div>
+      </div>
     </div>
-  );
-};
+    <div className="absolute top-[40%] left-[25%] -translate-y-1/2 hanging-star1">
+      <Image src="/estrella.svg" alt="Estrella" width={60} height={60} />
+    </div>
+    <div className="absolute top-[35%] right-[25%] -translate-y-1/2 hanging-star2">
+      <Image src="/estrella.svg" alt="Estrella" width={40} height={40} />
+    </div>
+  </div>
+);
 
-const StarrySky = () => {
-  const [init, setInit] = useState(false);
-  const [sceneReady, setSceneReady] = useState(false);
+const StarrySky = ({ onComplete }) => {
+  const containerRef = useRef(null);
+  const timeoutRef = useRef(null);
+  const [showIntro, setShowIntro] = useState(true);
 
   useEffect(() => {
-    initParticlesEngine(async (engine) => {
-      await loadSlim(engine);
-    }).then(() => {
-      setInit(true);
+    // Timeout de seguridad: llama a onComplete si la animación no termina en X segundos
+    timeoutRef.current = setTimeout(() => {
+      setShowIntro(false);
+      if (typeof onComplete === 'function') onComplete();
+    }, 6000); // 6 segundos máximo
+    return () => clearTimeout(timeoutRef.current);
+  }, [onComplete]);
+
+  useGSAP(() => {
+    if (!showIntro) return;
+    const tl = gsap.timeline({
+      onComplete: () => {
+        clearTimeout(timeoutRef.current);
+        setShowIntro(false);
+        if (typeof onComplete === 'function') onComplete();
+      }
     });
-
-    const timer = setTimeout(() => setSceneReady(true), 4500);
-    return () => clearTimeout(timer);
-  }, []);
-
-  const particleOptions = {
-    background: { color: { value: "#000" } },
-    fpsLimit: 60,
-    particles: {
-      number: { value: 150 },
-      color: { value: "#fff" },
-      opacity: { value: { min: 0.1, max: 0.7 } },
-      size: { value: { min: 1, max: 2.5 } },
-      move: { enable: true, speed: 0.2, direction: "none" as const, straight: false },
-    },
-  };
+    tl.to('.curtain', { opacity: 0, duration: 1.2, onComplete: () => gsap.set('.curtain', { display: 'none' }) })
+      .to('.lantern', { opacity: 0.7, scale: 1.1, duration: 1.0, repeat: -1, yoyo: true, ease: 'power1.inOut' }, "<0.3")
+      .to('.firefly1', { x: '+=20', y: '-=15', duration: 2, repeat: -1, yoyo: true, ease: 'sine.inOut' }, "<0.3")
+      .to('.firefly2', { x: '-=15', y: '+=10', duration: 1.5, repeat: -1, yoyo: true, ease: 'sine.inOut' }, "<0.6")
+      .to('.firefly3', { x: '+=10', y: '-=20', duration: 2.4, repeat: -1, yoyo: true, ease: 'sine.inOut' }, "<0.1")
+      .to('.forest-scene', { autoAlpha: 0, duration: 0.75, delay: 2 });
+  }, { scope: containerRef, dependencies: [showIntro] });
 
   return (
-    <div className="relative w-full h-screen overflow-hidden bg-black">
-      {/* CIELO (Detrás) */}
-      <div className="absolute inset-0">
-        {init && (
-          <motion.div initial={{ opacity: 0 }} animate={{ opacity: sceneReady ? 1 : 0 }} transition={{ duration: 3, delay: 2 }}>
-            <Particles id="tsparticles" options={particleOptions} />
-          </motion.div>
-        )}
-        <SkyElements isVisible={sceneReady} />
-      </div>
-
-      {/* CAMPO (Delante) */}
-      <motion.div
-        className="absolute inset-0"
-        animate={{ y: "100vh" }}
-        transition={{ duration: 2, delay: 2, ease: "easeInOut" }}
-      >
-        <div 
-          className="w-full h-full bg-cover bg-bottom"
-          style={{ backgroundImage: 'linear-gradient(to top, rgba(0,0,0,0) 0%, rgba(0,0,0,1) 100%), url(/cabañanoche.jpg)' }}
-        >
-          {/* Linterna */}
-          <motion.div
-            className="absolute"
-            style={{
-              top: '65%', 
-              left: '45%', 
-              width: '20px',
-              height: '20px',
-              borderRadius: '50%',
-              backgroundColor: 'rgba(255, 165, 0, 0.8)', 
-              boxShadow: '0 0 15px 8px rgba(255, 165, 0, 0.6)',
-              zIndex: 10,
-            }}
-            animate={{ opacity: [0.8, 1, 0.8] }}
-            transition={{ duration: 2, repeat: Infinity, ease: "easeInOut" }}
-          />
-
-          {/* Luciérnagas */}
-          <div className="absolute inset-0 pointer-events-none">
-            {/* Firefly 1 */}
-            <motion.div
-              className="absolute"
-              style={{
-                top: '70%', left: '30%', width: '5px', height: '5px', borderRadius: '50%', backgroundColor: 'yellow',
-                boxShadow: '0 0 5px 2px yellow', zIndex: 10,
-              }}
-              animate={{ x: [0, 10, 0], y: [0, -10, 0], opacity: [0.5, 1, 0.5] }}
-              transition={{ duration: 3, repeat: Infinity, ease: "easeInOut", delay: 0.5 }}
-            />
-            {/* Firefly 2 */}
-            <motion.div
-              className="absolute"
-              style={{
-                top: '80%', left: '60%', width: '5px', height: '5px', borderRadius: '50%', backgroundColor: 'yellow',
-                boxShadow: '0 0 5px 2px yellow', zIndex: 10,
-              }}
-              animate={{ x: [0, -15, 0], y: [0, 5, 0], opacity: [0.5, 1, 0.5] }}
-              transition={{ duration: 4, repeat: Infinity, ease: "easeInOut", delay: 1 }}
-            />
-            {/* Firefly 3 */}
-            <motion.div
-              className="absolute"
-              style={{
-                top: '75%', left: '45%', width: '5px', height: '5px', borderRadius: '50%', backgroundColor: 'yellow',
-                boxShadow: '0 0 5px 2px yellow', zIndex: 10,
-              }}
-              animate={{ x: [0, 5, 0], y: [0, 10, 0], opacity: [0.5, 1, 0.5] }}
-              transition={{ duration: 3.5, repeat: Infinity, ease: "easeInOut", delay: 0.8 }}
-            />
-          </div>
-        </div>
-      </motion.div>
-
-      <Header />
-
-      {/* FOOTER HTML (2D) */}
-      <div className="absolute bottom-0 left-0 w-full z-50">
-        <AppFooter animate={sceneReady} />
-      </div>
-
-      <motion.main 
-        className="absolute inset-0 flex flex-col items-center justify-center text-center text-white pointer-events-none"
-        initial={{ opacity: 0 }}
-        animate={{ opacity: sceneReady ? 1 : 0 }}
-        transition={{ duration: 2, delay: 4 }}
-      >
-        <h2 className="text-5xl font-bold mb-4 drop-shadow-lg">Desvela los misterios de tu futuro</h2>
-        <p className="text-xl drop-shadow-md">El tarot es una herramienta de autoconocimiento y guía.</p>
-        <Constellation name="ursa-major" />
-      </motion.main>
-    </div>
+    <section
+      ref={containerRef}
+      className="relative w-full h-screen overflow-hidden bg-black"
+      style={{ minHeight: '600px' }}
+    >
+      {showIntro && (
+        <>
+          <div className="absolute inset-0 z-50 bg-black curtain" />
+          <div className="absolute inset-0 z-20 forest-scene"><ForestScene /></div>
+        </>
+      )}
+    </section>
   );
 };
 
