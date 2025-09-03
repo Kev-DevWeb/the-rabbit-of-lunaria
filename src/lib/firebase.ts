@@ -1,22 +1,25 @@
-// src/lib/firebase.ts
-import { initializeApp } from "firebase/app";
+// Import the functions you need from the SDKs you need
+import { initializeApp, getApps } from "firebase/app";
 import { getFirestore } from "firebase/firestore";
+import { getAnalytics, isSupported } from "firebase/analytics";
 
-// TODO: Reemplaza esto con tu objeto de configuración de Firebase
-// Puedes encontrarlo en la consola de Firebase, en Configuración del proyecto -> Tus apps -> Web
+// Your web app's Firebase configuration
 // For Firebase JS SDK v7.20.0 and later, measurementId is optional
 const firebaseConfig = {
-  apiKey: "AIzaSyAZO5sQc-inY1GfcCNqQ_3ovjW8B8zynBo",
-  authDomain: "lunariarabbit.firebaseapp.com",
-  projectId: "lunariarabbit",
-  storageBucket: "lunariarabbit.firebasestorage.app",
-  messagingSenderId: "953994126619",
-  appId: "1:953994126619:web:0123a6b84f462fd488dfbe",
-  measurementId: "G-PM472KT27W"
+  apiKey: process.env.NEXT_PUBLIC_FIREBASE_API_KEY,
+  authDomain: process.env.NEXT_PUBLIC_FIREBASE_AUTH_DOMAIN,
+  projectId: process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID,
+  storageBucket: process.env.NEXT_PUBLIC_FIREBASE_STORAGE_BUCKET,
+  messagingSenderId: process.env.NEXT_PUBLIC_FIREBASE_MESSAGING_SENDER_ID,
+  appId: process.env.NEXT_PUBLIC_FIREBASE_APP_ID,
+  measurementId: process.env.NEXT_PUBLIC_FIREBASE_MEASUREMENT_ID
 };
 
-// Inicializa Firebase
-const app = initializeApp(firebaseConfig);
+// Initialize Firebase
+const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
+const db = getFirestore(app);
 
-// Exporta la instancia de Firestore
-export const db = getFirestore(app);
+// Inicializa Analytics solo si es compatible con el navegador
+const analytics = isSupported().then(yes => yes ? getAnalytics(app) : null);
+
+export { db, analytics };

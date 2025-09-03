@@ -1,7 +1,5 @@
 "use client";
 
-import Header from "@/components/Header";
-import AppFooter from "@/components/AppFooter";
 import StarBackground from "@/components/StarBackground";
 import Image from "next/image";
 
@@ -37,7 +35,6 @@ const SobreMiPage = () => {
   return (
     <div className="bg-black">
       <StarBackground constellation={SOBRE_MI_CONSTELLATION} width={420} height={280} />
-      <Header />
       <main className="min-h-screen flex flex-col items-center justify-center text-white pt-32">
         <div className="container mx-auto p-8 z-10 relative bg-black/70 rounded-xl shadow-lg backdrop-blur-sm">
           <h1 className="text-4xl font-bold text-center mb-4">Sobre Mí</h1>
@@ -55,7 +52,6 @@ Lunaria nace como un espacio seguro, sin prejuicios ni juicios, donde podamos ap
           />
         </div>
       </main>
-      <AppFooter />
     </div>
   );
 };

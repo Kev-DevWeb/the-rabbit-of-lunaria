@@ -2,6 +2,9 @@ import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from "next/font/google";
 import { Cinzel_Decorative, Playfair_Display, Cormorant_Garamond } from "next/font/google";
 import "./globals.css";
+import { AudioProvider } from '@/context/AudioProvider';
+import Header from '@/components/Header';
+import AppFooter from '@/components/AppFooter';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -41,11 +44,17 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="es-MX" className="h-full">
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${cinzelDecorative.variable} ${playfairDisplay.variable} ${cormorantGaramond.variable} antialiased`}
+        className={`${geistSans.variable} ${geistMono.variable} ${cinzelDecorative.variable} ${playfairDisplay.variable} ${cormorantGaramond.variable} antialiased bg-gray-900 text-white`}
       >
-        {children}
+        <AudioProvider>
+          <div className="flex flex-col min-h-screen">
+            <Header />
+            <main className="flex-grow">{children}</main>
+            <AppFooter />
+          </div>
+        </AudioProvider>
       </body>
     </html>
   );

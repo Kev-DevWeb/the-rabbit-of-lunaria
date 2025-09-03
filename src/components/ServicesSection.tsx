@@ -1,4 +1,4 @@
-"use client";
+'use client';
 import React, { useRef } from 'react';
 import Image from 'next/image';
 import { useGSAP } from '@gsap/react';
@@ -16,25 +16,30 @@ const ServicesSection = () => {
   useGSAP(() => {
     if (!sectionRef.current) return;
     gsap.set(tableRef.current, { autoAlpha: 0, scale: 0.85, y: 50, zIndex: 0 });
-    gsap.set(mantelRef.current, { autoAlpha: 0, scale: 0.95, y: 32, zIndex: 1 });
+    gsap.set(mantelRef.current, { autoAlpha: 0, scale: 0.95, y: 32, rotation: -3, zIndex: 1 });
     gsap.set(cardsRef.current, { zIndex: 10 });
 
     const tl = gsap.timeline({
       scrollTrigger: {
         trigger: sectionRef.current,
-        start: 'top bottom', // Cuando la parte superior de la sección toca la parte inferior de la ventana
-        end: 'bottom top',   // Cuando la parte inferior de la sección toca la parte superior de la ventana
-        toggleActions: 'play reverse play reverse',
-        // Ahora sí ejecuta animación tanto al bajar como al subir
+        start: 'top 80%', // Inicia la animación cuando el 80% de la sección es visible desde abajo
+        toggleActions: 'play none none none', // La animación solo se ejecuta una vez al entrar
       }
     });
 
-    tl.to(tableRef.current, { autoAlpha: 1, scale: 1, y: 0, duration: 0.6, ease: 'power3.out' }, 0.04)
-      .to(mantelRef.current, { autoAlpha: 1, scale: 1, y: 0, duration: 0.7, ease: 'power2.out' }, 0.25);
+    // Animación de entrada para el texto
+    tl.from('.service-title', { autoAlpha: 0, y: 40, duration: 0.8, ease: 'power3.out' }, 0)
+      .from('.service-text', { autoAlpha: 0, y: 40, duration: 0.8, ease: 'power3.out' }, 0.2);
+
+    // Animación para la mesa, el mantel y las cartas (ligeramente retrasada)
+    const sceneStartTime = 0.4;
+    tl.to(tableRef.current, { autoAlpha: 1, scale: 1, y: 0, duration: 0.8, ease: 'power3.out' }, sceneStartTime)
+      .to(mantelRef.current, { autoAlpha: 1, scale: 1, y: 0, rotation: 0, duration: 0.8, ease: 'power2.out' }, sceneStartTime + 0.25);
 
     if (cardsRef.current) {
+      const cards = cardsRef.current.querySelectorAll('.card-1, .card-2, .card-3');
       tl.fromTo(
-        cardsRef.current.querySelectorAll('.card-1, .card-2, .card-3'),
+        cards,
         { autoAlpha: 0, y: 85, scale: 0.94, rotate: -30 },
         {
           autoAlpha: 1,
@@ -45,8 +50,37 @@ const ServicesSection = () => {
           duration: 1.1,
           ease: 'power2.out',
         },
-        0.58
+        sceneStartTime + 0.58
       );
+
+      cards.forEach((card: Element) => {
+        const onMouseEnter = () => {
+          gsap.to(card, {
+            y: -15,
+            scale: 1.05,
+            boxShadow: "0px 20px 40px rgba(0,0,0,0.4)",
+            duration: 0.3,
+            ease: 'power2.out'
+          });
+        };
+        const onMouseLeave = () => {
+          gsap.to(card, {
+            y: 0,
+            scale: 1,
+            boxShadow: "0px 10px 20px rgba(0,0,0,0.2)",
+            duration: 0.3,
+            ease: 'power2.in'
+          });
+        };
+        card.addEventListener('mouseenter', onMouseEnter);
+        card.addEventListener('mouseleave', onMouseLeave);
+
+        // Cleanup
+        return () => {
+          card.removeEventListener('mouseenter', onMouseEnter);
+          card.removeEventListener('mouseleave', onMouseLeave);
+        }
+      });
     }
     return () => tl.scrollTrigger && tl.scrollTrigger.kill();
   }, []);
@@ -61,44 +95,49 @@ const ServicesSection = () => {
         </p>
         <div className="w-full flex justify-center">
           <div className="relative flex items-center justify-center mt-12 w-full" style={{ minHeight: '390px', height: '64vh', maxHeight: 520 }}>
-            {/* Mesa de madera (café) */}
+            {/* Mesa de madera (imagen) */}
             <div
               ref={tableRef}
-              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 flex items-center justify-center"
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
               aria-hidden="true"
               style={{
                 width: '85%',
                 height: '83%',
-                background: 'linear-gradient(180deg,#704e36 70%,#442911 100%)',
-                borderRadius: '42px',
-                boxShadow: '0 6px 32px #18100188',
                 zIndex: 0,
               }}
             >
-              {/* Mantel morado, contenido dentro de la mesa */}
-              <div
-                ref={mantelRef}
-                className="w-11/12 h-4/5"
-                style={{
-                  background: 'linear-gradient(180deg, #a259ff 80%, #511583 100%)',
-                  borderRadius: '40px',
-                  boxShadow: '0 12px 36px 0 #24001730 inset, 0 8px 16px #bfa7f944 inset',
-                  opacity: 0.93,
-                  border: '4px solid #ad84f7',
-                  zIndex: 1,
-                }}
+              <Image
+                src="/mesamadera.jpg"
+                alt="Mesa de madera"
+                fill
+                sizes="(max-width: 768px) 100vw, 50vw"
+                className="rounded-[42px] shadow-[0_6px_32px_#18100188]"
+                style={{ objectFit: 'cover' }}
               />
             </div>
+            {/* Mantel morado, ahora posicionado absolutamente sobre la mesa */}
+            <div
+              ref={mantelRef}
+              className="absolute w-[78%] h-[66%]" // w-11/12 de 85% y h-4/5 de 83%
+              style={{
+                background: 'linear-gradient(180deg, #a259ff 80%, #511583 100%)',
+                borderRadius: '40px',
+                boxShadow: '0 12px 36px 0 #24001730 inset, 0 8px 16px #bfa7f944 inset',
+                opacity: 0.93,
+                border: '4px solid #ad84f7',
+                zIndex: 1,
+              }}
+            />
             {/* Cartas (por encima de todo) */}
             <div ref={cardsRef} className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" style={{ zIndex: 10, width: '100%', height: '100%' }}>
-              <div className="absolute card-1">
-                <Image src="/cartablanca.jpg" alt="Carta de Tarot 1" width={150} height={250} className="rounded-lg shadow-lg" />
+              <div className="absolute card-1 service-card">
+                <Image src="/cartablanca.jpg" alt="Carta de Tarot 1" width={150} height={250} className="rounded-lg shadow-lg" style={{ width: '100%', height: 'auto' }} />
               </div>
-              <div className="absolute card-2">
-                <Image src="/lunacarta.jpg" alt="Carta de Tarot 2" width={150} height={250} className="rounded-lg shadow-lg" />
+              <div className="absolute card-2 service-card">
+                <Image src="/lunacarta.jpg" alt="Carta de Tarot 2" width={150} height={250} className="rounded-lg shadow-lg" style={{ width: '100%', height: 'auto' }} />
               </div>
-              <div className="absolute card-3">
-                <Image src="/cartamano.jpg" alt="Carta de Tarot 3" width={150} height={250} className="rounded-lg shadow-lg" />
+              <div className="absolute card-3 service-card">
+                <Image src="/cartamano.jpg" alt="Carta de Tarot 3" width={150} height={250} className="rounded-lg shadow-lg" style={{ width: '100%', height: 'auto' }} />
               </div>
             </div>
           </div>

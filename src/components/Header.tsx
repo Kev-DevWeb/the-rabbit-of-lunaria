@@ -1,23 +1,51 @@
-"use client";
-import { useState } from "react";
+'use client';
+import { useState, useRef } from "react";
 import Link from "next/link";
+import MuteButton from "./MuteButton";
+import { useGSAP } from "@gsap/react";
+import gsap from "gsap";
 
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
+  const headerRef = useRef<HTMLElement>(null);
+
+  useGSAP(() => {
+    const links = gsap.utils.toArray<Element>('.animated-link');
+    links.forEach((link: Element) => {
+      const onMouseEnter = () => {
+        gsap.to(link, { y: -2, color: "#d1d5db", duration: 0.2 });
+      };
+      const onMouseLeave = () => {
+        gsap.to(link, { y: 0, color: "#ffffff", duration: 0.2 });
+      };
+      link.addEventListener('mouseenter', onMouseEnter);
+      link.addEventListener('mouseleave', onMouseLeave);
+
+      // Cleanup
+      return () => {
+        link.removeEventListener('mouseenter', onMouseEnter);
+        link.removeEventListener('mouseleave', onMouseLeave);
+      }
+    });
+  }, { scope: headerRef });
+
 
   return (
-    <header className="absolute top-0 left-0 w-full p-4 sm:p-8 text-white z-50">
+    <header ref={headerRef} className="absolute top-0 left-0 w-full p-4 sm:p-8 text-white z-50">
       <nav className="container mx-auto flex justify-between items-center">
-        <Link href="/" className="text-xl sm:text-2xl font-bold hover:text-gray-300 navbar-title">
+        <Link href="/" className="text-xl sm:text-2xl font-bold hover:text-gray-300 navbar-title animated-link">
           La madriguera de Lunaria
         </Link>
 
         {/* Desktop Menu */}
-        <ul className="hidden md:flex space-x-6">
-          <li><Link href="/sobre-mi" className="hover:text-gray-300">Sobre mí</Link></li>
-          <li><Link href="/magia" className="hover:text-gray-300">Sobre la Magia</Link></li>
-          <li><Link href="/citas" className="hover:text-gray-300 font-semibold">Agendar Cita</Link></li>
-        </ul>
+        <div className="hidden md:flex items-center space-x-6">
+          <ul className="flex space-x-6">
+            <li><Link href="/sobre-mi" className="animated-link">Sobre mí</Link></li>
+            <li><Link href="/grimorio" className="animated-link whitespace-nowrap">El Grimorio de Lunaria</Link></li>
+            <li><Link href="/citas" className="font-semibold px-4 py-2 rounded-full bg-purple-600/50 text-white ring-1 ring-purple-400 hover:bg-purple-600/80 transition-all shadow-[0_0_15px_rgba(168,85,247,0.6)] hover:shadow-[0_0_25px_rgba(168,85,247,0.8)]">Agendar Cita</Link></li>
+          </ul>
+          <MuteButton />
+        </div>
 
         {/* Mobile Menu Button */}
         <div className="md:hidden">
@@ -39,9 +67,10 @@ const Header = () => {
       {isOpen && (
         <div className="md:hidden mt-4">
           <ul className="flex flex-col items-center space-y-4 bg-black bg-opacity-80 backdrop-blur-sm p-4 rounded-lg">
-            <li><Link href="/sobre-mi" className="block py-2 hover:text-gray-300" onClick={() => setIsOpen(false)}>Sobre mí</Link></li>
-            <li><Link href="/magia" className="block py-2 hover:text-gray-300" onClick={() => setIsOpen(false)}>Sobre la Magia</Link></li>
-            <li><Link href="/citas" className="block py-2 hover:text-gray-300 font-semibold" onClick={() => setIsOpen(false)}>Agendar Cita</Link></li>
+            <li><Link href="/sobre-mi" className="block py-2 hover:text-gray-300 animated-link" onClick={() => setIsOpen(false)}>Sobre mí</Link></li>
+            <li><Link href="/grimorio" className="block py-2 hover:text-gray-300 animated-link" onClick={() => setIsOpen(false)}>El Grimorio de Lunaria</Link></li>
+            <li><Link href="/citas" className="block py-2 px-5 rounded-full bg-purple-600/50 text-white ring-1 ring-purple-400 hover:bg-purple-600/80 transition-all shadow-[0_0_15px_rgba(168,85,247,0.6)]" onClick={() => setIsOpen(false)}>Agendar Cita</Link></li>
+            <li className="pt-2"><MuteButton /></li>
           </ul>
         </div>
       )}

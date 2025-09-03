@@ -33,48 +33,66 @@ h1, h2 {
   font-family: var(--font-cinzel-decorative);
 }
 
+/* Custom styles for React Day Picker */
 .rdp {
-    --rdp-cell-size: 40px;
-    --rdp-caption-font-size: 18px;
-    --rdp-accent-color: #facc15;
-    --rdp-background-color: #374151;
-    --rdp-accent-color-dark: #facc15;
-    --rdp-background-color-dark: #374151;
-    --rdp-outline: 2px solid var(--rdp-accent-color);
-    --rdp-outline-selected: 3px solid var(--rdp-accent-color);
-    --rdp-border-radius: 8px;
+  --rdp-cell-size: 40px;
+  --rdp-accent-color: #8b5cf6; /* purple-500 */
+  --rdp-background-color: #a78bfa; /* purple-400 */
+  --rdp-accent-color-dark: #7c3aed; /* purple-600 */
+  --rdp-background-color-dark: #a78bfa; /* purple-400 */
+  --rdp-outline: 2px solid var(--rdp-accent-color);
+  --rdp-outline-selected: 3px solid var(--rdp-accent-color);
+  --rdp-border-radius: 6px;
+  margin: 1em auto;
+  color: #d1d5db; /* gray-300 */
 }
 
 .rdp-day_selected, .rdp-day_selected:focus-visible, .rdp-day_selected:hover {
-    background-color: var(--rdp-accent-color) !important;
-    color: #111827 !important;
+  background-color: var(--rdp-accent-color);
+  color: white;
 }
 
 .rdp-caption_label {
-    color: white;
+  color: #d8b4fe; /* purple-300 */
+  font-family: var(--font-cinzel-decorative);
 }
 
 .rdp-head_cell {
-    color: #d1d5db;
+  color: #a78bfa; /* purple-400 */
+  font-size: 0.875rem;
 }
 
-.rdp-day {
-    color: #f9fafb;
+.rdp-day_today {
+  font-weight: bold;
+  color: #facc15; /* yellow-400 */
 }
 
 .rdp-button:hover:not([disabled]):not(.rdp-day_selected) {
-    background-color: #4b5563;
+  background-color: #3c096c33;
 }
 
-.constellation-star {
-    /* No longer needed here, will be animated directly */
+.rdp-nav_button {
+  color: #c4b5fd; /* purple-300 */
 }
-
-.constellation-line {
-    /* No longer needed here, will be animated directly */
+.rdp-nav_button:hover {
+  background-color: #3c096c55;
 }
 
 .text-shadow {
   text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.5);
 }
 
+@keyframes flicker {
+  0%, 100% {
+    transform: scaleY(1) rotate(-2deg);
+    opacity: 1;
+  }
+  50% {
+    transform: scaleY(0.95) rotate(2deg);
+    opacity: 0.95;
+  }
+}
+
+.animate-flicker {
+  animation: flicker 1.5s infinite;
+}

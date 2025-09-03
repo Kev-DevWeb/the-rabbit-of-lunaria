@@ -10,7 +10,7 @@ const HangingElements = () => (
   <div className="absolute inset-0 w-full h-full pointer-events-none z-0">
     <div className="absolute top-[20%] left-1/2 -translate-x-1/2 -translate-y-1/2 hanging-moon">
       <div className="relative w-48 h-48" style={{ filter: 'drop-shadow(0 0 20px rgba(255, 255, 255, 0.5))' }}>
-        <Image src="/lunallena.svg" alt="Luna Llena" layout="fill" objectFit="contain" />
+        <Image src="/lunallena.svg" alt="Luna Llena" fill priority style={{ objectFit: 'contain' }} />
         <div className="absolute inset-0 flex items-center justify-center">
           <Image src="/rabbit.svg" alt="Silueta de conejo" width={80} height={80} />
         </div>
