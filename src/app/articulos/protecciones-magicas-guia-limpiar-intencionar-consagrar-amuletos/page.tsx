@@ -38,14 +38,14 @@ export default function ProteccionesMagicasPage() {
           </p>
           <ul className="list-disc list-inside text-lg mt-4 space-y-2">
             <li>
-              <strong>Método directo:</strong> si el material lo permite (piedra, metal, vidrio), sumérgelo en un cuenco con agua y una cucharadita de sal durante toda la noche.
+              <strong>Método directo:</strong> si el material lo permite (piedra, metal, vidrio), sumérgelo en un cuenco con agua y una cucharadita de sal durante toda la noche. O en su defecto, pasalo por el humo de un incienso mientras le pides al elemento aire que lo purifique.
             </li>
             <li>
               <strong>Método indirecto:</strong> si es delicado (madera, cuero, tela), limpia suavemente con un paño humedecido en agua salada.
             </li>
           </ul>
           <p className="text-lg mt-4 italic">
-            ✨ Mientras lo limpias, repite mentalmente: “Libero toda energía ajena, este amuleto queda limpio y en armonía conmigo.”
+            Mientras lo limpias, repite mentalmente: “Libero toda energía ajena, este amuleto queda limpio y en armonía conmigo.”
           </p>
         </div>
         <div>
@@ -85,11 +85,12 @@ export default function ProteccionesMagicasPage() {
               <ul className="list-disc list-inside ml-4 mt-2">
                 <li>“Estoy protegido en todo momento.”</li>
                 <li>“Este amuleto resuena con mi energía y me cuida.”</li>
+                <li>(son solo ejemplos, puedes decir la frase que mas resuene contigo)</li>
               </ul>
             </li>
           </ul>
           <p className="text-lg mt-4">
-            🔮 Si trabajas con gemas como amatista, turmalina negra, cuarzo o jade, estas vibrarán en armonía con tu intención y harán el amuleto más poderoso.
+            Si trabajas con gemas como amatista, turmalina negra, cuarzo o jade, estas vibrarán en armonía con tu intención y harán el amuleto más poderoso.
           </p>
         </div>
         <div>
@@ -138,7 +139,7 @@ export default function ProteccionesMagicasPage() {
             </li>
           </ul>
           <p className="text-lg mt-4">
-            🔁 Haz este proceso una vez por semana o después de momentos intensos para mantener viva su energía protectora.
+            Haz este proceso una vez por semana o después de momentos intensos para mantener viva su energía protectora.
           </p>
         </div>
       </div>
