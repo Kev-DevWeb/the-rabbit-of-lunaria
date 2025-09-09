@@ -1,18 +1,23 @@
-import { ReadingType } from "@/types/readings";
+import { TarotReading } from "@/types/readings";
 
-export const readingsData: ReadingType[] = [
+export const readingsData: TarotReading[] = [
+      {
+      id: '3-cards',
+      title: 'Tirada de 3 Cartas (30 min)',
+      description: 'Varias tiradas para pedir consejo a tus guardianes espirituales. Preguntas ilimitadas durante 30 minutos.',
+      price: 'Aportación voluntaria (mínimo $20.00 MXN)',
+    },
+    {
+      id: 'past-lives',
+      title: 'Lectura de Vidas Pasadas',
+      description: 'Explora tus vidas pasadas y cómo influyen en tu presente. Preguntas ilimitadas de 30 minutos respecto a las vidas para comprender tu presente.',
+      price:'Aportación voluntaria (mínimo $60.00 MXN)',
+    },
   {
-    id: '3-cards',
-    title: 'Tirada Rápida (3+ Cartas)',
-    description: 'Ideal para preguntas concretas de sí/no, recibir consejos o explorar una situación específica. Incluye interpretaciones detalladas.',
-    duration: 30,
-    price: 20,
-  },
-  {
-    id: 'past-life',
-    title: 'Tirada de Vidas Pasadas',
-    description: 'Una lectura profunda para explorar las memorias y lecciones de tus vidas anteriores que impactan tu presente.',
+    id: 'past-life-present',
+    title: 'Tirada de Vidas Pasadas + lectura de 3 cartas',
+    description: '¿Que es mejor que explorar tus vidas pasadas? Hacerlo mientras obtienes claridad sobre tu presente con preguntas ilimitadas 60 minutos.',
     duration: 60,
-    price: 50,
+    price: 'Aportación voluntaria (mínimo $80.00 MXN)',
   }
 ];

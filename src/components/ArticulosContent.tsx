@@ -2,12 +2,7 @@
 import Link from 'next/link';
 import { useState, useEffect } from 'react';
 import { useSearchParams } from 'next/navigation';
-
-const articles = [
-  { slug: 'introduccion-la-magia', title: 'Introducción: La Magia', category: 'Magia' },
-  { slug: 'protecciones-magicas-guia-limpiar-intencionar-consagrar-amuletos', title: 'Protecciones mágicas: guía para limpiar, intencionar y consagrar amuletos', category: 'Protecciones', subcategory: 'Protecciones físicas y amuletos' },
-  { slug: 'protecciones-mentales-burbuja-luz-llama-violeta-fortaleza-interior', title: '🔮 Protecciones mentales: cómo usar la burbuja de luz, la llama violeta y la fortaleza interior', category: 'Protecciones', subcategory: 'Protecciones mentales' },
-];
+import { articles } from '@/lib/articles'; // Import articles from the new file
 
 export default function ArticulosContent() {
   const searchParams = useSearchParams();
@@ -53,6 +48,15 @@ export default function ArticulosContent() {
           value={searchQuery}
           onChange={(e) => setSearchQuery(e.target.value)}
         />
+        {/* New message below search bar */}
+        <p className="mt-4 text-center text-gray-400 text-lg">
+          ¿No encuentras la información que buscas o quieres agregar una nueva hoja al grimorio?{' '}
+          Escríbenos a{' '}
+          <a href="mailto:elconejodelunaria@gmail.com" className="text-purple-400 hover:underline">
+            elconejodelunaria@gmail.com
+          </a>{' '}
+          con tu artículo y tu nombre brujil o la información que buscas.
+        </p>
       </div>
       <div className="max-w-4xl mx-auto">
         {Object.entries(groupedArticles).map(([category, subcategories]) => (

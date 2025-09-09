@@ -7,15 +7,16 @@ import { es } from 'date-fns/locale';
 import { format } from 'date-fns';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
-import { ReadingType } from '@/types/readings';
+import { TarotReading } from '@/types/readings';
 import { db } from '@/lib/firebase';
-import { collection, query, where, getDocs, addDoc, Timestamp } from 'firebase/firestore';
+import { collection, query, where, getDocs } from 'firebase/firestore';
+
 import { readingsData } from '@/lib/readings-data';
 
 // --- Sub-componente para la tarjeta de lectura ---
 interface ReadingCardProps {
-  reading: ReadingType;
-  onSelect: (reading: ReadingType) => void;
+  reading: TarotReading;
+  onSelect: (reading: TarotReading) => void;
 }
 
 const ReadingCard = ({ reading, onSelect }: ReadingCardProps) => {
@@ -73,61 +74,62 @@ const ReadingCard = ({ reading, onSelect }: ReadingCardProps) => {
 };
 
 const BookingSystem = () => {
-  const [selectedReading, setSelectedReading] = useState<ReadingType | null>(null);
+  const [selectedReading, setSelectedReading] = useState<TarotReading | null>(null);
   const [selectedDate, setSelectedDate] = useState<Date | undefined>();
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
+  const [userName, setUserName] = useState('');
   const [userEmail, setUserEmail] = useState('');
   const [availableTimes, setAvailableTimes] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isBooking, setIsBooking] = useState(false);
   const [timeFetchError, setTimeFetchError] = useState<string | null>(null);
   const [bookingError, setBookingError] = useState<string | null>(null);
-  const [bookingSuccess, setBookingSuccess] = useState<string | null>(null);
+  const [bookingComplete, setBookingComplete] = useState(false);
   
   const containerRef = useRef(null);
   const step2Ref = useRef(null);
 
   useGSAP(() => {
-    if (selectedReading) {
+    if (selectedReading && !bookingComplete) {
       gsap.fromTo(step2Ref.current, { opacity: 0, y: 50 }, { opacity: 1, y: 0, duration: 0.7, ease: 'power3.out' });
     }
-  }, { dependencies: [selectedReading], scope: containerRef });
+  }, { dependencies: [selectedReading, bookingComplete], scope: containerRef });
 
   const resetBookingState = useCallback(() => {
     setSelectedDate(undefined);
     setSelectedTime(null);
     setAvailableTimes([]);
     setUserEmail('');
+    setUserName('');
     setTimeFetchError(null);
     setBookingError(null);
-    setBookingSuccess(null);
+    setBookingComplete(false);
   }, []);
 
-  const handleReadingSelect = (reading: ReadingType) => {
+  const handleReadingSelect = (reading: TarotReading) => {
     setSelectedReading(reading);
     resetBookingState();
   };
 
   const handleDateSelect = useCallback(async (date: Date | undefined) => {
     if (!date) return;
-    resetBookingState(); // Resetea hora/errores al elegir nueva fecha
     setSelectedDate(date);
+    setSelectedTime(null);
+    setAvailableTimes([]);
     setIsLoading(true);
     setTimeFetchError(null);
     setBookingError(null);
 
     try {
-      // 1. Determinar los horarios base según el día de la semana
-      const dayOfWeek = date.getDay(); // 0 = Domingo, 6 = Sábado
+      const dayOfWeek = date.getDay();
       let baseAvailableTimes: string[];
 
-      if (dayOfWeek === 0 || dayOfWeek === 6) { // Sábado o Domingo
+      if (dayOfWeek === 0 || dayOfWeek === 6) {
         baseAvailableTimes = ['11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00'];
-      } else { // Lunes a Viernes
+      } else {
         baseAvailableTimes = ['17:00', '18:00', '19:00', '20:00', '21:00', '22:00'];
       }
 
-      // 2. Filtrar horarios pasados si la fecha seleccionada es hoy
       const now = new Date();
       let timesForToday = [...baseAvailableTimes];
       if (
@@ -143,19 +145,13 @@ const BookingSystem = () => {
         });
       }
 
-      // 3. Consultar las citas ya existentes en Firebase
-      const startOfDay = new Date(date);
-      startOfDay.setHours(0, 0, 0, 0);
-      const endOfDay = new Date(date);
-      endOfDay.setHours(23, 59, 59, 999);
-
-      const bookingsRef = collection(db, 'bookings');
-      const q = query(bookingsRef, where('date', '>=', Timestamp.fromDate(startOfDay)), where('date', '<=', Timestamp.fromDate(endOfDay)));
+      const dateString = format(date, 'yyyy-MM-dd');
+      const readingsRef = collection(db, 'bookings');
+      const q = query(readingsRef, where('date', '==', dateString), where('status', 'in', ['pending', 'confirmed']));
       
       const querySnapshot = await getDocs(q);
       const bookedTimes = querySnapshot.docs.map(doc => doc.data().time);
 
-      // 4. Filtrar los horarios ya reservados
       const available = timesForToday.filter(time => !bookedTimes.includes(time));
       setAvailableTimes(available);
 
@@ -165,74 +161,67 @@ const BookingSystem = () => {
     } finally {
       setIsLoading(false);
     }
-  }, [resetBookingState]);
+  }, []);
 
   const handleBookingConfirm = async () => {
-    // Validación de campos
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-    if (!emailRegex.test(userEmail)) {
-      setBookingError("Por favor, introduce un correo electrónico válido.");
+    if (!emailRegex.test(userEmail) || !userName.trim()) {
+      setBookingError("Por favor, introduce un nombre y correo electrónico válidos.");
       return;
     }
-    if (!selectedReading || !selectedDate || !selectedTime || !userEmail) {
+    if (!selectedReading || !selectedDate || !selectedTime) {
       setBookingError("Por favor, completa todos los campos para continuar.");
       return;
     }
 
-    // --- DOBLE VERIFICACIÓN DE FECHA Y HORA ---
     const bookingDateTime = new Date(selectedDate);
     const [hours, minutes] = selectedTime.split(':').map(Number);
-    bookingDateTime.setHours(hours, minutes, 0, 0); // Seteamos segundos y ms a 0
+    bookingDateTime.setHours(hours, minutes, 0, 0);
 
-    const now = new Date();
-
-    if (bookingDateTime < now) {
+    if (bookingDateTime < new Date()) {
       setBookingError("No puedes agendar una cita en una fecha u hora que ya ha pasado.");
-      // Opcional: resetear la hora para forzar al usuario a re-seleccionar
       setSelectedTime(null);
       setAvailableTimes([]);
-      handleDateSelect(selectedDate); // Recalcular horas disponibles
+      handleDateSelect(selectedDate);
       return;
     }
-    // --- FIN DE LA VERIFICACIÓN ---
 
     setIsBooking(true);
     setBookingError(null);
-    setBookingSuccess(null);
-    try { 
-      await addDoc(collection(db, 'bookings'), {
-        readingId: selectedReading.id,
-        readingTitle: selectedReading.title,
-        price: selectedReading.price,
-        date: Timestamp.fromDate(bookingDateTime),
-        time: selectedTime,
-        userEmail: userEmail,
+
+    try {
+      const response = await fetch('/api/bookAppointment', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          date: format(selectedDate, 'yyyy-MM-dd'),
+          time: selectedTime,
+          name: userName,
+          email: userEmail,
+          readingId: selectedReading.id,
+          readingTitle: selectedReading.title,
+        }),
       });
 
-      // Envío de correo de confirmación
-      try {
-        await fetch('/api/send-confirmation', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            userEmail,
-            readingTitle: selectedReading.title,
-            date: bookingDateTime.toISOString(),
-            time: selectedTime,
-          }),
-        });
-      } catch (emailError) {
-        console.error("Error de Red: El correo de confirmación no pudo ser enviado, pero la cita fue agendada:", emailError);
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({}));
+        throw new Error(errorData.error || 'Error al llamar a la API de booking');
       }
 
-      const successMessage = `¡Cita agendada con éxito para el ${format(bookingDateTime, 'PPP', { locale: es })} a las ${selectedTime}!`;
-      setBookingSuccess(successMessage);
-      setSelectedReading(null);
-      resetBookingState();
+      const result = await response.json();
 
-    } catch (err) {
+      if (result.success) {
+        setBookingComplete(true);
+      } else {
+        throw new Error(result.error || 'La respuesta de la API no fue exitosa');
+      }
+    } catch (err: unknown) {
       console.error("Error al agendar la cita:", err);
-      setBookingError("Hubo un problema al agendar tu cita. Por favor, inténtalo de nuevo.");
+      let errorMessage = "Hubo un problema al agendar tu cita. Por favor, inténtalo de nuevo.";
+      if (err instanceof Error) {
+        errorMessage = err.message;
+      }
+      setBookingError(errorMessage);
     } finally {
       setIsBooking(false);
     }
@@ -240,14 +229,22 @@ const BookingSystem = () => {
 
   return (
     <div ref={containerRef} className="w-full max-w-5xl mx-auto">
-      {/* Mensaje de éxito */}
-      {bookingSuccess && !selectedReading && (
-        <div className="bg-green-900/50 border border-green-400 text-green-200 px-4 py-3 rounded-lg relative mb-6 text-center" role="alert">
-          <span className="block sm:inline">{bookingSuccess}</span>
+      {bookingComplete && (
+        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center z-50">
+          <div className="text-center p-8 bg-gray-900 backdrop-blur-md rounded-lg border border-purple-400/30 shadow-lg" style={{ animation: 'fadeIn 1s ease-out' }}>
+            <h2 className="text-3xl font-cinzel-decorative text-yellow-400">¡Cita Agendada!</h2>
+            <p className="mt-4 text-lg text-gray-300 max-w-md">🔮 ¡El destino ha escuchado! Tu cita está casi confirmada. Revisa tu correo para el pago 
+              -si no aparece el correo, revisa la sección de spam-. </p>
+            <button onClick={() => {
+              setSelectedReading(null);
+              resetBookingState();
+            }} className="mt-8 font-semibold px-8 py-3 rounded-full bg-yellow-500 text-black ring-1 ring-yellow-200 hover:bg-yellow-400 transition-all shadow-[0_0_20px_rgba(234,179,8,0.6)] hover:shadow-[0_0_30px_rgba(234,179,8,0.8)]">
+              Confirmar
+            </button>
+          </div>
         </div>
       )}
 
-      {/* Paso 1: Seleccionar Tirada */}
       {!selectedReading && (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
           {readingsData.map(reading => (
@@ -256,7 +253,6 @@ const BookingSystem = () => {
         </div>
       )}
 
-      {/* Paso 2 y 3: Seleccionar Fecha y Hora */}
       {selectedReading && (
         <div ref={step2Ref}>
           <div className="flex justify-between items-center mb-6 flex-wrap gap-4">
@@ -294,7 +290,8 @@ const BookingSystem = () => {
                         <button key={time} onClick={() => setSelectedTime(time)} className={`time-slot p-2 rounded-md text-center transition-colors ${selectedTime === time ? 'bg-purple-600 text-white ring-2 ring-white' : 'bg-purple-900/50 hover:bg-purple-600/80'}`}>
                           {time}
                         </button>
-                      ))}
+                      ))
+                      }
                     </div>
                   ) : (
                     <p className="text-center text-gray-400">No hay horas disponibles para este día.</p>
@@ -306,9 +303,20 @@ const BookingSystem = () => {
         </div>
       )}
 
-      {/* Paso 4: Confirmación */}
       {selectedDate && selectedTime && (
         <div className="text-center mt-8 transition-all duration-300 flex flex-col items-center gap-6">
+          <div>
+            <label htmlFor="name" className="block text-purple-200 mb-2 font-cormorant-garamond text-lg">Nombre:</label>
+            <input
+              type="text"
+              id="name"
+              value={userName}
+              onChange={(e) => setUserName(e.target.value)}
+              placeholder="Tu nombre"
+              className="w-full max-w-md px-4 py-2 rounded-md bg-purple-900/50 border border-purple-400/30 text-white focus:ring-2 focus:ring-yellow-400 focus:outline-none"
+              required
+            />
+          </div>
           <div>
             <label htmlFor="email" className="block text-purple-200 mb-2 font-cormorant-garamond text-lg">Correo para la confirmación:</label>
             <input
@@ -322,10 +330,10 @@ const BookingSystem = () => {
             />
           </div>
           <div>
-            <button onClick={handleBookingConfirm} disabled={isBooking || !userEmail} className="font-semibold px-8 py-3 rounded-full bg-yellow-500 text-black ring-1 ring-yellow-200 hover:bg-yellow-400 transition-all shadow-[0_0_20px_rgba(234,179,8,0.6)] hover:shadow-[0_0_30px_rgba(234,179,8,0.8)] disabled:bg-gray-500 disabled:shadow-none disabled:cursor-not-allowed">
+            <p className="text-sm text-gray-400 mb-4 text-center">El pago se realiza por transferencia bancaria. Recibirás los detalles en el correo de confirmación.</p>
+            <button onClick={handleBookingConfirm} disabled={isBooking || !userName.trim() || !userEmail} className="font-semibold px-8 py-3 rounded-full bg-yellow-500 text-black ring-1 ring-yellow-200 hover:bg-yellow-400 transition-all shadow-[0_0_20px_rgba(234,179,8,0.6)] hover:shadow-[0_0_30px_rgba(234,179,8,0.8)] disabled:bg-gray-500 disabled:shadow-none disabled:cursor-not-allowed">
               {isBooking ? 'Agendando...' : 'Confirmar Cita'}
             </button>
-            {/* Mensaje de error para la confirmación */}
             {bookingError && <p className="text-center text-red-400 mt-4">{bookingError}</p>}
           </div>
         </div>

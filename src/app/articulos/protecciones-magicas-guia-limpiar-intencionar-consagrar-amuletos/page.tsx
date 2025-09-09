@@ -1,6 +1,25 @@
+import { articles } from '@/lib/articles'; // Import articles data
+
+// Function to generate metadata for this page
+export async function generateMetadata() {
+  const article = articles.find(a => a.slug === 'protecciones-magicas-guia-limpiar-intencionar-consagrar-amuletos'); // Find the specific article
+
+  if (!article) {
+    return {
+      title: 'Artículo no encontrado',
+      description: 'El artículo que buscas no existe.',
+    };
+  }
+
+  return {
+    title: article.title,
+    description: article.description,
+  };
+}
+
 export default function ProteccionesMagicasPage() {
   return (
-    <>
+    <article className="relative container mx-auto px-4 py-8 text-white bg-black/50 backdrop-blur-sm rounded-lg shadow-lg">
       <h1 className="text-4xl font-bold mb-8">Protecciones mágicas: guía para limpiar, intencionar y consagrar amuletos</h1>
       <div className="space-y-8">
         <div>
@@ -123,6 +142,6 @@ export default function ProteccionesMagicasPage() {
           </p>
         </div>
       </div>
-    </>
+    </article>
   );
 }

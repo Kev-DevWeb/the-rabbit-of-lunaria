@@ -15,6 +15,7 @@
     "@tsparticles/react": "^3.0.0",
     "date-fns": "^4.1.0",
     "firebase": "^12.2.1",
+    "firebase-admin": "^13.5.0",
     "framer-motion": "^12.23.12",
     "gsap": "^3.13.0",
     "next": "15.5.2",
@@ -24,7 +25,8 @@
     "react-dom": "19.1.0",
     "react-pageflip": "^2.0.3",
     "three": "^0.179.1",
-    "tsparticles": "^3.9.1"
+    "tsparticles": "^3.9.1",
+    "uuid": "^9.0.0"
   },
   "devDependencies": {
     "@eslint/eslintrc": "^3",

@@ -1,4 +1,3 @@
-/* eslint-disable react/no-unescaped-entities */
 "use client";
 import React, { useRef } from 'react';
 import Image from 'next/image';
@@ -67,9 +66,17 @@ const CommunitySection = () => {
         <p className="text-base md:text-lg mt-4 community-text max-w-2xl mx-auto">
           Únete a nuestra comunidad en Lunaria, la madriguera mágica de la luna. Un espacio seguro y lleno de encanto para brujit@s, personas curiosas y pequeños babywitches que desean iniciar su camino mágico. Aquí podrás compartir experiencias, conocimiento, datos y sugerencias para seguir construyendo juntos un lugar donde la magia crece y todos aprendemos.
         </p>
+        {/* New message for Community Section */}
         <p className="text-base md:text-lg mt-6 community-text max-w-2xl mx-auto">
-          Envíanos tu conocimiento a: <a href="mailto:grimorio.lunaria@gmail.com?subject=Nueva pagina al grimorio [Titulo de tu conocimiento]" className="text-purple-300 hover:text-yellow-300 transition-colors">grimorio.lunaria@gmail.com</a> con el asunto: "Nueva pagina al grimorio [Titulo de tu conocimiento]". Darnos una explicación y fuentes para poder integrarlo al grimorio de Lunaria. ¡Disfruta tu estancia en Lunaria!
+          Puedes aportar al grimorio con tu conocimiento para ayudar a nuevos brujos.{' '}
+          Escríbenos a{' '}
+          <a href="mailto:elconejodelunaria@gmail.com" className="text-purple-300 hover:text-yellow-300 transition-colors">
+            elconejodelunaria@gmail.com
+          </a>{' '}
+          con tu artículo y tu nombre brujil, o con la información que buscas e intentaré añadirlo al grimorio lo más pronto posible.
+          Distruta tu estadia en Lunaria y recuerda, se tú mismo, porque en la magia, la autenticidad es el hechizo más poderoso de todos.
         </p>
+        
         <div className="flex items-end justify-center w-full mt-12 gap-8 relative" style={{ minHeight: 160 }}>
           <div ref={potion1Ref} className="mb-2 sm:mb-10" style={{ borderRadius: 24 }}>
             <Image src="/potion1.svg" alt="Poción mágica 1" width={90} height={160} priority style={{ filter: 'drop-shadow(0 0 32px #ad84f7b8) drop-shadow(0 0 12px #a259ffa9)' }} />

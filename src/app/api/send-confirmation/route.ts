@@ -25,6 +25,21 @@ export async function POST(request: Request) {
       day: 'numeric',
     });
 
+    // --- Google Calendar Integration ---
+    const [year, month, day] = date.split('-').map(Number);
+    const [hours, minutes] = time.split(':').map(Number);
+
+    // Create start date/time
+    const startDate = new Date(year, month - 1, day, hours, minutes);
+    const startFormatted = startDate.toISOString().replace(/[-:]|\.\d{3}/g, '');
+
+    // Create end date/time (assuming 1 hour duration)
+    const endDate = new Date(startDate.getTime() + 60 * 60 * 1000); // Add 1 hour
+    const endFormatted = endDate.toISOString().replace(/[-:]|\.\d{3}/g, '');
+
+    const googleCalendarUrl = `https://calendar.google.com/calendar/render?action=TEMPLATE&text=${encodeURIComponent(readingTitle)}&dates=${startFormatted}/${endFormatted}&details=${encodeURIComponent(`Tu lectura de tarot: ${readingTitle} con Lunaria.`)}&sf=true&output=xml`;
+    // --- End Google Calendar Integration ---
+
     const mailOptions = {
       from: `"La Madriguera de Lunaria" <${process.env.GMAIL_EMAIL}>`,
       to: userEmail,
@@ -36,16 +51,22 @@ export async function POST(request: Request) {
             <p style="color: #c7a5ff; font-size: 18px;">La Madriguera de Lunaria</p>
           </div>
           <div style="font-size: 16px; line-height: 1.8;">
-            <p>Saludos, buscador/a,</p>
-            <p>Las estrellas se han alineado para confirmar tu encuentro con los arcanos. Tu cita para la lectura de <strong>${readingTitle}</strong> ha sido grabada en el tapiz del tiempo.</p>
+            <p>Saludos, alma curiosa,</p>
+            <p>¡Las estrellas han confirmado tu encuentro con los arcanos! Tu cita para la lectura de <strong>${readingTitle}</strong> ha sido sellada en el gran libro del destino.</p>
             <hr style="border: none; border-top: 1px solid #5a3a70; margin: 25px 0;">
-            <p style="font-size: 18px;"><strong>Fecha:</strong> ${formattedDate}</p>
+            <p style="font-size: 18px;"><strong>Detalles de tu encuentro cósmico:</strong></p>
+            <p><strong>Fecha:</strong> ${formattedDate}</p>
             <p style="font-size: 18px;"><strong>Hora:</strong> ${time}</p>
             <hr style="border: none; border-top: 1px solid #5a3a70; margin: 25px 0;">
-            <p>Prepárate para desvelar los susurros del universo. Si los hilos del destino tejen un nuevo camino y necesitas reagendar, por favor, responde a este mensaje arcano.</p>
-            <p>Que la luz de la luna ilumine tu sendero hasta nuestro encuentro.</p>
+            <p>Prepárate para desvelar los susurros del universo y recibir la sabiduría que te aguarda. Si los hilos del destino tejen un nuevo camino y necesitas ajustar tu encuentro, por favor, responde a este mensaje arcano.</p>
+            <p style="text-align: center; margin-top: 30px;">
+              <a href="${googleCalendarUrl}" target="_blank" style="display: inline-block; padding: 12px 25px; background-color: #7b3f9e; color: #ffffff; text-decoration: none; border-radius: 8px; font-size: 16px; font-weight: bold;">
+                Añadir a Google Calendar
+              </a>
+            </p>
+            <p>¡Que la luz de la luna ilumine tu sendero hasta nuestro encuentro en La Madriguera de Lunaria!</p>
             <br>
-            <p><em>Con gratitud,</em></p>
+            <p><em>Con gratitud y magia,</em></p>
             <p><em>Lunaria</em></p>
           </div>
           <div style="text-align: center; margin-top: 40px;">
@@ -57,7 +78,7 @@ export async function POST(request: Request) {
 
     try {
       await transporter.sendMail(mailOptions);
-      console.log('Correo de confirmación enviado a:', userEmail);
+      
       return NextResponse.json({ message: 'Correo de confirmación enviado exitosamente.' }, { status: 200 });
     } catch (mailError) {
       console.error('Error al enviar el correo con Nodemailer:', mailError);
