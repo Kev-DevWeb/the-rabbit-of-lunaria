@@ -14,7 +14,7 @@ export const articles = [
   },
   {
     slug: 'protecciones-mentales-burbuja-luz-llama-violeta-fortaleza-interior',
-    title: '🔮 Protecciones mentales: cómo usar la burbuja de luz, la llama violeta y la fortaleza interior',
+    title: 'Protecciones mentales: cómo usar la burbuja de luz, la llama violeta y la fortaleza interior',
     category: 'Protecciones',
     subcategory: 'Protecciones mentales',
     description: 'Explora tres poderosas técnicas de visualización para proteger tu mente y espíritu: la burbuja de luz, la llama violeta y la fortaleza mental.'
