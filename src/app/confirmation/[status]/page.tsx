@@ -2,29 +2,47 @@
 
 import { useEffect, useState } from 'react';
 import { useParams } from 'next/navigation';
+import Link from 'next/link';
 
 export default function ConfirmationPage() {
   const params = useParams();
   const status = params.status;
-  const [message, setMessage] = useState('');
+  const [title, setTitle] = useState('');
+  const [message, setMessage] = useState('Cargando...');
   const [isSuccess, setIsSuccess] = useState(false);
 
   useEffect(() => {
-    if (status === 'success') {
-      setMessage('¡Acción realizada con éxito!');
-      setIsSuccess(true);
-    } else if (status === 'cancelled') {
-      setMessage('La cita ha sido cancelada.');
-      setIsSuccess(true);
-    } else if (status === 'confirmed') {
-      setMessage('La cita ha sido confirmada.');
-      setIsSuccess(true);
-    } else if (status === 'error') {
-      setMessage('Ha ocurrido un error al procesar la solicitud.');
-      setIsSuccess(false);
-    } else {
-      setMessage('Estado desconocido.');
-      setIsSuccess(false);
+    switch (status) {
+      case 'success':
+        setTitle('¡Pago completado!');
+        setMessage('Tu pago ha sido procesado exitosamente. Los hilos del destino han comenzado a tejerse para vuestro encuentro. Recibirás un correo con los detalles de tu cita. Revisa tu bandeja de entrada (y la de spam, por si las estrellas se desalinean).');
+        setIsSuccess(true);
+        break;
+      case 'pending':
+        setTitle('Cita reservada');
+        setMessage('Tu espacio ha sido reservado. Recibirás un correo electrónico en breve con los detalles para completar el pago mediante transferencia bancaria. Tu cita se confirmará una vez recibido el pago.');
+        setIsSuccess(true);
+        break;
+      case 'cancelled':
+        setTitle('Cita cancelada');
+        setMessage('La cita ha sido cancelada según tu solicitud.');
+        setIsSuccess(true);
+        break;
+      case 'confirmed':
+        setTitle('Cita confirmada');
+        setMessage('¡Tu cita ha sido confirmada! Nos vemos pronto.');
+        setIsSuccess(true);
+        break;
+      case 'error':
+        setTitle('Ha ocurrido un error');
+        setMessage('No se pudo procesar tu solicitud. Por favor, inténtalo de nuevo o contacta para recibir ayuda.');
+        setIsSuccess(false);
+        break;
+      default:
+        setTitle('Estado desconocido');
+        setMessage('La página que buscas no existe o el estado de la cita no es válido.');
+        setIsSuccess(false);
+        break;
     }
   }, [status]);
 
@@ -46,7 +64,8 @@ export default function ConfirmationPage() {
         borderRadius: '15px',
         border: `1px solid ${isSuccess ? '#7b3f9e' : '#e74c3c'}`,
         maxWidth: '600px',
-        width: '100%'
+        width: '100%',
+        boxShadow: '0 10px 30px rgba(0,0,0,0.5)'
       }}>
         <h1 style={{
           fontFamily: '"Cinzel Decorative", cursive',
@@ -54,14 +73,24 @@ export default function ConfirmationPage() {
           fontSize: '32px',
           marginBottom: '20px'
         }}>
-          {isSuccess ? '~ Mensaje del Cosmos ~' : '~ Un Velo de Incertidumbre ~'}
+          {title}
         </h1>
         <p style={{ fontSize: '20px', lineHeight: '1.6' }}>
           {message}
         </p>
-        <p style={{ marginTop: '30px', fontSize: '16px' }}>
-          Puedes cerrar esta ventana.
-        </p>
+        <div style={{ marginTop: '40px' }}>
+          <Link href="/" style={{
+            textDecoration: 'none',
+            color: '#1a1a2e',
+            backgroundColor: '#d4b3ff',
+            padding: '12px 24px',
+            borderRadius: '8px',
+            fontWeight: 'bold',
+            transition: 'background-color 0.3s ease'
+          }}>
+            Regresar al Inicio
+          </Link>
+        </div>
       </div>
     </div>
   );

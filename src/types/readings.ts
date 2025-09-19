@@ -14,5 +14,6 @@ export type TarotReading = {
   title: string;
   description: string;
   price: string;
+  priceValue: number; // Added for numerical price
   duration?: number; // Optional, as seen in readings-data.ts
 };

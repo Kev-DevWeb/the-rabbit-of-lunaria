@@ -86,7 +86,7 @@ const ServicesSection = () => {
   }, []);
 
   return (
-    <section ref={sectionRef} className="relative w-full h-screen flex flex-col items-center justify-center text-white bg-transparent p-0 m-0">
+    <section ref={sectionRef} className="relative w-full h-screen flex flex-col items-center justify-center text-white bg-transparent p-0 m-0 mb-16">
       <div className="text-center max-w-3xl p-8 relative z-10">
         <h2 className="text-3xl md:text-4xl font-bold font-cinzel-decorative service-title">Lecturas de Tarot</h2>
         <p className="text-base md:text-lg mt-4 service-text">

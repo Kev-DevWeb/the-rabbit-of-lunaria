@@ -1,20 +1,27 @@
 import * as admin from 'firebase-admin';
 
+// Esta es la versión final y simplificada.
+// Lee una única variable de entorno que contiene el JSON de la clave de servicio.
+
 if (!admin.apps.length) {
   try {
-    // Initialize Firebase Admin SDK
-    // Ensure your service account key is stored securely as an environment variable
-    // For Vercel, you can add this as an environment variable in your project settings.
-    // The value should be the JSON content of your service account key file.
+    const serviceAccountString = process.env.FIREBASE_ADMIN_SDK_CONFIG;
+
+    if (!serviceAccountString) {
+      throw new Error('La variable de entorno FIREBASE_ADMIN_SDK_CONFIG no está definida.');
+    }
+
+    const serviceAccount = JSON.parse(serviceAccountString);
+
     admin.initializeApp({
-      credential: admin.credential.cert(JSON.parse(process.env.FIREBASE_ADMIN_SDK_CONFIG || '{}')),
+      credential: admin.credential.cert(serviceAccount),
       databaseURL: `https://${process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID}.firebaseio.com`,
     });
+    console.log('Firebase Admin SDK inicializado correctamente desde la variable de entorno.');
+
   } catch (error) {
-    console.error('Firebase Admin initialization error', error);
+    console.error('Error al inicializar Firebase Admin:', error);
   }
 }
 
-const adminDb = admin.firestore();
-
-export { adminDb };
+export const adminDb = admin.firestore();
