@@ -1,6 +1,5 @@
 'use client'
 import { usePathname } from 'next/navigation'
-import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from "next/font/google";
 import { Cinzel_Decorative, Playfair_Display, Cormorant_Garamond } from "next/font/google";
 import "./globals.css";

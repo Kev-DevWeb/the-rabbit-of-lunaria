@@ -5,13 +5,15 @@ import { PortableText } from '@portabletext/react';
 import imageUrlBuilder from '@sanity/image-url';
 import { SanityImageSource } from '@sanity/image-url/lib/types/types';
 import { getYouTubeEmbedId } from '@/lib/utils';
+import { PortableTextBlock } from '@portabletext/types';
+import React from 'react';
 
 // Define the types for our article data
 interface Article {
   title: string;
   slug: { current: string };
   mainImage?: SanityImageSource;
-  body: any[]; // Portable Text content
+  body: PortableTextBlock[]; // Portable Text content
   publishedAt: string;
   author: { name: string };
   description: string;
@@ -68,7 +70,7 @@ export async function generateMetadata({ params }: { params: Promise<{ slug:stri
 const ptComponents = {
   types: {
     image: ({ value }: { value: SanityImageSource & { alt?: string } }) => {
-      if (!value?.asset?._ref) {
+      if (typeof value === 'string' || !('asset' in value) || !value.asset) {
         return null;
       }
       return (
@@ -100,10 +102,10 @@ const ptComponents = {
     },
   },
   block: {
-    h2: ({ children }: any) => <h2 className="text-3xl font-bold my-6 text-purple-300">{children}</h2>,
-    h3: ({ children }: any) => <h3 className="text-2xl font-semibold my-5 text-purple-400">{children}</h3>,
-    h4: ({ children }: any) => <h4 className="text-xl font-semibold my-4 text-purple-400/80">{children}</h4>,
-    blockquote: ({ children }: any) => <blockquote className="border-l-4 border-purple-400 pl-4 italic my-6 text-gray-300">{children}</blockquote>,
+    h2: ({ children }: {children?: React.ReactNode}) => <h2 className="text-3xl font-bold my-6 text-purple-300">{children}</h2>,
+    h3: ({ children }: {children?: React.ReactNode}) => <h3 className="text-2xl font-semibold my-5 text-purple-400">{children}</h3>,
+    h4: ({ children }: {children?: React.ReactNode}) => <h4 className="text-xl font-semibold my-4 text-purple-400/80">{children}</h4>,
+    blockquote: ({ children }: {children?: React.ReactNode}) => <blockquote className="border-l-4 border-purple-400 pl-4 italic my-6 text-gray-300">{children}</blockquote>,
   }
 };
 

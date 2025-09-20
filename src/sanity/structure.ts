@@ -1,8 +1,8 @@
-import {StructureBuilder} from 'sanity/structure'
+import {StructureBuilder, StructureResolverContext} from 'sanity/structure'
 import {BookIcon} from '@sanity/icons'
 
 // The structure resolver will now be async
-export const structure = async (S: StructureBuilder, context: any) => {
+export const structure = async (S: StructureBuilder, context: StructureResolverContext) => {
   // Fetch all categories to build the dynamic list
   const categories = await context.getClient({apiVersion: '2024-03-11'}).fetch(
     `*[_type == 'category']{_id, title}`
@@ -19,7 +19,7 @@ export const structure = async (S: StructureBuilder, context: any) => {
           .filter(`_type == "post" && $categoryId in categories[]._ref`)
           .params({ categoryId: category._id })
           .menuItems([
-            ...S.documentList().getMenuItems(),
+            ...(S.documentList().getMenuItems() || []),
             S.menuItem()
               .title('Crear Nuevo Artículo Aquí')
               .intent({ 
