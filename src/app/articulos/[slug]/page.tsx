@@ -1,22 +1,55 @@
-import { articles } from '@/lib/articles';
+import { client } from '@/sanity/lib/client';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
+import { PortableText } from '@portabletext/react';
+import imageUrlBuilder from '@sanity/image-url';
+import { SanityImageSource } from '@sanity/image-url/lib/types/types';
+import { getYouTubeEmbedId } from '@/lib/utils';
 
-type Props = {
-  params: Promise<{ slug: string }>;
-};
+// Define the types for our article data
+interface Article {
+  title: string;
+  slug: { current: string };
+  mainImage?: SanityImageSource;
+  body: any[]; // Portable Text content
+  publishedAt: string;
+  author: { name: string };
+  description: string;
+}
 
-export async function generateMetadata({ params }: Props): Promise<Metadata> {
+const builder = imageUrlBuilder(client);
+
+function urlFor(source: SanityImageSource) {
+  return builder.image(source);
+}
+
+// Helper to fetch a single article
+async function getArticle(slug: string): Promise<Article | null> {
+  const query = `*[_type == "post" && slug.current == $slug][0]{
+    title,
+    slug,
+    mainImage,
+    body,
+    publishedAt,
+    "author": author->{name},
+    "description": pt::text(body)
+  }`;
+  return await client.fetch(query, { slug });
+}
+
+// Generate Metadata for SEO
+export async function generateMetadata({ params }: { params: Promise<{ slug:string }> }): Promise<Metadata> {
   const { slug } = await params;
-  const article = articles.find((a) => a.slug === slug);
+  const article = await getArticle(slug);
 
   if (!article) {
     return {};
   }
 
   const title = article.title;
-  const description = article.description;
-  const url = `https://the-rabbit-of-lunaria.vercel.app/articulos/${article.slug}`;
+  const description = article.description.substring(0, 155);
+  const url = `https://the-rabbit-of-lunaria.vercel.app/articulos/${article.slug.current}`;
+  const imageUrl = article.mainImage ? urlFor(article.mainImage).width(1200).height(630).url() : '';
 
   return {
     title,
@@ -26,15 +59,57 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
       description,
       url,
       type: 'article',
-      // You might want to add an image specific to the article here
-      // images: [{ url: article.image || 'https://www.lamadrigueradelunaria.com/default-article-og.jpg' }],
+      images: imageUrl ? [{ url: imageUrl }] : [],
     },
   };
 }
 
-export default async function ArticuloPage({ params }: Props) {
+// Custom components for rendering Portable Text
+const ptComponents = {
+  types: {
+    image: ({ value }: { value: SanityImageSource & { alt?: string } }) => {
+      if (!value?.asset?._ref) {
+        return null;
+      }
+      return (
+        // eslint-disable-next-line @next/next/no-img-element
+        <img
+          src={urlFor(value).url()}
+          alt={value.alt || ' '}
+          loading="lazy"
+          className="mx-auto my-4 rounded-lg shadow-lg shadow-purple-900/50"
+        />
+      );
+    },
+    embed: ({ value }: { value: { url: string } }) => {
+      const embedId = getYouTubeEmbedId(value.url);
+      if (embedId) {
+        return (
+          <div className="aspect-w-16 aspect-h-9 my-4">
+            <iframe
+              src={`https://www.youtube.com/embed/${embedId}`}
+              frameBorder="0"
+              allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+              allowFullScreen
+              className="w-full h-full rounded-lg shadow-lg shadow-purple-900/50"
+            ></iframe>
+          </div>
+        );
+      }
+      return <p>Unsupported embed: {value.url}</p>;
+    },
+  },
+  block: {
+    h2: ({ children }: any) => <h2 className="text-3xl font-bold my-6 text-purple-300">{children}</h2>,
+    h3: ({ children }: any) => <h3 className="text-2xl font-semibold my-5 text-purple-400">{children}</h3>,
+    h4: ({ children }: any) => <h4 className="text-xl font-semibold my-4 text-purple-400/80">{children}</h4>,
+    blockquote: ({ children }: any) => <blockquote className="border-l-4 border-purple-400 pl-4 italic my-6 text-gray-300">{children}</blockquote>,
+  }
+};
+
+export default async function ArticuloPage({ params }: { params: Promise<{ slug: string }> }) {
   const { slug } = await params;
-  const article = articles.find((a) => a.slug === slug);
+  const article = await getArticle(slug);
 
   if (!article) {
     notFound();
@@ -44,37 +119,39 @@ export default async function ArticuloPage({ params }: Props) {
     "@context": "https://schema.org",
     "@type": "Article",
     "headline": article.title,
-    "description": article.description,
-    "image": "https://the-rabbit-of-lunaria.vercel.app/default-article-image.jpg",
+    "description": article.description.substring(0, 155),
+    "image": article.mainImage ? urlFor(article.mainImage).url() : '',
     "author": {
       "@type": "Person",
-      "name": "La madriguera de Lunaria" // Replace with actual author if available
+      "name": article.author?.name || "La madriguera de Lunaria",
     },
     "publisher": {
       "@type": "Organization",
       "name": "La madriguera de Lunaria",
       "logo": {
         "@type": "ImageObject",
-        "url": "https://the-rabbit-of-lunaria.vercel.app/logo.png"
-      }
+        "url": "https://the-rabbit-of-lunaria.vercel.app/logo.png",
+      },
     },
-    "datePublished": "2023-01-01T00:00:00Z", // Replace with actual publication date
-    "dateModified": "2023-01-01T00:00:00Z", // Replace with actual modification date
+    "datePublished": article.publishedAt,
     "mainEntityOfPage": {
       "@type": "WebPage",
-      "@id": `https://the-rabbit-of-lunaria.vercel.app/articulos/${slug}`
-    }
+      "@id": `https://the-rabbit-of-lunaria.vercel.app/articulos/${article.slug.current}`,
+    },
   };
 
   return (
-    <div className="container mx-auto px-4 py-8 text-white">
-      <script
+    // Remove prose classes to use our own custom styling from ptComponents
+    <div className="max-w-4xl mx-auto px-4 py-8 text-white">
+       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <h1 className="text-4xl font-bold mb-8">{article.title}</h1>
-      <p>{article.description}</p> {/* Display description as placeholder for content */}
-      {/* Here you would render the actual content of the article */}
+      <h1 className="text-4xl font-bold mb-2 text-center font-cinzel-decorative">{article.title}</h1>
+      <p className="text-center text-gray-400 mb-8">Aportado por: {article.author?.name || 'La Madriguera'}</p>
+      <div className="text-lg leading-relaxed">
+        <PortableText value={article.body} components={ptComponents} />
+      </div>
     </div>
   );
 }

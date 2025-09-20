@@ -72,5 +72,18 @@ export const blockContentType = defineType({
         }
       ]
     }),
+    defineArrayMember({
+      name: 'embed',
+      title: 'Embed',
+      type: 'object',
+      fields: [
+        {
+          name: 'url',
+          title: 'URL del Embed',
+          type: 'url',
+          description: 'Pega la URL de YouTube, Twitter, etc. aquí.',
+        },
+      ],
+    }),
   ],
 })

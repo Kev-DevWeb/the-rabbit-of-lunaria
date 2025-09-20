@@ -1,3 +1,5 @@
+'use client'
+import { usePathname } from 'next/navigation'
 import type { Metadata } from 'next';
 import { Geist, Geist_Mono } from "next/font/google";
 import { Cinzel_Decorative, Playfair_Display, Cormorant_Garamond } from "next/font/google";
@@ -34,29 +36,8 @@ const cormorantGaramond = Cormorant_Garamond({
   variable: "--font-cormorant-garamond",
 });
 
-export const metadata: Metadata = {
-  title: {
-    default: "La madriguera de Lunaria - Tarot",
-    template: "%s | La madriguera de Lunaria",
-  },
-  description: "Lecturas de tarot y agendamiento de citas.",
-  openGraph: {
-    title: "La madriguera de Lunaria - Tarot",
-    description: "Lecturas de tarot y agendamiento de citas.",
-    url: "https://the-rabbit-of-lunaria.vercel.app",
-    siteName: "La madriguera de Lunaria",
-    images: [
-      {
-        url: "https://the-rabbit-of-lunaria.vercel.app/og-image.jpg",
-        width: 1200,
-        height: 630,
-        alt: "La madriguera de Lunaria - Tarot",
-      },
-    ],
-    locale: "es_MX",
-    type: "website",
-  },
-};
+// Metadata object cannot be exported from a client component. 
+// We can keep it here, but it might be better to move it to a server component if needed.
 
 const jsonLd = {
   "@context": "https://schema.org",
@@ -92,6 +73,9 @@ export default function RootLayout({
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  const pathname = usePathname()
+  const isStudioPage = pathname.startsWith('/studio')
+
   return (
     <html lang="en">
       <head>
@@ -109,9 +93,9 @@ export default function RootLayout({
       >
         <AudioProvider>
           <div className="flex flex-col min-h-screen">
-            <Header />
+            {!isStudioPage && <Header />}
             <main className="flex-grow">{children}</main>
-            <AppFooter />
+            {!isStudioPage && <AppFooter />}
           </div>
         </AudioProvider>
       </body>

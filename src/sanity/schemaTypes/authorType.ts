@@ -1,15 +1,17 @@
 import {UserIcon} from '@sanity/icons'
-import {defineArrayMember, defineField, defineType} from 'sanity'
+import {defineField, defineType} from 'sanity'
 
 export const authorType = defineType({
   name: 'author',
-  title: 'Author',
+  title: 'Aportador', // Changed title to be more thematic
   type: 'document',
   icon: UserIcon,
   fields: [
     defineField({
       name: 'name',
+      title: 'Nombre del aportador',
       type: 'string',
+      validation: (Rule) => Rule.required(),
     }),
     defineField({
       name: 'slug',
@@ -17,30 +19,12 @@ export const authorType = defineType({
       options: {
         source: 'name',
       },
-    }),
-    defineField({
-      name: 'image',
-      type: 'image',
-      options: {
-        hotspot: true,
-      },
-    }),
-    defineField({
-      name: 'bio',
-      type: 'array',
-      of: [
-        defineArrayMember({
-          type: 'block',
-          styles: [{title: 'Normal', value: 'normal'}],
-          lists: [],
-        }),
-      ],
+      hidden: true, // Hide slug as it's not relevant for the user
     }),
   ],
   preview: {
     select: {
       title: 'name',
-      media: 'image',
     },
   },
 })
