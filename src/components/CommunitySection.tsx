@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import SplitType from 'split-type';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -17,6 +18,7 @@ const CommunitySection = () => {
     if (potion1Ref.current) {
       gsap.to(potion1Ref.current, {
         y: -24,
+        rotation: -5,
         duration: 2.6,
         repeat: -1,
         yoyo: true,
@@ -26,6 +28,7 @@ const CommunitySection = () => {
     if (cauldronRef.current) {
       gsap.to(cauldronRef.current, {
         y: -16,
+        rotation: 3,
         duration: 2.4,
         repeat: -1,
         yoyo: true,
@@ -36,6 +39,7 @@ const CommunitySection = () => {
     if (potion2Ref.current) {
       gsap.to(potion2Ref.current, {
         y: -22,
+        rotation: 5,
         duration: 2.9,
         repeat: -1,
         yoyo: true,
@@ -43,6 +47,8 @@ const CommunitySection = () => {
         delay: 0.8
       });
     }
+
+    const text = new SplitType('.community-text', { types: 'lines' });
 
     // Animaciones de entrada con ScrollTrigger
     const tl = gsap.timeline({
@@ -54,7 +60,7 @@ const CommunitySection = () => {
     });
 
     tl.from('.community-title', { autoAlpha: 0, y: 50, duration: 1, ease: 'power3.out' })
-      .from('.community-text', { autoAlpha: 0, y: 40, duration: 1, ease: 'power3.out' }, '-=0.8')
+      .from(text.lines, { autoAlpha: 0, y: 40, stagger: 0.1, duration: 1, ease: 'power3.out' }, '-=0.8')
       .from([potion1Ref.current, cauldronRef.current, potion2Ref.current], { autoAlpha: 0, scale: 0.5, stagger: 0.2, duration: 0.8, ease: 'back.out(1.7)' }, '-=0.6');
 
   }, { scope: sectionRef });

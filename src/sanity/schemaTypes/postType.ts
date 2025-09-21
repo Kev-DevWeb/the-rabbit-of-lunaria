@@ -6,7 +6,29 @@ export const postType = defineType({
   title: 'Post',
   type: 'document',
   icon: DocumentTextIcon,
+  groups: [
+    {
+      name: 'meta',
+      title: 'Meta',
+    },
+  ],
   fields: [
+    defineField({
+      name: 'metaTitle',
+      type: 'string',
+      group: 'meta',
+    }),
+    defineField({
+      name: 'metaDescription',
+      type: 'text',
+      group: 'meta',
+    }),
+    defineField({
+      name: 'keywords',
+      type: 'array',
+      of: [{type: 'string'}],
+      group: 'meta',
+    }),
     defineField({
       name: 'title',
       type: 'string',
@@ -34,8 +56,25 @@ export const postType = defineType({
           name: 'alt',
           type: 'string',
           title: 'Alternative text',
-        })
-      ]
+        }),
+        defineField({
+          name: 'caption',
+          type: 'string',
+          title: 'Caption',
+        }),
+        defineField({
+          name: 'width',
+          type: 'number',
+          title: 'Width',
+          readOnly: true,
+        }),
+        defineField({
+          name: 'height',
+          type: 'number',
+          title: 'Height',
+          readOnly: true,
+        }),
+      ],
     }),
     defineField({
       name: 'categories',

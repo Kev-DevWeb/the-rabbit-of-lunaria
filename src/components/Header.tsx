@@ -4,6 +4,9 @@ import Link from "next/link";
 import MuteButton from "./MuteButton";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
+import { ScrollTrigger } from "gsap/ScrollTrigger";
+
+gsap.registerPlugin(ScrollTrigger);
 
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
@@ -27,6 +30,36 @@ const Header = () => {
         link.removeEventListener('mouseleave', onMouseLeave);
       }
     });
+
+    gsap.to(headerRef.current, {
+      padding: "1rem 2rem",
+      backgroundColor: "rgba(0, 0, 0, 0.8)",
+      backdropFilter: "blur(10px)",
+      scrollTrigger: {
+        trigger: "body",
+        start: "top top",
+        end: "+=100",
+        scrub: 1,
+      },
+    });
+
+    const ctaButton = document.querySelector('.cta-button');
+    if (ctaButton) {
+      const onMouseEnter = () => {
+        gsap.to(ctaButton, { rotation: 5, duration: 0.1, ease: 'power2.inOut', repeat: 1, yoyo: true });
+      };
+      const onMouseLeave = () => {
+        gsap.to(ctaButton, { rotation: 0, duration: 0.1, ease: 'power2.inOut' });
+      };
+      ctaButton.addEventListener('mouseenter', onMouseEnter);
+      ctaButton.addEventListener('mouseleave', onMouseLeave);
+
+      // Cleanup
+      return () => {
+        ctaButton.removeEventListener('mouseenter', onMouseEnter);
+        ctaButton.removeEventListener('mouseleave', onMouseLeave);
+      }
+    }
   }, { scope: headerRef });
 
 
@@ -42,7 +75,7 @@ const Header = () => {
           <ul className="flex space-x-6">
             <li><Link href="/sobre-mi" className="animated-link">Sobre mí</Link></li>
             <li><Link href="/articulos" className="animated-link whitespace-nowrap">El grimorio de Lunaria</Link></li>
-            <li><Link href="/citas" className="font-semibold px-4 py-2 rounded-full bg-purple-600/50 text-white ring-1 ring-purple-400 hover:bg-purple-600/80 transition-all shadow-[0_0_15px_rgba(168,85,247,0.6)] hover:shadow-[0_0_25px_rgba(168,85,247,0.8)]">Agendar Cita</Link></li>
+            <li><Link href="/citas" className="font-semibold px-4 py-2 rounded-full bg-purple-600/50 text-white ring-1 ring-purple-400 hover:bg-purple-600/80 transition-all shadow-[0_0_15px_rgba(168,85,247,0.6)] hover:shadow-[0_0_25px_rgba(168,85,247,0.8)] cta-button">Agendar Cita</Link></li>
           </ul>
           <MuteButton />
         </div>

@@ -67,6 +67,10 @@ const jsonLd = {
   ],
 };
 
+import { LenisProvider } from '@/context/LenisProvider';
+
+import PageTransition from '@/components/PageTransition';
+
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -91,11 +95,15 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} ${cinzelDecorative.variable} ${playfairDisplay.variable} ${cormorantGaramond.variable} antialiased bg-gray-900 text-white`}
       >
         <AudioProvider>
-          <div className="flex flex-col min-h-screen">
-            {!isStudioPage && <Header />}
-            <main className="flex-grow">{children}</main>
-            {!isStudioPage && <AppFooter />}
-          </div>
+          <LenisProvider>
+            <div className="flex flex-col min-h-screen">
+              {!isStudioPage && <Header />}
+              <main className="flex-grow">
+                <PageTransition>{children}</PageTransition>
+              </main>
+              {!isStudioPage && <AppFooter />}
+            </div>
+          </LenisProvider>
         </AudioProvider>
       </body>
     </html>

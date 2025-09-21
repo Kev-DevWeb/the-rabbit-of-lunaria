@@ -1,4 +1,3 @@
-/* eslint-disable @next/next/no-img-element */
 'use client';
 import Link from 'next/link';
 import { useState, useEffect, useRef } from 'react';
@@ -9,13 +8,14 @@ import { SanityImageSource } from '@sanity/image-url/lib/types/types';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
+import Image from 'next/image';
 
 // Define types for our Sanity data
 interface Article {
   _id: string;
   title: string;
   slug: { current: string };
-  mainImage?: SanityImageSource;
+  mainImage?: SanityImageSource & { alt?: string; width?: number; height?: number };
   categories: {
     title: string;
     description?: string;
@@ -49,7 +49,13 @@ export default function ArticulosContent() {
         _id,
         title,
         slug,
-        mainImage,
+        mainImage{
+          ...,
+          asset->{
+            ...,
+            metadata
+          }
+        },
         "categories": categories[]->{ title, description }
       }`;
       const fetchedArticles = await client.fetch<Article[]>(sanityQuery);
@@ -137,9 +143,11 @@ export default function ArticulosContent() {
               {articlesInCategory.map((article) => (
                 <li key={article._id} className="mb-4 flex items-center article-item">
                   {article.mainImage && (
-                    <img
-                      src={urlFor(article.mainImage).width(80).height(80).fit('crop').url()}
-                      alt={article.title}
+                    <Image
+                      src={urlFor(article.mainImage).url()}
+                      alt={article.mainImage.alt || article.title}
+                      width={80}
+                      height={80}
                       className="w-20 h-20 object-cover rounded-md mr-4"
                     />
                   )}

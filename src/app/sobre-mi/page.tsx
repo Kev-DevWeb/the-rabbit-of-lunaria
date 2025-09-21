@@ -5,6 +5,9 @@ import Image from "next/image";
 
 import { useRef, useEffect } from 'react';
 import { gsap } from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+gsap.registerPlugin(ScrollTrigger);
 
 // Constelación corregida (inspirada en sobre la magia)
 const SOBRE_MI_CONSTELLATION = [
@@ -19,6 +22,7 @@ const SOBRE_MI_CONSTELLATION = [
 const SobreMiPage = () => {
   const textRef = useRef(null);
   const imageRef = useRef(null);
+  const starBackgroundRef = useRef(null);
 
   useEffect(() => {
     gsap.fromTo(textRef.current,
@@ -30,11 +34,33 @@ const SobreMiPage = () => {
       { opacity: 0, scale: 0.8 },
       { opacity: 1, scale: 1, duration: 1.5, ease: "elastic.out(1, 0.5)", delay: 0.5 }
     );
+
+    gsap.to(starBackgroundRef.current, {
+      y: "-20%",
+      scrollTrigger: {
+        trigger: "body",
+        start: "top top",
+        end: "bottom top",
+        scrub: true,
+      },
+    });
+
+    gsap.to(textRef.current, {
+      y: "-10%",
+      scrollTrigger: {
+        trigger: "body",
+        start: "top top",
+        end: "bottom top",
+        scrub: true,
+      },
+    });
   }, []);
 
   return (
     <div className="bg-black">
-      <StarBackground constellation={SOBRE_MI_CONSTELLATION} width={420} height={280} />
+      <div ref={starBackgroundRef} className="absolute top-0 left-0 w-full h-full">
+        <StarBackground constellation={SOBRE_MI_CONSTELLATION} width={420} height={280} />
+      </div>
       <main className="min-h-screen flex flex-col items-center justify-center text-white pt-32">
         <div className="container mx-auto p-8 z-10 relative bg-black/70 rounded-xl shadow-lg backdrop-blur-sm">
           <h1 className="text-4xl font-bold text-center mb-4">Sobre Mí</h1>

@@ -7,16 +7,20 @@ import { SanityImageSource } from '@sanity/image-url/lib/types/types';
 import { getYouTubeEmbedId } from '@/lib/utils';
 import { PortableTextBlock } from '@portabletext/types';
 import React from 'react';
+import Image from 'next/image';
 
 // Define the types for our article data
 interface Article {
   title: string;
   slug: { current: string };
-  mainImage?: SanityImageSource;
+  mainImage?: SanityImageSource & { alt?: string; asset?: { metadata?: { dimensions?: { width: number; height: number } } } };
   body: PortableTextBlock[]; // Portable Text content
   publishedAt: string;
   author: { name: string };
   description: string;
+  metaTitle?: string;
+  metaDescription?: string;
+  keywords?: string[];
 }
 
 const builder = imageUrlBuilder(client);
@@ -30,11 +34,20 @@ async function getArticle(slug: string): Promise<Article | null> {
   const query = `*[_type == "post" && slug.current == $slug][0]{
     title,
     slug,
-    mainImage,
+    mainImage{
+      ...,
+      asset->{
+        ...,
+        metadata
+      }
+    },
     body,
     publishedAt,
     "author": author->{name},
-    "description": pt::text(body)
+    "description": pt::text(body),
+    metaTitle,
+    metaDescription,
+    keywords
   }`;
   return await client.fetch(query, { slug });
 }
@@ -48,14 +61,15 @@ export async function generateMetadata({ params }: { params: Promise<{ slug:stri
     return {};
   }
 
-  const title = article.title;
-  const description = article.description.substring(0, 155);
+  const title = article.metaTitle || article.title;
+  const description = article.metaDescription || article.description.substring(0, 155);
   const url = `https://the-rabbit-of-lunaria.vercel.app/articulos/${article.slug.current}`;
   const imageUrl = article.mainImage ? urlFor(article.mainImage).width(1200).height(630).url() : '';
 
   return {
     title,
     description,
+    keywords: article.keywords || [],
     openGraph: {
       title,
       description,
@@ -69,15 +83,16 @@ export async function generateMetadata({ params }: { params: Promise<{ slug:stri
 // Custom components for rendering Portable Text
 const ptComponents = {
   types: {
-    image: ({ value }: { value: SanityImageSource & { alt?: string } }) => {
+    image: ({ value }: { value: SanityImageSource & { alt?: string; asset?: { metadata?: { dimensions?: { width: number; height: number } } } } }) => {
       if (typeof value === 'string' || !('asset' in value) || !value.asset) {
         return null;
       }
       return (
-        // eslint-disable-next-line @next/next/no-img-element
-        <img
+        <Image
           src={urlFor(value).url()}
           alt={value.alt || ' '}
+          width={value.asset?.metadata?.dimensions?.width || 800}
+          height={value.asset?.metadata?.dimensions?.height || 600}
           loading="lazy"
           className="mx-auto my-4 rounded-lg shadow-lg shadow-purple-900/50"
         />
@@ -151,6 +166,17 @@ export default async function ArticuloPage({ params }: { params: Promise<{ slug:
       />
       <h1 className="text-4xl font-bold mb-2 text-center font-cinzel-decorative">{article.title}</h1>
       <p className="text-center text-gray-400 mb-8">Aportado por: {article.author?.name || 'La Madriguera'}</p>
+      {article.mainImage && (
+        <div className="mb-8">
+          <Image
+            src={urlFor(article.mainImage).url()}
+            alt={article.mainImage.alt || article.title}
+            width={article.mainImage.asset?.metadata?.dimensions?.width || 800}
+            height={article.mainImage.asset?.metadata?.dimensions?.height || 400}
+            className="w-full h-auto rounded-lg"
+          />
+        </div>
+      )}
       <div className="text-lg leading-relaxed">
         <PortableText value={article.body} components={ptComponents} />
       </div>

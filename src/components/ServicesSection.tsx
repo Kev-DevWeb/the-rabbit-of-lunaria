@@ -40,7 +40,7 @@ const ServicesSection = () => {
       const cards = cardsRef.current.querySelectorAll('.card-1, .card-2, .card-3');
       tl.fromTo(
         cards,
-        { autoAlpha: 0, y: 85, scale: 0.94, rotate: -30 },
+        { autoAlpha: 0, y: 85, scale: 0.94, rotate: (i) => [-10, 5, -8][i] },
         {
           autoAlpha: 1,
           y: 0,
@@ -53,12 +53,22 @@ const ServicesSection = () => {
         sceneStartTime + 0.58
       );
 
-      cards.forEach((card: Element) => {
-        const onMouseEnter = () => {
+      const listeners: { card: Element; enter: EventListener; leave: EventListener }[] = [];
+      cards.forEach((card) => {
+        const onMouseEnter = (e: MouseEvent) => {
+          const rect = card.getBoundingClientRect();
+          const x = e.clientX - rect.left;
+          const y = e.clientY - rect.top;
+
+          const rotateY = gsap.utils.mapRange(0, rect.width, -15, 15, x);
+          const rotateX = gsap.utils.mapRange(0, rect.height, 15, -15, y);
+
           gsap.to(card, {
             y: -15,
             scale: 1.05,
             boxShadow: "0px 20px 40px rgba(0,0,0,0.4)",
+            rotationY: rotateY,
+            rotationX: rotateX,
             duration: 0.3,
             ease: 'power2.out'
           });
@@ -68,21 +78,37 @@ const ServicesSection = () => {
             y: 0,
             scale: 1,
             boxShadow: "0px 10px 20px rgba(0,0,0,0.2)",
+            rotationY: 0,
+            rotationX: 0,
             duration: 0.3,
             ease: 'power2.in'
           });
         };
-        card.addEventListener('mouseenter', onMouseEnter);
-        card.addEventListener('mouseleave', onMouseLeave);
+        
+        const enterListener = onMouseEnter as EventListener;
+        const leaveListener = onMouseLeave as EventListener;
 
-        // Cleanup
-        return () => {
-          card.removeEventListener('mouseenter', onMouseEnter);
-          card.removeEventListener('mouseleave', onMouseLeave);
-        }
+        card.addEventListener('mouseenter', enterListener);
+        card.addEventListener('mouseleave', leaveListener);
+
+        listeners.push({ card, enter: enterListener, leave: leaveListener });
       });
+
+      return () => {
+        listeners.forEach(({ card, enter, leave }) => {
+          card.removeEventListener('mouseenter', enter);
+          card.removeEventListener('mouseleave', leave);
+        });
+        if (tl.scrollTrigger) {
+          tl.scrollTrigger.kill();
+        }
+      };
     }
-    return () => tl.scrollTrigger && tl.scrollTrigger.kill();
+    return () => {
+      if (tl.scrollTrigger) {
+        tl.scrollTrigger.kill();
+      }
+    };
   }, []);
 
   return (
@@ -129,15 +155,15 @@ const ServicesSection = () => {
               }}
             />
             {/* Cartas (por encima de todo) */}
-            <div ref={cardsRef} className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" style={{ zIndex: 10, width: '100%', height: '100%' }}>
-              <div className="absolute card-1 service-card">
-                <Image src="/cartablanca.jpg" alt="Carta de Tarot 1" width={150} height={250} className="rounded-lg shadow-lg" style={{ width: '100%', height: 'auto' }} />
+            <div ref={cardsRef} className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" style={{ zIndex: 10, width: '80%', height: '80%' }}>
+              <div className="absolute card-1 service-card" style={{ left: '15%', top: '10%' }}>
+                <Image src="/cartablanca.jpg" alt="Carta de Tarot 1" width={120} height={200} className="rounded-lg shadow-lg" style={{ width: '100%', height: 'auto' }} />
               </div>
-              <div className="absolute card-2 service-card">
-                <Image src="/lunacarta.jpg" alt="Carta de Tarot 2" width={150} height={250} className="rounded-lg shadow-lg" style={{ width: '100%', height: 'auto' }} />
+              <div className="absolute card-2 service-card" style={{ left: '40%', top: '10%' }}>
+                <Image src="/lunacarta.jpg" alt="Carta de Tarot 2" width={120} height={200} className="rounded-lg shadow-lg" style={{ width: '100%', height: 'auto' }} />
               </div>
-              <div className="absolute card-3 service-card">
-                <Image src="/cartamano.jpg" alt="Carta de Tarot 3" width={150} height={250} className="rounded-lg shadow-lg" style={{ width: '100%', height: 'auto' }} />
+              <div className="absolute card-3 service-card" style={{ left: '65%', top: '10%' }}>
+                <Image src="/cartamano.jpg" alt="Carta de Tarot 3" width={120} height={200} className="rounded-lg shadow-lg" style={{ width: '100%', height: 'auto' }} />
               </div>
             </div>
           </div>

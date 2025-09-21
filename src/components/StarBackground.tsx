@@ -4,6 +4,7 @@ import Particles, { initParticlesEngine } from '@tsparticles/react';
 import { loadSlim } from '@tsparticles/slim';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
+import { useLenis } from '@/context/LenisProvider';
 
 /**
  * Simple example constellation: array of { x, y, isBigStar }
@@ -36,6 +37,7 @@ const StarBackground = ({
 }) => {
   const svgRef = useRef(null);
   const [init, setInit] = useState(false);
+  const lenis = useLenis();
 
   useEffect(() => {
     initParticlesEngine(async engine => {
@@ -66,6 +68,20 @@ const StarBackground = ({
     }
   }, [constellation]);
 
+  useGSAP(() => {
+    if (lenis) {
+      gsap.to(svgRef.current, {
+        y: "-50%",
+        scrollTrigger: {
+          trigger: "body",
+          start: "top top",
+          end: "bottom top",
+          scrub: true,
+        },
+      });
+    }
+  }, [lenis]);
+
   // Particle background config
   const particleOptions = {
     background: { color: { value: "#000" } },
@@ -79,10 +95,11 @@ const StarBackground = ({
         {init && <Particles id="tsparticles-bg" options={particleOptions} />}
       </div>
       <div
+        ref={svgRef}
         className="absolute left-1/2 top-1/2 z-40"
         style={{ transform: `translate(-50%, -50%)`, width, height }}
       >
-        <svg ref={svgRef} width={width} height={height}>
+        <svg width={width} height={height}>
           {/* Constelación: líneas */}
           <path
             id="constellation-line"

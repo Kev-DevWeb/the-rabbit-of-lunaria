@@ -18,6 +18,7 @@ export const structure = async (S: StructureBuilder, context: StructureResolverC
           .title(`Artículos en: ${category.title}`)
           .filter(`_type == "post" && $categoryId in categories[]._ref`)
           .params({ categoryId: category._id })
+          .apiVersion('2024-03-11')
           .menuItems([
             ...(S.documentList().getMenuItems() || []),
             S.menuItem()

@@ -3,7 +3,7 @@ import {defineField, defineType} from 'sanity'
 
 export const authorType = defineType({
   name: 'author',
-  title: 'Aportador', // Changed title to be more thematic
+  title: 'Aportador',
   type: 'document',
   icon: UserIcon,
   fields: [
@@ -19,7 +19,13 @@ export const authorType = defineType({
       options: {
         source: 'name',
       },
-      hidden: true, // Hide slug as it's not relevant for the user
+      hidden: true,
+    }),
+    defineField({
+      name: 'relatedArticlesUrl',
+      title: 'Artículos Relacionados',
+      type: 'url',
+      description: 'URL a una página que muestra todos los artículos de este aportador.',
     }),
   ],
   preview: {
