@@ -24,7 +24,7 @@ export const structure = async (S: StructureBuilder, context: StructureResolverC
             .filter(`_type == "post" && $categoryId in categories[]._ref`)
             .params({ categoryId: category._id })
             .apiVersion(apiVersion)
-            .defaultLayout('card') // Vista de cartas para categorías
+            // Removed defaultLayout - using default view
             .menuItems([
               ...(S.documentList().getMenuItems() || []),
               S.menuItem()
@@ -52,7 +52,7 @@ export const structure = async (S: StructureBuilder, context: StructureResolverC
               .title('Vista de Galería')
               .filter('_type == "post"')
               .apiVersion(apiVersion)
-              .defaultLayout('card') // Vista de cartas nativa
+              // Using default layout - Sanity will handle the best view
           ),
         
         // Vista tradicional de lista
@@ -63,7 +63,7 @@ export const structure = async (S: StructureBuilder, context: StructureResolverC
               .title('Lista de Artículos')
               .filter('_type == "post"')
               .apiVersion(apiVersion)
-              .defaultLayout('default') // Vista de lista tradicional
+              // Using default layout
           ),
         
         S.documentTypeListItem('category').title('Gestionar Categorías'),
@@ -85,7 +85,7 @@ export const structure = async (S: StructureBuilder, context: StructureResolverC
             S.documentList()
               .title('Artículos')
               .filter('_type == "post"')
-              .defaultLayout('card') // Vista de cartas como fallback
+              // Using default layout as fallback
           ),
         S.documentTypeListItem('category').title('Gestionar Categorías'),
         S.documentTypeListItem('author').title('Gestionar Aportadores'),
