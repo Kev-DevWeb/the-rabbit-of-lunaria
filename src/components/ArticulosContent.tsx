@@ -174,7 +174,7 @@ export default function ArticulosContent() {
           <div className="h-px bg-gradient-to-r from-transparent via-yellow-400 to-transparent flex-grow max-w-32"></div>
         </div>
         <p className="text-lg text-purple-200 font-serif italic">
-          "Los secretos del cosmos organizados para tu sabiduría"
+          &ldquo;Los secretos del cosmos organizados para tu sabiduría&rdquo;
         </p>
       </div>
 
@@ -206,7 +206,7 @@ export default function ArticulosContent() {
       <div className="max-w-5xl mx-auto">
         <div className="bg-black/40 backdrop-blur-sm rounded-lg border border-purple-500/30 shadow-2xl p-8">
           
-          {Object.entries(organizedContent).map(([categoryName, categoryData], categoryIndex) => (
+          {Object.entries(organizedContent).map(([categoryName, categoryData]) => (
             <div key={categoryName} className="mb-12 last:mb-0 category-section">
               {/* Título de la categoría principal */}
               <div className="text-center mb-8">
@@ -237,7 +237,7 @@ export default function ArticulosContent() {
 
                   {/* Lista de artículos con diseño de índice */}
                   <div className={`space-y-2 ${subcategoryName !== 'General' ? 'ml-8' : ''}`}>
-                    {articlesInSubcategory.map((article, articleIndex) => (
+                    {articlesInSubcategory.map((article) => (
                       <Link 
                         key={article._id}
                         href={`/articulos/${article.slug.current}`}
@@ -297,7 +297,7 @@ export default function ArticulosContent() {
           {/* Footer del índice */}
           <div className="text-center mt-12 pt-8 border-t border-purple-500/30">
             <p className="text-purple-300 font-serif italic text-sm">
-              "Cada página contiene secretos esperando ser descubiertos..."
+              &ldquo;Cada página contiene secretos esperando ser descubiertos...&rdquo;
             </p>
           </div>
         </div>
