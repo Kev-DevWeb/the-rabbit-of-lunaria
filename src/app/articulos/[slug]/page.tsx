@@ -182,4 +182,4 @@ export default async function ArticuloPage({ params }: { params: Promise<{ slug:
       </div>
     </div>
   );
-}
+} 
