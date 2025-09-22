@@ -1,5 +1,5 @@
 import {StructureBuilder, StructureResolverContext} from 'sanity/structure'
-import {BookIcon} from '@sanity/icons'
+import {BookIcon, ImagesIcon} from '@sanity/icons'
 
 // The structure resolver will now be async
 export const structure = async (S: StructureBuilder, context: StructureResolverContext) => {
@@ -24,6 +24,7 @@ export const structure = async (S: StructureBuilder, context: StructureResolverC
             .filter(`_type == "post" && $categoryId in categories[]._ref`)
             .params({ categoryId: category._id })
             .apiVersion(apiVersion)
+            .defaultLayout('card') // Vista de cartas para categorías
             .menuItems([
               ...(S.documentList().getMenuItems() || []),
               S.menuItem()
@@ -42,8 +43,29 @@ export const structure = async (S: StructureBuilder, context: StructureResolverC
     return S.list()
       .title('El Grimorio')
       .items([
-        // Pinned items for management
-        S.documentTypeListItem('post').title('Todos los Artículos'),
+        // Vista especial de galería con cartas grandes
+        S.listItem()
+          .title('Galería de Artículos')
+          .icon(ImagesIcon)
+          .child(
+            S.documentList()
+              .title('Vista de Galería')
+              .filter('_type == "post"')
+              .apiVersion(apiVersion)
+              .defaultLayout('card') // Vista de cartas nativa
+          ),
+        
+        // Vista tradicional de lista
+        S.documentTypeListItem('post')
+          .title('Todos los Artículos (Lista)')
+          .child(
+            S.documentList()
+              .title('Lista de Artículos')
+              .filter('_type == "post"')
+              .apiVersion(apiVersion)
+              .defaultLayout('default') // Vista de lista tradicional
+          ),
+        
         S.documentTypeListItem('category').title('Gestionar Categorías'),
         S.documentTypeListItem('author').title('Gestionar Aportadores'),
         S.divider(),
@@ -57,7 +79,14 @@ export const structure = async (S: StructureBuilder, context: StructureResolverC
     return S.list()
       .title('El Grimorio')
       .items([
-        S.documentTypeListItem('post').title('Todos los Artículos'),
+        S.documentTypeListItem('post')
+          .title('Todos los Artículos')
+          .child(
+            S.documentList()
+              .title('Artículos')
+              .filter('_type == "post"')
+              .defaultLayout('card') // Vista de cartas como fallback
+          ),
         S.documentTypeListItem('category').title('Gestionar Categorías'),
         S.documentTypeListItem('author').title('Gestionar Aportadores'),
       ])

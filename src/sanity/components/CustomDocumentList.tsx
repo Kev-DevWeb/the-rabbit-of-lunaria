@@ -2,9 +2,26 @@
 import React from 'react'
 import {Card, Flex, Stack, Text, Box} from '@sanity/ui'
 import {definePlugin} from 'sanity'
+import Image from 'next/image'
+
+// Tipos para el documento
+interface DocumentData {
+  _id: string
+  title?: string
+  mainImage?: {
+    asset?: {
+      url: string
+    }
+    alt?: string
+  }
+  authors?: Array<{
+    name: string
+  }>
+  publishedAt?: string
+}
 
 // Componente personalizado para mostrar documentos como cartas
-const CustomDocumentCard = ({document}: any) => {
+const CustomDocumentCard = ({document}: {document: DocumentData}) => {
   return (
     <Card 
       padding={3} 
@@ -19,11 +36,13 @@ const CustomDocumentCard = ({document}: any) => {
     >
       <Stack space={3}>
         {/* Imagen más grande */}
-        {document.mainImage && (
+        {document.mainImage && document.mainImage.asset && (
           <Box style={{height: '150px', overflow: 'hidden', borderRadius: '4px'}}>
-            <img 
-              src={document.mainImage.asset?.url + '?w=200&h=150&fit=crop'} 
-              alt={document.mainImage.alt || document.title}
+            <Image 
+              src={document.mainImage.asset.url + '?w=200&h=150&fit=crop'} 
+              alt={document.mainImage.alt || document.title || 'Imagen del artículo'}
+              width={200}
+              height={150}
               style={{
                 width: '100%',
                 height: '100%',
@@ -68,7 +87,7 @@ export const customViews = definePlugin({
   document: {
     views: [
       {
-        component: ({document}) => (
+        component: ({document}: {document: DocumentData}) => (
           <Flex wrap="wrap" justify="flex-start">
             <CustomDocumentCard document={document} />
           </Flex>
