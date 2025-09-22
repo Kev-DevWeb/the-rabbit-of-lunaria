@@ -91,15 +91,15 @@ export const postType = defineType({
       type: 'blockContent',
     }),
   ],
-  preview: {
-    select: {
-      title: 'title',
-      authors: 'authors[].name',
-      media: 'mainImage',
-    },
-    prepare(selection) {
-      const {authors} = selection
-      return {...selection, subtitle: authors && `by ${authors.join(', ')}`}
-    },
+ preview: {
+  select: {
+    title: 'title',
+    author: 'authors.0.name', // Solo el primer autor
+    media: 'mainImage',
   },
+  prepare(selection) {
+    const {author} = selection
+    return {...selection, subtitle: author ? `by ${author}` : 'No author'}
+  },
+},
 })
