@@ -22,5 +22,12 @@ export const categoryType = defineType({
       name: 'description',
       type: 'text',
     }),
+    defineField({
+      name: 'parent',
+      title: 'Parent Category',
+      type: 'reference',
+      to: [{type: 'category'}],
+      description: 'Asigna una categoría padre para crear sub-categorías.',
+    }),
   ],
 })

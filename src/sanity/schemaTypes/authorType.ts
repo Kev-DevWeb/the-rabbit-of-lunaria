@@ -15,17 +15,11 @@ export const authorType = defineType({
     }),
     defineField({
       name: 'slug',
+      title: 'Slug',
       type: 'slug',
       options: {
         source: 'name',
       },
-      hidden: true,
-    }),
-    defineField({
-      name: 'relatedArticlesUrl',
-      title: 'Artículos Relacionados',
-      type: 'url',
-      description: 'URL a una página que muestra todos los artículos de este aportador.',
     }),
   ],
   preview: {

@@ -45,10 +45,11 @@ export default function ArticulosContent() {
 
     async function fetchArticles() {
       setLoading(true);
-      const sanityQuery = `*[_type == "post"]{
+      const sanityQuery = `*[_type == "post"] | order(publishedAt asc) {
         _id,
         title,
         slug,
+        publishedAt,
         mainImage{
           ...,
           asset->{

@@ -41,9 +41,10 @@ export const postType = defineType({
       },
     }),
     defineField({
-      name: 'author',
-      type: 'reference',
-      to: {type: 'author'},
+      name: 'authors',
+      title: 'Aportadores',
+      type: 'array',
+      of: [defineArrayMember({type: 'reference', to: {type: 'author'}})],
     }),
     defineField({
       name: 'mainImage',
@@ -93,12 +94,12 @@ export const postType = defineType({
   preview: {
     select: {
       title: 'title',
-      author: 'author.name',
+      authors: 'authors[].name',
       media: 'mainImage',
     },
     prepare(selection) {
-      const {author} = selection
-      return {...selection, subtitle: author && `by ${author}`}
+      const {authors} = selection
+      return {...selection, subtitle: authors && `by ${authors.join(', ')}`}
     },
   },
 })
