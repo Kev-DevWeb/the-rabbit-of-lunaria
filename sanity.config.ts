@@ -1,5 +1,5 @@
 /**
- * This configuration is used to for the Sanity Studio that’s mounted on the `/app/studio/[[...tool]]/page.tsx` route
+ * This configuration is used to for the Sanity Studio that's mounted on the `/app/studio/[[...tool]]/page.tsx` route
  */
 
 import {visionTool} from '@sanity/vision'
@@ -10,6 +10,7 @@ import {structureTool} from 'sanity/structure'
 import {apiVersion, dataset, projectId} from './src/sanity/env'
 import {schema} from './src/sanity/schemaTypes'
 import {structure} from './src/sanity/structure'
+import {customViews} from './src/sanity/components/CustomDocumentList'
 
 export default defineConfig({
   basePath: '/studio',
@@ -22,5 +23,6 @@ export default defineConfig({
     // Vision is for querying with GROQ from inside the Studio
     // https://www.sanity.io/docs/the-vision-plugin
     visionTool({defaultApiVersion: apiVersion}),
+    customViews, // Plugin personalizado para vistas
   ],
 })
