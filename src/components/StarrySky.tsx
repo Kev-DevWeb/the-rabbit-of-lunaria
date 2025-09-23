@@ -43,10 +43,13 @@ const StarrySky = ({ onComplete }: StarrySkyProps) => {
       paused: true,
       onStart: () => {
         if (audioRef.current) {
+          audioRef.current.volume = 0.5; // Volumen moderado
           const playPromise = audioRef.current.play();
           if (playPromise !== undefined) {
-            playPromise.catch(error => {
-              console.error("Audio play failed", error);
+            playPromise.then(() => {
+              console.log("Audio de noche reproduciéndose correctamente");
+            }).catch(error => {
+              console.warn("Audio play failed - esto es normal si no hay interacción del usuario:", error);
             });
           }
         }
@@ -112,6 +115,18 @@ const StarrySky = ({ onComplete }: StarrySkyProps) => {
   }, { scope: containerRef, dependencies: [showIntro, isOpening] });
 
   const handleEnter = () => {
+    // Reproducir audio al hacer clic (después de interacción del usuario)
+    if (audioRef.current) {
+      audioRef.current.volume = 0.5;
+      const playPromise = audioRef.current.play();
+      if (playPromise !== undefined) {
+        playPromise.then(() => {
+          console.log("Audio de noche iniciado por interacción del usuario");
+        }).catch(error => {
+          console.error("Error al reproducir audio:", error);
+        });
+      }
+    }
     setIsOpening(true);
   };
 

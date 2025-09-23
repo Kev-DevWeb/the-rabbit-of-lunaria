@@ -66,16 +66,16 @@ export default function FloatingMusicPlayer() {
   const [position, setPosition] = useState({ x: 20, y: 80 }); // Posición inicial en la izquierda
   const playerRef = useRef<HTMLDivElement>(null);
 
-  // Auto-contraer después de un tiempo sin interacción
+  // Auto-contraer después de un tiempo sin interacción (pero no si está reproduciendo)
   useEffect(() => {
     let timeoutId: NodeJS.Timeout;
-    if (isExpanded && !isDragging) {
+    if (isExpanded && !isDragging && !isPlaying) {
       timeoutId = setTimeout(() => {
         setIsExpanded(false);
-      }, 5000); // 5 segundos
+      }, 8000); // 8 segundos y solo si no está reproduciendo
     }
     return () => clearTimeout(timeoutId);
-  }, [isExpanded, isDragging]);
+  }, [isExpanded, isDragging, isPlaying]);
 
   // Manejo de arrastre (opcional)
   const handleMouseDown = (e: React.MouseEvent) => {

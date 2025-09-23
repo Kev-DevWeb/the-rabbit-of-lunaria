@@ -83,13 +83,17 @@ export const AudioProvider = ({ children }: { children: ReactNode }) => {
   const currentTrack = trackList[getRealIndex(currentTrackIndex)] || trackList[0];
 
   useEffect(() => {
-    const audio = new Audio(currentTrack.src);
+    console.log('Creando nuevo elemento de audio para:', currentTrack.title, 'URL:', currentTrack.src);
+    
+    const audio = new Audio();
     audio.preload = "auto";
     audio.crossOrigin = "anonymous";
     audio.volume = 0.7;
+    audio.src = currentTrack.src; // Asignar src después de configurar propiedades
     audioRef.current = audio;
 
     const handleAudioEnd = () => {
+      console.log('Audio terminó, isPlaying:', isPlayingRef.current);
       // Solo avanzar automáticamente si está reproduciéndose
       if (isPlayingRef.current) {
         setCurrentTrackIndex((prev) => (prev + 1) % trackList.length);
@@ -107,20 +111,33 @@ export const AudioProvider = ({ children }: { children: ReactNode }) => {
     };
 
     const handleCanPlay = () => {
-      console.log('Audio listo:', currentTrack.title);
+      console.log('Audio listo para reproducir:', currentTrack.title);
+    };
+
+    const handleLoadStart = () => {
+      console.log('Iniciando carga de:', currentTrack.src);
+    };
+
+    const handleLoadedData = () => {
+      console.log('Datos cargados para:', currentTrack.title);
     };
 
     audio.addEventListener('ended', handleAudioEnd);
     audio.addEventListener('error', handleError);
     audio.addEventListener('canplay', handleCanPlay);
+    audio.addEventListener('loadstart', handleLoadStart);
+    audio.addEventListener('loadeddata', handleLoadedData);
 
     return () => {
       if (fadeIntervalRef.current) clearInterval(fadeIntervalRef.current);
       audio.removeEventListener('ended', handleAudioEnd);
       audio.removeEventListener('error', handleError);
       audio.removeEventListener('canplay', handleCanPlay);
+      audio.removeEventListener('loadstart', handleLoadStart);
+      audio.removeEventListener('loadeddata', handleLoadedData);
       audio.pause();
       audioRef.current = null;
+      console.log('Audio limpiado para:', currentTrack.title);
     };
   }, [currentTrackIndex, trackList.length, currentTrack.src, currentTrack.title]);
 
@@ -188,29 +205,77 @@ export const AudioProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const togglePlay = useCallback(async () => {
-    if (!audioRef.current) return;
+    console.log("🎵 togglePlay llamado, isPlaying:", isPlaying, "audioRef.current:", !!audioRef.current);
+    
+    if (!audioRef.current) {
+      console.error("❌ No hay elemento de audio disponible");
+      return;
+    }
+    
     const audio = audioRef.current;
+    console.log("🎵 Audio src:", audio.src, "readyState:", audio.readyState, "networkState:", audio.networkState);
 
     if (!isPlaying) {
+      console.log("▶️ Intentando reproducir...");
       setIsPlaying(true);
       audio.volume = 0;
+      
       try {
+        // Esperar a que el audio esté listo si es necesario
+        if (audio.readyState < 2) { // HAVE_CURRENT_DATA
+          console.log("⏳ Esperando que el audio esté listo...");
+          await new Promise((resolve, reject) => {
+            const timeout = setTimeout(() => {
+              audio.removeEventListener('canplay', onCanPlay);
+              audio.removeEventListener('error', onError);
+              reject(new Error('Timeout esperando que el audio esté listo'));
+            }, 10000); // 10 segundos timeout
+            
+            const onCanPlay = () => {
+              clearTimeout(timeout);
+              audio.removeEventListener('canplay', onCanPlay);
+              audio.removeEventListener('error', onError);
+              console.log("✅ Audio listo para reproducir");
+              resolve(void 0);
+            };
+            const onError = (e: Event) => {
+              clearTimeout(timeout);
+              audio.removeEventListener('canplay', onCanPlay);
+              audio.removeEventListener('error', onError);
+              console.error("❌ Error cargando audio:", e);
+              reject(new Error('Error cargando audio'));
+            };
+            audio.addEventListener('canplay', onCanPlay);
+            audio.addEventListener('error', onError);
+          });
+        }
+        
         await audio.play();
+        console.log("🎶 Audio reproduciendo exitosamente");
         fadeAudio(0.7, 2000);
         if (!hasPlayedOnce) {
           setHasPlayedOnce(true);
         }
       } catch (error) {
-        console.error("Error al intentar reproducir el audio:", error);
+        console.error("❌ Error al intentar reproducir el audio:", error);
         setIsPlaying(false);
+        // Si hay error, intentar con la siguiente canción
+        if (trackList.length > 1) {
+          console.log("🔄 Intentando con la siguiente canción...");
+          setTimeout(() => {
+            setCurrentTrackIndex((prev) => (prev + 1) % trackList.length);
+          }, 1000);
+        }
       }
     } else {
+      console.log("⏸️ Pausando audio...");
       setIsPlaying(false);
       fadeAudio(0, 1500, () => {
         audio.pause();
+        console.log("⏹️ Audio pausado");
       });
     }
-  }, [isPlaying, hasPlayedOnce, fadeAudio]);
+  }, [isPlaying, hasPlayedOnce, fadeAudio, trackList.length]);
 
   const toggleShuffle = useCallback(() => {
     setIsShuffleMode(!isShuffleMode);
