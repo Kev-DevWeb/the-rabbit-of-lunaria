@@ -312,31 +312,33 @@ export default function ArticulosContent() {
       </div>
 
       {/* Buscador elegante */}
-      <div className="mb-12 max-w-2xl mx-auto">
-        <div className="relative">
-          <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-purple-400" />
-          <input
-            type="text"
-            placeholder="Buscar en el grimorio..."
-            className="w-full pl-12 pr-4 py-4 rounded-lg bg-black/40 backdrop-blur-sm border border-purple-500/30 text-white placeholder-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition-all duration-300"
-            value={searchQuery}
-            onChange={(e) => setSearchQuery(e.target.value)}
-          />
-        </div>
-        
-        <div className="mt-6 p-4 bg-purple-900/20 rounded-lg border border-purple-500/20">
-          <p className="text-center text-purple-200 text-sm leading-relaxed">
-            ¿No encuentras la sabiduría que buscas? o ¿Quieres aportar con tu conocimiento? Escríbenos a{' '}
-            <a href="mailto:elconejodelunaria@gmail.com" className="text-yellow-400 hover:text-yellow-300 underline transition-colors">
-              elconejodelunaria@gmail.com
-            </a>{' '}
-            para agregar una nueva página al grimorio.
-          </p>
+      <div className="mb-12 max-w-4xl mx-auto">
+        <div className="max-w-2xl mx-auto">
+          <div className="relative">
+            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-purple-400" />
+            <input
+              type="text"
+              placeholder="Buscar en el grimorio..."
+              className="w-full pl-12 pr-4 py-4 rounded-lg bg-black/40 backdrop-blur-sm border border-purple-500/30 text-white placeholder-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition-all duration-300"
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+            />
+          </div>
+          
+          <div className="mt-6 p-4 bg-purple-900/20 rounded-lg border border-purple-500/20">
+            <p className="text-center text-purple-200 text-sm leading-relaxed">
+              ¿No encuentras la sabiduría que buscas? o ¿Quieres aportar con tu conocimiento? Escríbenos a{' '}
+              <a href="mailto:elconejodelunaria@gmail.com" className="text-yellow-400 hover:text-yellow-300 underline transition-colors">
+                elconejodelunaria@gmail.com
+              </a>{' '}
+              para agregar una nueva página al grimorio.
+            </p>
+          </div>
         </div>
       </div>
 
       {/* Índice completo del Grimorio - Formato de libro */}
-      <div className="max-w-4xl">
+      <div className="max-w-4xl mx-auto">
         <div className="bg-black/40 backdrop-blur-sm rounded-lg border border-purple-500/30 shadow-2xl p-8">
           
           {/* Renderizar estructura de categorías anidadas */}
