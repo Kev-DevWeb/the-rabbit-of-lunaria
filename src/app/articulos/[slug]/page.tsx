@@ -117,10 +117,11 @@ const ptComponents = {
     },
   },
   block: {
-    h2: ({ children }: {children?: React.ReactNode}) => <h2 className="text-3xl font-bold my-6 text-purple-300">{children}</h2>,
-    h3: ({ children }: {children?: React.ReactNode}) => <h3 className="text-2xl font-semibold my-5 text-purple-400">{children}</h3>,
-    h4: ({ children }: {children?: React.ReactNode}) => <h4 className="text-xl font-semibold my-4 text-purple-400/80">{children}</h4>,
-    blockquote: ({ children }: {children?: React.ReactNode}) => <blockquote className="border-l-4 border-purple-400 pl-4 italic my-6 text-gray-300">{children}</blockquote>,
+    h2: ({ children }: {children?: React.ReactNode}) => <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold my-4 sm:my-6 text-purple-300">{children}</h2>,
+    h3: ({ children }: {children?: React.ReactNode}) => <h3 className="text-lg sm:text-xl lg:text-2xl font-semibold my-3 sm:my-5 text-purple-400">{children}</h3>,
+    h4: ({ children }: {children?: React.ReactNode}) => <h4 className="text-base sm:text-lg lg:text-xl font-semibold my-3 sm:my-4 text-purple-400/80">{children}</h4>,
+    blockquote: ({ children }: {children?: React.ReactNode}) => <blockquote className="border-l-2 sm:border-l-4 border-purple-400 pl-2 sm:pl-4 italic my-4 sm:my-6 text-gray-300">{children}</blockquote>,
+    normal: ({ children }: {children?: React.ReactNode}) => <p className="mb-4 sm:mb-6 text-gray-200 leading-relaxed sm:leading-loose">{children}</p>,
   }
 };
 
@@ -161,19 +162,19 @@ export default async function ArticuloPage({ params }: { params: Promise<{ slug:
 
   return (
     // Remove prose classes to use our own custom styling from ptComponents
-    <div className="max-w-4xl mx-auto px-4 py-8 text-white">
+    <div className="max-w-4xl mx-auto px-2 sm:px-4 py-6 sm:py-8 text-gray-200">
        <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <h1 className="text-4xl font-bold mb-2 text-center font-cinzel-decorative">{article.title}</h1>
-      <p className="text-center text-gray-400 mb-8">
+      <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2 text-center font-cinzel-decorative text-white">{article.title}</h1>
+      <p className="text-center text-gray-400 mb-6 sm:mb-8 text-sm sm:text-base">
         Aportado por: {article.authors && article.authors.length > 0 
           ? article.authors.map(author => author.name).join(', ') 
           : 'La Madriguera'}
       </p>
       {article.mainImage && (
-        <div className="mb-8">
+        <div className="mb-6 sm:mb-8">
           <Image
             src={urlFor(article.mainImage).url()}
             alt={article.mainImage.alt || article.title}
@@ -183,7 +184,7 @@ export default async function ArticuloPage({ params }: { params: Promise<{ slug:
           />
         </div>
       )}
-      <div className="text-lg leading-relaxed">
+      <div className="text-base sm:text-lg lg:text-xl leading-relaxed sm:leading-loose">
         <PortableText value={article.body} components={ptComponents} />
       </div>
     </div>

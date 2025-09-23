@@ -6,7 +6,7 @@ import "./globals.css";
 import { AudioProvider } from '@/context/AudioProvider';
 import Header from '@/components/Header';
 import AppFooter from '@/components/AppFooter';
-import FloatingMusicPlayer from '@/components/FloatingMusicPlayer';
+import FloatingMusicPlayer from '@/components/FloatingMusicPlayerGSAP';
 import Script from 'next/script';
 
 const geistSans = Geist({

@@ -10,6 +10,7 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
 import Image from 'next/image';
 import { BookOpen, Sparkles, Search } from 'lucide-react';
+import GrimorieMusicBanner from './GrimorieMusicBanner';
 
 // Define types for our Sanity data
 interface Category {
@@ -167,13 +168,23 @@ export default function ArticulosContent() {
 
   // Función para renderizar categorías anidadas recursivamente
   const renderCategoryNode = (categoryName: string, categoryNode: CategoryNode, level: number = 0): React.ReactNode => {
-    const paddingLeft = level * 24; // 24px por cada nivel de anidación (sangría más pronunciada)
-    const titleSize = level === 0 ? 'text-2xl' : level === 1 ? 'text-xl' : 'text-lg';
-    const sparkleSize = level === 0 ? 'w-5 h-5' : level === 1 ? 'w-4 h-4' : 'w-3 h-3';
-    const marginBottom = level === 0 ? 'mb-8' : level === 1 ? 'mb-6' : 'mb-4';
+    // Sangrías responsive: móvil (8px), tablet (16px), desktop (24px)
+    const paddingClass = level === 0 ? '' : 
+                        level === 1 ? 'pl-2 sm:pl-4 lg:pl-6' : 
+                        level === 2 ? 'pl-4 sm:pl-8 lg:pl-12' : 
+                                     'pl-6 sm:pl-12 lg:pl-16';
+    
+    // Tamaños responsive de texto: móvil más grande, tablet intermedio, desktop igual
+    const titleSize = level === 0 ? 'text-xl sm:text-2xl lg:text-2xl' : 
+                      level === 1 ? 'text-lg sm:text-xl lg:text-xl' : 
+                                   'text-base sm:text-lg lg:text-lg';
+    const sparkleSize = level === 0 ? 'w-4 h-4 sm:w-5 sm:h-5' : 
+                        level === 1 ? 'w-3 h-3 sm:w-4 sm:h-4' : 
+                                     'w-3 h-3';
+    const marginBottom = level === 0 ? 'mb-6 sm:mb-8' : level === 1 ? 'mb-4 sm:mb-6' : 'mb-3 sm:mb-4';
     
     return (
-      <div key={`${categoryName}-${level}`} className={`${marginBottom} last:mb-0 category-section`} style={{ paddingLeft: `${paddingLeft}px` }}>
+      <div key={`${categoryName}-${level}`} className={`${marginBottom} ${paddingClass} last:mb-0 category-section`}>
         {/* Título de la categoría - Alineado a la izquierda como índice de libro */}
         <div className="mb-4">
           <div className="flex items-center gap-2 mb-2">
@@ -183,17 +194,17 @@ export default function ArticulosContent() {
             </h3>
           </div>
           {categoryNode.description && (
-            <p className="text-purple-200 font-serif italic text-sm mb-2 ml-7">
+            <p className="text-purple-200 font-serif italic text-xs sm:text-sm mb-2 ml-2 sm:ml-4 lg:ml-7">
               {categoryNode.description}
             </p>
           )}
-          {/* Línea decorativa más sutil y corta */}
-          <div className="h-px bg-gradient-to-r from-purple-400 to-transparent w-32 ml-7"></div>
+          {/* Línea decorativa más sutil y corta - responsive */}
+          <div className="h-px bg-gradient-to-r from-purple-400 to-transparent w-16 sm:w-24 lg:w-32 ml-2 sm:ml-4 lg:ml-7"></div>
         </div>
 
         {/* Artículos de esta categoría */}
         {categoryNode.articles.length > 0 && (
-          <div className="space-y-1 mb-6 ml-7">
+          <div className="space-y-1 mb-4 sm:mb-6 ml-2 sm:ml-4 lg:ml-7">
             {categoryNode.articles.map((article) => (
               <Link 
                 key={article._id}
@@ -216,7 +227,7 @@ export default function ArticulosContent() {
                 <div className="flex items-center flex-grow min-w-0">
                   {/* Punto de índice más pequeño */}
                   <div className="w-1 h-1 bg-yellow-400 rounded-full group-hover:bg-yellow-300 transition-colors mr-2 flex-shrink-0"></div>
-                  <span className="text-white group-hover:text-yellow-100 transition-colors font-medium text-base flex-grow truncate">
+                  <span className="text-gray-200 group-hover:text-yellow-100 transition-colors font-medium text-sm sm:text-base lg:text-base flex-grow truncate">
                     {article.title}
                   </span>
                 </div>
@@ -311,6 +322,9 @@ export default function ArticulosContent() {
         </div>
       </div>
 
+      {/* Banner musical del grimorio */}
+      <GrimorieMusicBanner />
+
       {/* Buscador elegante */}
       <div className="mb-12 max-w-4xl mx-auto">
         <div className="max-w-2xl mx-auto">
@@ -319,7 +333,7 @@ export default function ArticulosContent() {
             <input
               type="text"
               placeholder="Buscar en el grimorio..."
-              className="w-full pl-12 pr-4 py-4 rounded-lg bg-black/40 backdrop-blur-sm border border-purple-500/30 text-white placeholder-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition-all duration-300"
+              className="w-full pl-10 sm:pl-12 pr-4 py-3 sm:py-4 rounded-lg bg-black/40 backdrop-blur-sm border border-purple-500/30 text-gray-200 placeholder-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition-all duration-300 text-sm sm:text-base"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />

@@ -1,0 +1,213 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test Free Music Archive - El Conejo de Lunaria</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #1a1a2e;
+            color: #e94560;
+        }
+        h1 {
+            text-align: center;
+            color: #f5f5f5;
+        }
+        .track {
+            background-color: #16213e;
+            padding: 15px;
+            margin: 10px 0;
+            border-radius: 8px;
+            border: 1px solid #0f3460;
+        }
+        .track h3 {
+            margin: 0 0 10px 0;
+            color: #f39c12;
+        }
+        .track p {
+            margin: 5px 0;
+            color: #bdc3c7;
+        }
+        .credits {
+            font-size: 0.9em;
+            color: #95a5a6;
+            font-style: italic;
+        }
+        audio {
+            width: 100%;
+            margin: 10px 0;
+        }
+        .status {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 0.8em;
+            margin-left: 10px;
+        }
+        .success { background-color: #27ae60; color: white; }
+        .error { background-color: #e74c3c; color: white; }
+        .testing { background-color: #f39c12; color: white; }
+    </style>
+</head>
+<body>
+    <h1>🌙 Test Free Music Archive URLs</h1>
+    <p>Probando las URLs de música libre para El Conejo de Lunaria</p>
+    
+    <div id="tracks"></div>
+
+    <script>
+        // Pistas de Free Music Archive que estamos usando
+        const musicTracks = [
+            {
+                src: 'https://ia800605.us.archive.org/16/items/ambient_meditation_music/ambient_01.mp3',
+                title: 'Mystic Depths',
+                artist: 'Ethereal Sounds',
+                credits: 'Free Music Archive - CC BY',
+                license: 'Creative Commons BY 4.0',
+                tags: ['ambient', 'mystical', 'meditation', 'ethereal'],
+                duration: '4:32'
+            },
+            {
+                src: 'https://ia800302.us.archive.org/35/items/nature_ambient_collection/forest_whispers.mp3',
+                title: 'Forest Whispers',
+                artist: 'Nature Collective',
+                credits: 'Free Music Archive - CC0 (Public Domain)',
+                license: 'Public Domain',
+                tags: ['nature', 'forest', 'ambient', 'mystical', 'peaceful'],
+                duration: '6:18'
+            },
+            {
+                src: 'https://ia600107.us.archive.org/8/items/meditation_sounds/lunar_meditation.mp3',
+                title: 'Lunar Meditation',
+                artist: 'Moon Phases',
+                credits: 'Free Music Archive - CC BY-SA',
+                license: 'Creative Commons BY-SA 4.0',
+                tags: ['lunar', 'meditation', 'night', 'moon', 'serene'],
+                duration: '8:45'
+            },
+            {
+                src: 'https://ia800408.us.archive.org/12/items/spiritual_journey/crystal_healing.mp3',
+                title: 'Crystal Healing',
+                artist: 'Spiritual Harmonies',
+                credits: 'Free Music Archive - CC BY',
+                license: 'Creative Commons BY 4.0',
+                tags: ['healing', 'crystal', 'spiritual', 'chakra', 'meditation'],
+                duration: '7:22'
+            },
+            {
+                src: 'https://ia600804.us.archive.org/15/items/mystical_journey/ancient_temple.mp3',
+                title: 'Ancient Temple',
+                artist: 'Sacred Sounds',
+                credits: 'Free Music Archive - CC BY-SA',
+                license: 'Creative Commons BY-SA 4.0',
+                tags: ['ancient', 'temple', 'mystical', 'sacred', 'spiritual'],
+                duration: '6:47'
+            },
+            {
+                src: 'https://ia800203.us.archive.org/7/items/nighttime_ambience/starlit_sky.mp3',
+                title: 'Starlit Sky',
+                artist: 'Cosmic Dreams',
+                credits: 'Free Music Archive - CC BY',
+                license: 'Creative Commons BY 4.0',
+                tags: ['night', 'stars', 'cosmic', 'dreamy', 'ambient'],
+                duration: '9:33'
+            },
+            {
+                src: 'https://ia800207.us.archive.org/19/items/forest_sounds_collection/enchanted_forest.mp3',
+                title: 'Enchanted Forest',
+                artist: 'Nature Collective',
+                credits: 'Free Music Archive - CC BY',
+                license: 'Creative Commons BY 4.0',
+                tags: ['forest', 'nature', 'mystical', 'enchanted', 'ambient'],
+                duration: '12:15'
+            },
+            {
+                src: 'https://ia600905.us.archive.org/11/items/meditation_bells/tibetan_bells.mp3',
+                title: 'Tibetan Bells',
+                artist: 'Mountain Echoes',
+                credits: 'Free Music Archive - CC BY-SA',
+                license: 'Creative Commons BY-SA 4.0',
+                tags: ['bells', 'tibetan', 'meditation', 'spiritual', 'healing'],
+                duration: '15:30'
+            },
+            {
+                src: 'https://ia600509.us.archive.org/23/items/ambient_piano_collection/peaceful_piano.mp3',
+                title: 'Peaceful Piano',
+                artist: 'Calm Waters',
+                credits: 'Free Music Archive - CC0 (Public Domain)',
+                license: 'Public Domain',
+                tags: ['piano', 'peaceful', 'ambient', 'calm', 'relaxing'],
+                duration: '5:14'
+            }
+        ];
+
+        const tracksContainer = document.getElementById('tracks');
+
+        // Función para probar cada pista
+        async function testTrack(track, index) {
+            const trackDiv = document.createElement('div');
+            trackDiv.className = 'track';
+            trackDiv.id = `track-${index}`;
+            
+            trackDiv.innerHTML = `
+                <h3>${track.title} <span class="status testing" id="status-${index}">Testing...</span></h3>
+                <p><strong>Artista:</strong> ${track.artist}</p>
+                <p><strong>Duración:</strong> ${track.duration}</p>
+                <p><strong>Tags:</strong> ${track.tags.join(', ')}</p>
+                <p class="credits">${track.credits} (${track.license})</p>
+                <audio id="audio-${index}" controls preload="metadata">
+                    <source src="${track.src}" type="audio/mpeg">
+                    Tu navegador no soporta el elemento de audio.
+                </audio>
+                <p id="error-${index}" style="color: #e74c3c; display: none;"></p>
+            `;
+            
+            tracksContainer.appendChild(trackDiv);
+            
+            const audio = document.getElementById(`audio-${index}`);
+            const status = document.getElementById(`status-${index}`);
+            const errorDiv = document.getElementById(`error-${index}`);
+            
+            // Probar si el audio se puede cargar
+            audio.addEventListener('loadedmetadata', () => {
+                status.textContent = '✅ OK';
+                status.className = 'status success';
+                console.log(`✅ ${track.title} - URL válida`);
+            });
+            
+            audio.addEventListener('error', (e) => {
+                status.textContent = '❌ Error';
+                status.className = 'status error';
+                errorDiv.style.display = 'block';
+                errorDiv.textContent = `Error al cargar: ${e.target.error?.message || 'URL no disponible'}`;
+                console.error(`❌ ${track.title} - Error:`, e.target.error);
+            });
+            
+            // También probar con fetch
+            try {
+                const response = await fetch(track.src, { method: 'HEAD' });
+                if (!response.ok) {
+                    throw new Error(`HTTP ${response.status}`);
+                }
+            } catch (error) {
+                console.error(`❌ Fetch error for ${track.title}:`, error);
+                if (status.textContent === 'Testing...') {
+                    status.textContent = '❌ Fetch Error';
+                    status.className = 'status error';
+                    errorDiv.style.display = 'block';
+                    errorDiv.textContent = `Fetch error: ${error.message}`;
+                }
+            }
+        }
+
+        // Probar todas las pistas
+        musicTracks.forEach(testTrack);
+
+        console.log('🎵 Probando', musicTracks.length, 'pistas de Free Music Archive');
+    </script>
+</body>
+</html>

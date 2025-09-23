@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useRef, useState, useEffect, useCallback, ReactNode } from 'react';
-import { musicPlaylists, type Playlist, type PixabayTrack } from '@/lib/pixabay-music';
+import { usePathname } from 'next/navigation';
+import { musicPlaylists, getPlaylistByRoute, type Playlist, type MusicTrack } from '@/lib/music-playlists';
 
 interface Track {
   src: string;
@@ -37,11 +38,12 @@ export const useAudio = () => {
 };
 
 export const AudioProvider = ({ children }: { children: ReactNode }) => {
+  const pathname = usePathname();
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [hasPlayedOnce, setHasPlayedOnce] = useState(false);
   const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
-  const [currentPlaylistId, setCurrentPlaylistId] = useState('ambient-fancy-magic'); // Comenzar con la playlist curada
+  const [currentPlaylistId, setCurrentPlaylistId] = useState('webpage'); // Comenzar con la playlist general
   const [isShuffleMode, setIsShuffleMode] = useState(true); // Activar shuffle por defecto
   const [shuffledOrder, setShuffledOrder] = useState<number[]>([]);
   const fadeIntervalRef = useRef<NodeJS.Timeout | null>(null);
@@ -52,11 +54,25 @@ export const AudioProvider = ({ children }: { children: ReactNode }) => {
     isPlayingRef.current = isPlaying;
   }, [isPlaying]);
 
+  // Cambiar playlist automáticamente según la ruta
+  useEffect(() => {
+    const newPlaylistId = pathname.startsWith('/articulos') || pathname.startsWith('/autores') 
+      ? 'grimoire' 
+      : 'webpage';
+    
+    if (newPlaylistId !== currentPlaylistId) {
+      setCurrentPlaylistId(newPlaylistId);
+      // Resetear el índice cuando cambia la playlist
+      setCurrentTrackIndex(0);
+      console.log(`🎵 Playlist cambiada a: ${newPlaylistId === 'grimoire' ? 'Grimorio (estudio)' : 'General (mística)'}`);
+    }
+  }, [pathname, currentPlaylistId]);
+
   // Obtener playlist actual
   const currentPlaylist = musicPlaylists.find(p => p.id === currentPlaylistId) || musicPlaylists[0];
   
   // Convertir tracks de la playlist actual a formato compatible
-  const trackList: Track[] = currentPlaylist.tracks.map((track: PixabayTrack) => ({
+  const trackList: Track[] = currentPlaylist.tracks.map((track: MusicTrack) => ({
     src: track.src,
     title: track.title,
     artist: track.artist,

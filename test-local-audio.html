@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Test Local Audio Files</title>
+</head>
+<body>
+    <h1>Test Local Audio Files</h1>
+    
+    <h2>Música de Fondo Mística</h2>
+    <audio controls>
+        <source src="/musicafondo.mp3" type="audio/mpeg">
+        Tu navegador no soporta el elemento audio.
+    </audio>
+    
+    <h2>Sonidos de la Noche</h2>
+    <audio controls>
+        <source src="/night.mp3" type="audio/mpeg">
+        Tu navegador no soporta el elemento audio.
+    </audio>
+    
+    <h2>Sonidos de la Noche (WAV)</h2>
+    <audio controls>
+        <source src="/night.wav" type="audio/wav">
+        Tu navegador no soporta el elemento audio.
+    </audio>
+
+    <script>
+        // Test programmatic audio access
+        console.log('Testing audio files...');
+        
+        const testAudio = (src, name) => {
+            const audio = new Audio(src);
+            audio.addEventListener('canplay', () => {
+                console.log(`✅ ${name} (${src}) - CAN PLAY`);
+            });
+            audio.addEventListener('error', (e) => {
+                console.error(`❌ ${name} (${src}) - ERROR:`, e);
+            });
+            audio.addEventListener('loadstart', () => {
+                console.log(`📁 ${name} (${src}) - LOADING...`);
+            });
+        };
+
+        testAudio('/musicafondo.mp3', 'Música de Fondo');
+        testAudio('/night.mp3', 'Sonidos Noche MP3');
+        testAudio('/night.wav', 'Sonidos Noche WAV');
+    </script>
+</body>
+</html>
