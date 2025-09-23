@@ -48,8 +48,8 @@ const SobreMiPage = () => {
         duration: 0.5,
         onComplete: () => {
           gsap.to(typewriterRef.current, {
-            text: "Tarotista • Guía Espiritual • Aprendiz Eterno",
-            duration: 2,
+            text: "Tarotista • 21 Arcanos Mayores • Comunicación Espiritual • Protecciones Básicas",
+            duration: 3,
             ease: "none",
           });
         }
@@ -230,13 +230,14 @@ const SobreMiPage = () => {
                 </h2>
                 <p className="text-gray-200 leading-relaxed mb-4 text-base sm:text-lg">
                   ¡Hola, hermoso ser! Soy Arledge Brer, y me emociona tenerte aquí en este espacio sagrado. 
-                  Soy un pequeño brujito que ha encontrado en el tarot no solo una herramienta de sabiduría ancestral, 
-                  sino también una forma hermosa de conectar corazones y acompañar almas.
+                  Soy un tarotista que trabaja específicamente con los 21 Arcanos Mayores, encontrando en estas cartas 
+                  una herramienta poderosa de sabiduría ancestral para conectar corazones y acompañar almas.
                 </p>
                 <p className="text-gray-200 leading-relaxed mb-4 text-base sm:text-lg">
-                  Creé <span className="text-purple-300 font-semibold">La Madriguera de Lunaria</span> con amor 
-                  y propósito: construir el refugio que a mí me hubiera gustado encontrar cuando inicié este camino mágico. 
-                  Un lugar sin juicios, lleno de comprensión y donde cada pregunta es bienvenida.
+                  Además del tarot, canalizo la comunicación con entidades espirituales y ofrezco protecciones energéticas básicas. 
+                  Creé <span className="text-purple-300 font-semibold">La Madriguera de Lunaria</span> como 
+                  el refugio que a mí me hubiera gustado encontrar cuando inicié este camino: un lugar sin juicios, 
+                  lleno de comprensión y donde cada pregunta espiritual es bienvenida.
                 </p>
               </div>
 
@@ -246,8 +247,9 @@ const SobreMiPage = () => {
                   Mi Misión
                 </h3>
                 <p className="text-gray-200 leading-relaxed text-base sm:text-lg">
-                  Acompañarte en tu viaje de autodescubrimiento, ofreciendo claridad cuando las dudas nublan tu camino 
-                  y celebrando contigo cada pequeño despertar. Aquí, la magia se vive con autenticidad y amor.
+                  Mi propósito es acompañarte en tu viaje espiritual a través de la sabiduría de los Arcanos Mayores, 
+                  facilitando la comunicación con tus guías espirituales y ofreciéndote herramientas de protección energética. 
+                  Aquí encontrarás claridad, orientación y un espacio seguro para explorar tu camino espiritual.
                 </p>
               </div>
             </div>
@@ -281,84 +283,84 @@ const SobreMiPage = () => {
             </div>
           </div>
 
-          {/* Skills & Technologies Cards */}
+          {/* Servicios Espirituales */}
           <div ref={cardsContainerRef} className="mt-16">
             <h3 className="text-3xl font-bold text-center mb-10 text-purple-300 flex items-center justify-center gap-3">
-              <BookOpen className="w-8 h-8 text-yellow-400" />
-              Mis Herramientas Espirituales & Técnicas
+              <Moon className="w-8 h-8 text-yellow-400" />
+              Mis Servicios Espirituales
             </h3>
             
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               
-              {/* Spiritual Skills */}
-              <div className="bg-gradient-to-br from-purple-800/40 to-pink-800/30 backdrop-blur-lg rounded-xl p-6 border border-purple-400/30 hover:border-purple-400/60 transition-all duration-300 hover:scale-105">
-                <Moon className="w-12 h-12 text-purple-300 mb-4" />
-                <h4 className="text-xl font-semibold text-purple-200 mb-3">Artes Divinatorias</h4>
+              {/* Tarot - Arcanos Mayores */}
+              <div className="bg-gradient-to-br from-purple-800/40 to-indigo-800/30 backdrop-blur-lg rounded-xl p-6 border border-purple-400/30 hover:border-purple-400/60 transition-all duration-300 hover:scale-105">
+                <Star className="w-12 h-12 text-purple-300 mb-4" />
+                <h4 className="text-xl font-semibold text-purple-200 mb-3">Tarot - Arcanos Mayores</h4>
                 <ul className="text-gray-300 space-y-2 text-sm">
-                  <li>• Tarot Rider-Waite & Marsella</li>
-                  <li>• Lectura de Cartas Españolas</li>
-                  <li>• Interpretación Intuitiva</li>
-                  <li>• Guía Espiritual Personalizada</li>
+                  <li>• Lecturas con 21 Arcanos Mayores</li>
+                  <li>• Interpretación Simbólica Profunda</li>
+                  <li>• Guía para Decisiones Importantes</li>
+                  <li>• Conexión con tu Propósito</li>
                 </ul>
               </div>
 
-              {/* Modern Tech Skills */}
+              {/* Comunicación con Entidades */}
               <div className="bg-gradient-to-br from-blue-800/40 to-cyan-800/30 backdrop-blur-lg rounded-xl p-6 border border-blue-400/30 hover:border-blue-400/60 transition-all duration-300 hover:scale-105">
-                <Star className="w-12 h-12 text-blue-300 mb-4" />
-                <h4 className="text-xl font-semibold text-blue-200 mb-3">Tecnologías Frontend</h4>
+                <Sparkles className="w-12 h-12 text-blue-300 mb-4" />
+                <h4 className="text-xl font-semibold text-blue-200 mb-3">Comunicación Espiritual</h4>
                 <ul className="text-gray-300 space-y-2 text-sm">
-                  <li>• Next.js 15 & React 19</li>
-                  <li>• TypeScript & Tailwind CSS</li>
-                  <li>• GSAP Animations</li>
-                  <li>• Responsive Design</li>
+                  <li>• Canalización de Mensajes</li>
+                  <li>• Contacto con Guías Espirituales</li>
+                  <li>• Interpretación de Señales</li>
+                  <li>• Mediación Energética Segura</li>
                 </ul>
               </div>
 
-              {/* Backend & Services */}
-              <div className="bg-gradient-to-br from-green-800/40 to-teal-800/30 backdrop-blur-lg rounded-xl p-6 border border-green-400/30 hover:border-green-400/60 transition-all duration-300 hover:scale-105">
+              {/* Protecciones Básicas */}
+              <div className="bg-gradient-to-br from-green-800/40 to-emerald-800/30 backdrop-blur-lg rounded-xl p-6 border border-green-400/30 hover:border-green-400/60 transition-all duration-300 hover:scale-105">
                 <Gem className="w-12 h-12 text-green-300 mb-4" />
-                <h4 className="text-xl font-semibold text-green-200 mb-3">Backend & Servicios</h4>
+                <h4 className="text-xl font-semibold text-green-200 mb-3">Protecciones Energéticas</h4>
                 <ul className="text-gray-300 space-y-2 text-sm">
-                  <li>• Firebase & Firestore</li>
-                  <li>• Sanity CMS</li>
-                  <li>• PayPal Integration</li>
-                  <li>• Email Automation</li>
+                  <li>• Limpieza Energética Básica</li>
+                  <li>• Escudos de Protección</li>
+                  <li>• Consejos de Autocuidado Espiritual</li>
+                  <li>• Rituales de Purificación</li>
                 </ul>
               </div>
 
-              {/* Design & UX */}
+              {/* Guía Espiritual */}
               <div className="bg-gradient-to-br from-pink-800/40 to-rose-800/30 backdrop-blur-lg rounded-xl p-6 border border-pink-400/30 hover:border-pink-400/60 transition-all duration-300 hover:scale-105">
                 <Heart className="w-12 h-12 text-pink-300 mb-4" />
-                <h4 className="text-xl font-semibold text-pink-200 mb-3">Diseño & Experiencia</h4>
+                <h4 className="text-xl font-semibold text-pink-200 mb-3">Guía & Acompañamiento</h4>
                 <ul className="text-gray-300 space-y-2 text-sm">
-                  <li>• UI/UX Intuitivo</li>
-                  <li>• Animaciones Interactivas</li>
-                  <li>• Diseño Responsivo</li>
-                  <li>• Accesibilidad Web</li>
+                  <li>• Orientación en Momentos Difíciles</li>
+                  <li>• Desarrollo de Intuición</li>
+                  <li>• Apoyo en Despertar Espiritual</li>
+                  <li>• Espacio Seguro sin Juicios</li>
                 </ul>
               </div>
 
-              {/* SEO & Performance */}
+              {/* Metodología */}
               <div className="bg-gradient-to-br from-yellow-800/40 to-orange-800/30 backdrop-blur-lg rounded-xl p-6 border border-yellow-400/30 hover:border-yellow-400/60 transition-all duration-300 hover:scale-105">
-                <Sparkles className="w-12 h-12 text-yellow-300 mb-4" />
-                <h4 className="text-xl font-semibold text-yellow-200 mb-3">SEO & Rendimiento</h4>
+                <Moon className="w-12 h-12 text-yellow-300 mb-4" />
+                <h4 className="text-xl font-semibold text-yellow-200 mb-3">Mi Enfoque</h4>
                 <ul className="text-gray-300 space-y-2 text-sm">
-                  <li>• Optimización SEO</li>
-                  <li>• Core Web Vitals</li>
-                  <li>• Schema.org Markup</li>
-                  <li>• Performance Optimization</li>
+                  <li>• Lecturas Intuitivas Personalizadas</li>
+                  <li>• Ambiente Relajado y Acogedor</li>
+                  <li>• Respeto por tu Proceso</li>
+                  <li>• Confidencialidad Absoluta</li>
                 </ul>
               </div>
 
-              {/* Audio & Media */}
-              <div className="bg-gradient-to-br from-indigo-800/40 to-purple-800/30 backdrop-blur-lg rounded-xl p-6 border border-indigo-400/30 hover:border-indigo-400/60 transition-all duration-300 hover:scale-105">
-                <BookOpen className="w-12 h-12 text-indigo-300 mb-4" />
-                <h4 className="text-xl font-semibold text-indigo-200 mb-3">Audio & Multimedia</h4>
+              {/* Experiencia */}
+              <div className="bg-gradient-to-br from-violet-800/40 to-purple-800/30 backdrop-blur-lg rounded-xl p-6 border border-violet-400/30 hover:border-violet-400/60 transition-all duration-300 hover:scale-105">
+                <BookOpen className="w-12 h-12 text-violet-300 mb-4" />
+                <h4 className="text-xl font-semibold text-violet-200 mb-3">Mi Aprendizaje</h4>
                 <ul className="text-gray-300 space-y-2 text-sm">
-                  <li>• Audio Player Personalizado</li>
-                  <li>• Free Music Archive API</li>
-                  <li>• Ambiente Musical Automático</li>
-                  <li>• Experiencia Inmersiva</li>
+                  <li>• Estudio Continuo del Tarot</li>
+                  <li>• Práctica Diaria de Meditación</li>
+                  <li>• Conexión con la Naturaleza</li>
+                  <li>• Crecimiento Espiritual Constante</li>
                 </ul>
               </div>
             </div>

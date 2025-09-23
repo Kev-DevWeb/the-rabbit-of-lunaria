@@ -118,12 +118,8 @@ export const AudioProvider = ({ children }: { children: ReactNode }) => {
 
     const handleError = (error: Event) => {
       console.error('Error cargando audio desde', currentTrack.src, ':', error);
-      // Solo avanzar automáticamente si está reproduciéndose y hay más de una pista
-      if (isPlayingRef.current && trackList.length > 1) {
-        setCurrentTrackIndex((prev) => (prev + 1) % trackList.length);
-      } else {
-        setIsPlaying(false); // Pausar si hay un error y no se está reproduciendo
-      }
+      // Pausar reproducción si hay error
+      setIsPlaying(false);
     };
 
     const handleCanPlay = () => {
@@ -198,10 +194,12 @@ export const AudioProvider = ({ children }: { children: ReactNode }) => {
   }, []);
 
   const nextTrack = useCallback(() => {
+    console.log("⏭️ Avanzando a la siguiente pista");
     setCurrentTrackIndex((prev) => (prev + 1) % trackList.length);
   }, [trackList.length]);
 
   const prevTrack = useCallback(() => {
+    console.log("⏮️ Retrocediendo a la pista anterior");
     setCurrentTrackIndex((prev) => (prev - 1 + trackList.length) % trackList.length);
   }, [trackList.length]);
 
@@ -229,69 +227,32 @@ export const AudioProvider = ({ children }: { children: ReactNode }) => {
     }
     
     const audio = audioRef.current;
-    console.log("🎵 Audio src:", audio.src, "readyState:", audio.readyState, "networkState:", audio.networkState);
 
     if (!isPlaying) {
       console.log("▶️ Intentando reproducir...");
-      setIsPlaying(true);
-      audio.volume = 0;
-      
       try {
-        // Esperar a que el audio esté listo si es necesario
-        if (audio.readyState < 2) { // HAVE_CURRENT_DATA
-          console.log("⏳ Esperando que el audio esté listo...");
-          await new Promise((resolve, reject) => {
-            const timeout = setTimeout(() => {
-              audio.removeEventListener('canplay', onCanPlay);
-              audio.removeEventListener('error', onError);
-              reject(new Error('Timeout esperando que el audio esté listo'));
-            }, 10000); // 10 segundos timeout
-            
-            const onCanPlay = () => {
-              clearTimeout(timeout);
-              audio.removeEventListener('canplay', onCanPlay);
-              audio.removeEventListener('error', onError);
-              console.log("✅ Audio listo para reproducir");
-              resolve(void 0);
-            };
-            const onError = (e: Event) => {
-              clearTimeout(timeout);
-              audio.removeEventListener('canplay', onCanPlay);
-              audio.removeEventListener('error', onError);
-              console.error("❌ Error cargando audio:", e);
-              reject(new Error('Error cargando audio'));
-            };
-            audio.addEventListener('canplay', onCanPlay);
-            audio.addEventListener('error', onError);
-          });
-        }
+        // Configurar volumen inicial
+        audio.volume = 0.7;
         
+        // Reproducir directamente
         await audio.play();
+        setIsPlaying(true);
         console.log("🎶 Audio reproduciendo exitosamente");
-        fadeAudio(0.7, 2000);
+        
         if (!hasPlayedOnce) {
           setHasPlayedOnce(true);
         }
       } catch (error) {
-        console.error("❌ Error al intentar reproducir el audio:", error);
+        console.error("❌ Error al reproducir:", error);
         setIsPlaying(false);
-        // Si hay error, intentar con la siguiente canción
-        if (trackList.length > 1) {
-          console.log("🔄 Intentando con la siguiente canción...");
-          setTimeout(() => {
-            setCurrentTrackIndex((prev) => (prev + 1) % trackList.length);
-          }, 1000);
-        }
       }
     } else {
       console.log("⏸️ Pausando audio...");
+      audio.pause();
       setIsPlaying(false);
-      fadeAudio(0, 1500, () => {
-        audio.pause();
-        console.log("⏹️ Audio pausado");
-      });
+      console.log("⏹️ Audio pausado");
     }
-  }, [isPlaying, hasPlayedOnce, fadeAudio, trackList.length]);
+  }, [isPlaying, hasPlayedOnce]);
 
   const toggleShuffle = useCallback(() => {
     setIsShuffleMode(!isShuffleMode);
