@@ -1,5 +1,6 @@
 import {DocumentTextIcon} from '@sanity/icons'
 import {defineArrayMember, defineField, defineType} from 'sanity'
+import { SEOGenerator } from '../components/SEOGenerator'
 
 export const postType = defineType({
   name: 'post',
@@ -14,20 +15,45 @@ export const postType = defineType({
   ],
   fields: [
     defineField({
+      name: 'seoGenerator',
+      title: 'Generador de SEO',
+      type: 'object',
+      group: 'meta',
+      fields: [
+        {
+          name: 'placeholder',
+          type: 'string',
+          hidden: true
+        }
+      ],
+      components: {
+        input: SEOGenerator
+      }
+    }),
+    defineField({
       name: 'metaTitle',
+      title: 'Meta Title (SEO)',
       type: 'string',
       group: 'meta',
+      description: 'Título optimizado para SEO (50-60 caracteres recomendados)',
+      validation: Rule => Rule.max(60).warning('Se recomienda mantener el título por debajo de 60 caracteres')
     }),
     defineField({
       name: 'metaDescription',
+      title: 'Meta Description (SEO)',
       type: 'text',
       group: 'meta',
+      description: 'Descripción que aparece en los resultados de búsqueda (150-160 caracteres)',
+      validation: Rule => Rule.max(160).warning('Se recomienda mantener la descripción por debajo de 160 caracteres')
     }),
     defineField({
       name: 'keywords',
+      title: 'Keywords (SEO)',
       type: 'array',
       of: [{type: 'string'}],
       group: 'meta',
+      description: 'Palabras clave relevantes para el artículo (máximo 15 recomendadas)',
+      validation: Rule => Rule.max(15).warning('Se recomienda no usar más de 15 keywords')
     }),
     defineField({
       name: 'title',

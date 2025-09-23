@@ -12,6 +12,13 @@ import Image from 'next/image';
 import { BookOpen, Sparkles, Search } from 'lucide-react';
 
 // Define types for our Sanity data
+interface Category {
+  title: string;
+  description?: string;
+  slug?: { current: string };
+  parent?: Category;
+}
+
 interface Article {
   _id: string;
   title: string;
@@ -23,21 +30,16 @@ interface Article {
     slug: { current: string };
     image?: SanityImageSource;
   }[];
-  categories: {
-    title: string;
-    description?: string;
-    parent?: {
-      title: string;
-    };
-  }[];
+  categories: Category[];
 }
 
-interface CategoryGroup {
+interface CategoryNode {
   title: string;
   description?: string;
   subcategories: {
-    [subcategoryName: string]: Article[];
+    [subcategoryName: string]: CategoryNode;
   };
+  articles: Article[];
 }
 
 const builder = imageUrlBuilder(client);
@@ -83,8 +85,22 @@ export default function ArticulosContent() {
         "categories": categories[]->{
           title, 
           description,
+          slug,
           parent->{
-            title
+            title,
+            slug,
+            parent->{
+              title,
+              slug,
+              parent->{
+                title,
+                slug,
+                parent->{
+                  title,
+                  slug
+                }
+              }
+            }
           }
         }
       }`;
@@ -100,29 +116,135 @@ export default function ArticulosContent() {
     article.title.toLowerCase().includes(searchQuery.toLowerCase())
   );
 
-  // Organizar artículos por categorías padre y subcategorías
-  const organizedContent = filteredArticles.reduce((acc, article) => {
-    const category = article.categories?.[0];
-    if (!category) return acc;
-
-    const parentCategory = category.parent?.title || category.title;
-    const subcategory = category.parent ? category.title : 'General';
-
-    if (!acc[parentCategory]) {
-      acc[parentCategory] = {
-        title: parentCategory,
-        description: category.parent ? '' : category.description,
-        subcategories: {}
-      };
+  // Función para obtener la ruta completa de categorías (desde la raíz)
+  const getCategoryPath = (category: Category): string[] => {
+    const path: string[] = [];
+    let current: Category | undefined = category;
+    
+    while (current) {
+      path.unshift(current.title);
+      current = current.parent;
     }
+    
+    return path;
+  };
 
-    if (!acc[parentCategory].subcategories[subcategory]) {
-      acc[parentCategory].subcategories[subcategory] = [];
-    }
+  // Función para crear estructura anidada recursivamente
+  const createNestedStructure = (articles: Article[]): Record<string, CategoryNode> => {
+    const structure: Record<string, CategoryNode> = {};
+    
+    articles.forEach(article => {
+      if (!article.categories?.[0]) return;
+      
+      const categoryPath = getCategoryPath(article.categories[0]);
+      let current = structure;
+      
+      // Navegar/crear la estructura anidada
+      categoryPath.forEach((categoryName, index) => {
+        if (!current[categoryName]) {
+          current[categoryName] = {
+            title: categoryName,
+            description: index === categoryPath.length - 1 ? article.categories[0].description : '',
+            subcategories: {},
+            articles: []
+          };
+        }
+        
+        // Si es la última categoría en el path, agregar el artículo
+        if (index === categoryPath.length - 1) {
+          current[categoryName].articles.push(article);
+        } else {
+          current = current[categoryName].subcategories;
+        }
+      });
+    });
+    
+    return structure;
+  };
 
-    acc[parentCategory].subcategories[subcategory].push(article);
-    return acc;
-  }, {} as Record<string, CategoryGroup>);
+  // Organizar artículos por categorías multinivel
+  const organizedContent = createNestedStructure(filteredArticles);
+
+  // Función para renderizar categorías anidadas recursivamente
+  const renderCategoryNode = (categoryName: string, categoryNode: CategoryNode, level: number = 0): React.ReactNode => {
+    const marginLeft = level * 8; // 8px por cada nivel de anidación
+    const titleSize = level === 0 ? 'text-3xl' : level === 1 ? 'text-2xl' : 'text-xl';
+    const sparkleSize = level === 0 ? 'w-6 h-6' : 'w-5 h-5';
+    
+    return (
+      <div key={`${categoryName}-${level}`} className="mb-8 last:mb-0 category-section" style={{ marginLeft: `${marginLeft}px` }}>
+        {/* Título de la categoría */}
+        <div className="text-center mb-6">
+          <div className="flex items-center justify-center gap-3 mb-3">
+            <Sparkles className={`${sparkleSize} text-purple-400`} />
+            <h3 className={`${titleSize} font-serif font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-300 via-pink-300 to-purple-300`}>
+              {categoryName}
+            </h3>
+            <Sparkles className={`${sparkleSize} text-purple-400`} />
+          </div>
+          {categoryNode.description && (
+            <p className="text-purple-200 font-serif italic text-sm mb-3">
+              {categoryNode.description}
+            </p>
+          )}
+          <div className="h-px bg-gradient-to-r from-transparent via-purple-400 to-transparent w-1/2 mx-auto"></div>
+        </div>
+
+        {/* Artículos de esta categoría */}
+        {categoryNode.articles.length > 0 && (
+          <div className="space-y-2 mb-6">
+            {categoryNode.articles.map((article) => (
+              <Link 
+                key={article._id}
+                href={`/articulos/${article.slug.current}`}
+                className="group flex items-center p-3 rounded-md hover:bg-purple-800/30 transition-all duration-300 article-entry"
+              >
+                {/* Imagen del artículo */}
+                {article.mainImage && (
+                  <div className="flex-shrink-0 mr-4">
+                    <Image
+                      src={urlFor(article.mainImage).width(60).height(60).url()}
+                      alt={article.mainImage.alt || article.title}
+                      width={60}
+                      height={60}
+                      className="w-15 h-15 object-cover rounded-md border border-purple-500/30 group-hover:border-purple-400/50 transition-colors"
+                    />
+                  </div>
+                )}
+                
+                <div className="flex items-center flex-grow min-w-0">
+                  <div className="w-1.5 h-1.5 bg-yellow-400 rounded-full group-hover:bg-yellow-300 transition-colors mr-3 flex-shrink-0"></div>
+                  <span className="text-white group-hover:text-yellow-100 transition-colors font-medium text-lg flex-grow truncate">
+                    {article.title}
+                  </span>
+                </div>
+                
+                {/* Línea punteada estilo índice */}
+                <div className="flex-grow mx-4 border-b border-dotted border-purple-400/40 group-hover:border-purple-300/60 transition-colors min-w-12"></div>
+                
+                {/* Fecha como "número de página" */}
+                <span className="text-purple-300 group-hover:text-purple-200 font-mono text-sm transition-colors min-w-20 text-right flex-shrink-0">
+                  {article.publishedAt 
+                    ? new Date(article.publishedAt).toLocaleDateString('es-ES', { 
+                        day: '2-digit', 
+                        month: '2-digit',
+                        year: 'numeric' 
+                      })
+                    : 'Sin fecha'
+                  }
+                </span>
+              </Link>
+            ))}
+          </div>
+        )}
+
+        {/* Subcategorías recursivas */}
+        {Object.entries(categoryNode.subcategories).map(([subcategoryName, subcategoryNode]) =>
+          renderCategoryNode(subcategoryName, subcategoryNode, level + 1)
+        )}
+      </div>
+    );
+  };
 
   useGSAP(() => {
     if (loading) return;
@@ -216,84 +338,10 @@ export default function ArticulosContent() {
       <div className="max-w-5xl mx-auto">
         <div className="bg-black/40 backdrop-blur-sm rounded-lg border border-purple-500/30 shadow-2xl p-8">
           
-          {Object.entries(organizedContent).map(([categoryName, categoryData]) => (
-            <div key={categoryName} className="mb-12 last:mb-0 category-section">
-              {/* Título de la categoría principal */}
-              <div className="text-center mb-8">
-                <div className="flex items-center justify-center gap-3 mb-3">
-                  <Sparkles className="w-6 h-6 text-purple-400" />
-                  <h3 className="text-3xl font-serif font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-300 via-pink-300 to-purple-300">
-                    {categoryName}
-                  </h3>
-                  <Sparkles className="w-6 h-6 text-purple-400" />
-                </div>
-                {categoryData.description && (
-                  <p className="text-purple-200 font-serif italic text-sm mb-3">
-                    {categoryData.description}
-                  </p>
-                )}
-                <div className="h-px bg-gradient-to-r from-transparent via-purple-400 to-transparent w-1/2 mx-auto"></div>
-              </div>
-
-              {/* Subcategorías y artículos */}
-              {Object.entries(categoryData.subcategories).map(([subcategoryName, articlesInSubcategory]) => (
-                <div key={subcategoryName} className="mb-8">
-                  {/* Nombre de la subcategoría (solo si no es "General") */}
-                  {subcategoryName !== 'General' && (
-                    <h4 className="text-xl font-serif font-semibold text-purple-200 mb-4 pl-4 border-l-3 border-purple-500/50">
-                      {subcategoryName}
-                    </h4>
-                  )}
-
-                  {/* Lista de artículos con diseño de índice */}
-                  <div className={`space-y-2 ${subcategoryName !== 'General' ? 'ml-8' : ''}`}>
-                    {articlesInSubcategory.map((article) => (
-                      <Link 
-                        key={article._id}
-                        href={`/articulos/${article.slug.current}`}
-                        className="group flex items-center p-3 rounded-md hover:bg-purple-800/30 transition-all duration-300 article-entry"
-                      >
-                        {/* Imagen del artículo */}
-                        {article.mainImage && (
-                          <div className="flex-shrink-0 mr-4">
-                            <Image
-                              src={urlFor(article.mainImage).width(60).height(60).url()}
-                              alt={article.mainImage.alt || article.title}
-                              width={60}
-                              height={60}
-                              className="w-15 h-15 object-cover rounded-md border border-purple-500/30 group-hover:border-purple-400/50 transition-colors"
-                            />
-                          </div>
-                        )}
-                        
-                        <div className="flex items-center flex-grow min-w-0">
-                          <div className="w-1.5 h-1.5 bg-yellow-400 rounded-full group-hover:bg-yellow-300 transition-colors mr-3 flex-shrink-0"></div>
-                          <span className="text-white group-hover:text-yellow-100 transition-colors font-medium text-lg flex-grow truncate">
-                            {article.title}
-                          </span>
-                        </div>
-                        
-                        {/* Línea punteada estilo índice */}
-                        <div className="flex-grow mx-4 border-b border-dotted border-purple-400/40 group-hover:border-purple-300/60 transition-colors min-w-12"></div>
-                        
-                        {/* Fecha como "número de página" */}
-                        <span className="text-purple-300 group-hover:text-purple-200 font-mono text-sm transition-colors min-w-20 text-right flex-shrink-0">
-                          {article.publishedAt 
-                            ? new Date(article.publishedAt).toLocaleDateString('es-ES', { 
-                                day: '2-digit', 
-                                month: '2-digit',
-                                year: 'numeric' 
-                              })
-                            : '---'
-                          }
-                        </span>
-                      </Link>
-                    ))}
-                  </div>
-                </div>
-              ))}
-            </div>
-          ))}
+          {/* Renderizar estructura de categorías anidadas */}
+          {Object.entries(organizedContent).map(([categoryName, categoryNode]) =>
+            renderCategoryNode(categoryName, categoryNode, 0)
+          )}
 
           {Object.keys(organizedContent).length === 0 && (
             <div className="text-center py-12">
