@@ -45,6 +45,12 @@ export const AudioProvider = ({ children }: { children: ReactNode }) => {
   const [isShuffleMode, setIsShuffleMode] = useState(true); // Activar shuffle por defecto
   const [shuffledOrder, setShuffledOrder] = useState<number[]>([]);
   const fadeIntervalRef = useRef<NodeJS.Timeout | null>(null);
+  const isPlayingRef = useRef(isPlaying); // Referencia para acceder al estado actual en los event listeners
+
+  // Mantener la referencia actualizada
+  useEffect(() => {
+    isPlayingRef.current = isPlaying;
+  }, [isPlaying]);
 
   // Obtener playlist actual
   const currentPlaylist = musicPlaylists.find(p => p.id === currentPlaylistId) || musicPlaylists[0];
@@ -84,12 +90,20 @@ export const AudioProvider = ({ children }: { children: ReactNode }) => {
     audioRef.current = audio;
 
     const handleAudioEnd = () => {
-      setCurrentTrackIndex((prev) => (prev + 1) % trackList.length);
+      // Solo avanzar automáticamente si está reproduciéndose
+      if (isPlayingRef.current) {
+        setCurrentTrackIndex((prev) => (prev + 1) % trackList.length);
+      }
     };
 
     const handleError = (error: Event) => {
       console.error('Error cargando audio desde', currentTrack.src, ':', error);
-      setCurrentTrackIndex((prev) => (prev + 1) % trackList.length);
+      // Solo avanzar automáticamente si está reproduciéndose y hay más de una pista
+      if (isPlayingRef.current && trackList.length > 1) {
+        setCurrentTrackIndex((prev) => (prev + 1) % trackList.length);
+      } else {
+        setIsPlaying(false); // Pausar si hay un error y no se está reproduciendo
+      }
     };
 
     const handleCanPlay = () => {

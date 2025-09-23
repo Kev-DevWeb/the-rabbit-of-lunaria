@@ -63,7 +63,7 @@ export default function FloatingMusicPlayer() {
   
   const [isExpanded, setIsExpanded] = useState(false);
   const [isDragging, setIsDragging] = useState(false);
-  const [position, setPosition] = useState({ x: 50, y: 50 }); // Posición inicial
+  const [position, setPosition] = useState({ x: 20, y: 80 }); // Posición inicial en la izquierda
   const playerRef = useRef<HTMLDivElement>(null);
 
   // Auto-contraer después de un tiempo sin interacción
@@ -114,8 +114,8 @@ export default function FloatingMusicPlayer() {
           isExpanded ? 'w-80 h-auto' : 'w-16 h-16'
         }`}
         style={{
-          right: isExpanded ? '20px' : `${100 - position.x}%`,
-          bottom: isExpanded ? '20px' : `${100 - position.y}%`,
+          left: isExpanded ? '20px' : `${position.x}px`,
+          bottom: isExpanded ? '20px' : `${position.y}px`,
         }}
         onMouseDown={handleMouseDown}
       >
