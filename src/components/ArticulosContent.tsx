@@ -167,70 +167,71 @@ export default function ArticulosContent() {
 
   // Función para renderizar categorías anidadas recursivamente
   const renderCategoryNode = (categoryName: string, categoryNode: CategoryNode, level: number = 0): React.ReactNode => {
-    const marginLeft = level * 8; // 8px por cada nivel de anidación
-    const titleSize = level === 0 ? 'text-3xl' : level === 1 ? 'text-2xl' : 'text-xl';
-    const sparkleSize = level === 0 ? 'w-6 h-6' : 'w-5 h-5';
+    const paddingLeft = level * 24; // 24px por cada nivel de anidación (sangría más pronunciada)
+    const titleSize = level === 0 ? 'text-2xl' : level === 1 ? 'text-xl' : 'text-lg';
+    const sparkleSize = level === 0 ? 'w-5 h-5' : level === 1 ? 'w-4 h-4' : 'w-3 h-3';
+    const marginBottom = level === 0 ? 'mb-8' : level === 1 ? 'mb-6' : 'mb-4';
     
     return (
-      <div key={`${categoryName}-${level}`} className="mb-8 last:mb-0 category-section" style={{ marginLeft: `${marginLeft}px` }}>
-        {/* Título de la categoría */}
-        <div className="text-center mb-6">
-          <div className="flex items-center justify-center gap-3 mb-3">
-            <Sparkles className={`${sparkleSize} text-purple-400`} />
-            <h3 className={`${titleSize} font-serif font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-300 via-pink-300 to-purple-300`}>
+      <div key={`${categoryName}-${level}`} className={`${marginBottom} last:mb-0 category-section`} style={{ paddingLeft: `${paddingLeft}px` }}>
+        {/* Título de la categoría - Alineado a la izquierda como índice de libro */}
+        <div className="mb-4">
+          <div className="flex items-center gap-2 mb-2">
+            <Sparkles className={`${sparkleSize} text-purple-400 flex-shrink-0`} />
+            <h3 className={`${titleSize} font-serif font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-300 via-pink-300 to-purple-300 leading-tight`}>
               {categoryName}
             </h3>
-            <Sparkles className={`${sparkleSize} text-purple-400`} />
           </div>
           {categoryNode.description && (
-            <p className="text-purple-200 font-serif italic text-sm mb-3">
+            <p className="text-purple-200 font-serif italic text-sm mb-2 ml-7">
               {categoryNode.description}
             </p>
           )}
-          <div className="h-px bg-gradient-to-r from-transparent via-purple-400 to-transparent w-1/2 mx-auto"></div>
+          {/* Línea decorativa más sutil y corta */}
+          <div className="h-px bg-gradient-to-r from-purple-400 to-transparent w-32 ml-7"></div>
         </div>
 
         {/* Artículos de esta categoría */}
         {categoryNode.articles.length > 0 && (
-          <div className="space-y-2 mb-6">
+          <div className="space-y-1 mb-6 ml-7">
             {categoryNode.articles.map((article) => (
               <Link 
                 key={article._id}
                 href={`/articulos/${article.slug.current}`}
-                className="group flex items-center p-3 rounded-md hover:bg-purple-800/30 transition-all duration-300 article-entry"
+                className="group flex items-center py-2 px-3 rounded-md hover:bg-purple-800/20 transition-all duration-300 article-entry"
               >
-                {/* Imagen del artículo */}
+                {/* Imagen del artículo - Más pequeña para formato de libro */}
                 {article.mainImage && (
-                  <div className="flex-shrink-0 mr-4">
+                  <div className="flex-shrink-0 mr-3">
                     <Image
-                      src={urlFor(article.mainImage).width(60).height(60).url()}
+                      src={urlFor(article.mainImage).width(40).height(40).url()}
                       alt={article.mainImage.alt || article.title}
-                      width={60}
-                      height={60}
-                      className="w-15 h-15 object-cover rounded-md border border-purple-500/30 group-hover:border-purple-400/50 transition-colors"
+                      width={40}
+                      height={40}
+                      className="w-10 h-10 object-cover rounded border border-purple-500/30 group-hover:border-purple-400/50 transition-colors"
                     />
                   </div>
                 )}
                 
                 <div className="flex items-center flex-grow min-w-0">
-                  <div className="w-1.5 h-1.5 bg-yellow-400 rounded-full group-hover:bg-yellow-300 transition-colors mr-3 flex-shrink-0"></div>
-                  <span className="text-white group-hover:text-yellow-100 transition-colors font-medium text-lg flex-grow truncate">
+                  {/* Punto de índice más pequeño */}
+                  <div className="w-1 h-1 bg-yellow-400 rounded-full group-hover:bg-yellow-300 transition-colors mr-2 flex-shrink-0"></div>
+                  <span className="text-white group-hover:text-yellow-100 transition-colors font-medium text-base flex-grow truncate">
                     {article.title}
                   </span>
                 </div>
                 
-                {/* Línea punteada estilo índice */}
-                <div className="flex-grow mx-4 border-b border-dotted border-purple-400/40 group-hover:border-purple-300/60 transition-colors min-w-12"></div>
+                {/* Línea punteada estilo índice de libro */}
+                <div className="flex-grow mx-3 border-b border-dotted border-purple-400/30 group-hover:border-purple-300/50 transition-colors min-w-8"></div>
                 
                 {/* Fecha como "número de página" */}
-                <span className="text-purple-300 group-hover:text-purple-200 font-mono text-sm transition-colors min-w-20 text-right flex-shrink-0">
+                <span className="text-purple-300 group-hover:text-purple-200 font-mono text-xs transition-colors min-w-16 text-right flex-shrink-0">
                   {article.publishedAt 
                     ? new Date(article.publishedAt).toLocaleDateString('es-ES', { 
                         day: '2-digit', 
-                        month: '2-digit',
-                        year: 'numeric' 
+                        month: '2-digit'
                       })
-                    : 'Sin fecha'
+                    : 'S/F'
                   }
                 </span>
               </Link>
@@ -296,18 +297,18 @@ export default function ArticulosContent() {
 
   return (
     <div ref={container} className="min-h-screen">
-      {/* Header del Grimorio */}
-      <div className="text-center mb-12">
-        <div className="flex items-center justify-center gap-4 mb-6">
-          <div className="h-px bg-gradient-to-r from-transparent via-yellow-400 to-transparent flex-grow max-w-32"></div>
-          <BookOpen className="w-8 h-8 text-yellow-400" />
-          <h2 className="text-4xl font-serif font-bold text-yellow-300">Índice</h2>
-          <BookOpen className="w-8 h-8 text-yellow-400" />
-          <div className="h-px bg-gradient-to-r from-transparent via-yellow-400 to-transparent flex-grow max-w-32"></div>
+      {/* Header del Grimorio - Estilo libro tradicional */}
+      <div className="mb-12">
+        <div className="flex items-start gap-4 mb-6">
+          <BookOpen className="w-8 h-8 text-yellow-400 mt-2 flex-shrink-0" />
+          <div>
+            <h2 className="text-4xl font-serif font-bold text-yellow-300 mb-2">Índice</h2>
+            <p className="text-lg text-purple-200 font-serif italic">
+              &ldquo;Los secretos del cosmos organizados para tu sabiduría&rdquo;
+            </p>
+            <div className="h-px bg-gradient-to-r from-yellow-400 to-transparent w-64 mt-3"></div>
+          </div>
         </div>
-        <p className="text-lg text-purple-200 font-serif italic">
-          &ldquo;Los secretos del cosmos organizados para tu sabiduría&rdquo;
-        </p>
       </div>
 
       {/* Buscador elegante */}
@@ -325,7 +326,7 @@ export default function ArticulosContent() {
         
         <div className="mt-6 p-4 bg-purple-900/20 rounded-lg border border-purple-500/20">
           <p className="text-center text-purple-200 text-sm leading-relaxed">
-            ¿No encuentras la sabiduría que buscas? Escríbenos a{' '}
+            ¿No encuentras la sabiduría que buscas? o ¿Quieres aportar con tu conocimiento? Escríbenos a{' '}
             <a href="mailto:elconejodelunaria@gmail.com" className="text-yellow-400 hover:text-yellow-300 underline transition-colors">
               elconejodelunaria@gmail.com
             </a>{' '}
@@ -334,8 +335,8 @@ export default function ArticulosContent() {
         </div>
       </div>
 
-      {/* Índice completo del Grimorio */}
-      <div className="max-w-5xl mx-auto">
+      {/* Índice completo del Grimorio - Formato de libro */}
+      <div className="max-w-4xl">
         <div className="bg-black/40 backdrop-blur-sm rounded-lg border border-purple-500/30 shadow-2xl p-8">
           
           {/* Renderizar estructura de categorías anidadas */}
@@ -344,7 +345,7 @@ export default function ArticulosContent() {
           )}
 
           {Object.keys(organizedContent).length === 0 && (
-            <div className="text-center py-12">
+            <div className="py-12">
               <p className="text-purple-300 font-serif italic">
                 {searchQuery 
                   ? `No se encontraron resultados para "${searchQuery}"`
@@ -354,7 +355,7 @@ export default function ArticulosContent() {
           )}
 
           {/* Footer del índice */}
-          <div className="text-center mt-12 pt-8 border-t border-purple-500/30">
+          <div className="mt-12 pt-8 border-t border-purple-500/30">
             <p className="text-purple-300 font-serif italic text-sm">
               &ldquo;Cada página contiene secretos esperando ser descubiertos...&rdquo;
             </p>

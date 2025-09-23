@@ -18,11 +18,11 @@ const UnmuteIcon = () => (
 );
 
 const MuteButton = () => {
-  const { isMuted, toggleMute } = useAudio();
+  const { isPlaying, togglePlay } = useAudio();
 
   return (
-    <button onClick={toggleMute} className="p-2 rounded-full text-white hover:bg-white/20 transition-colors" aria-label={isMuted ? "Activar sonido" : "Silenciar sonido"}>
-      {isMuted ? <MuteIcon /> : <UnmuteIcon />}
+    <button onClick={togglePlay} className="p-2 rounded-full text-white hover:bg-white/20 transition-colors" aria-label={isPlaying ? "Pausar música" : "Reproducir música"}>
+      {isPlaying ? <UnmuteIcon /> : <MuteIcon />}
     </button>
   );
 };

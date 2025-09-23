@@ -6,6 +6,7 @@ import "./globals.css";
 import { AudioProvider } from '@/context/AudioProvider';
 import Header from '@/components/Header';
 import AppFooter from '@/components/AppFooter';
+import FloatingMusicPlayer from '@/components/FloatingMusicPlayer';
 import Script from 'next/script';
 
 const geistSans = Geist({
@@ -102,6 +103,8 @@ export default function RootLayout({
                 <PageTransition>{children}</PageTransition>
               </main>
               {!isStudioPage && <AppFooter />}
+              {/* Reproductor musical flotante global */}
+              {!isStudioPage && <FloatingMusicPlayer />}
             </div>
           </LenisProvider>
         </AudioProvider>
