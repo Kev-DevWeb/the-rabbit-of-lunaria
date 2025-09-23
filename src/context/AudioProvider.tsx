@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useRef, useState, useEffect, useCallback, ReactNode } from 'react';
 import { usePathname } from 'next/navigation';
-import { musicPlaylists, getPlaylistByRoute, type Playlist, type MusicTrack } from '@/lib/music-playlists';
+import { musicPlaylists, getPlaylistByRoute, type Playlist, type MusicTrack } from '@/lib/music-playlists-simple';
+import { fetchJamendoMusic, convertJamendoToMusicTrack, jamendoFallbackTracks } from '@/lib/jamendo-api';
 
 interface Track {
   src: string;
@@ -25,6 +26,8 @@ interface AudioContextType {
   // Nuevas funciones para reproducción
   isShuffleMode: boolean;
   toggleShuffle: () => void;
+  // Estado de carga de Jamendo
+  isLoadingJamendo: boolean;
 }
 
 const AudioContext = createContext<AudioContextType | undefined>(undefined);
@@ -32,27 +35,60 @@ const AudioContext = createContext<AudioContextType | undefined>(undefined);
 export const useAudio = () => {
   const context = useContext(AudioContext);
   if (!context) {
-    throw new Error('useAudio must be used within an AudioProvider');
+    throw new Error('useAudio debe ser usado dentro de AudioProvider');
   }
   return context;
 };
 
-export const AudioProvider = ({ children }: { children: ReactNode }) => {
+interface AudioProviderProps {
+  children: ReactNode;
+}
+
+export const AudioProvider: React.FC<AudioProviderProps> = ({ children }) => {
   const pathname = usePathname();
   const audioRef = useRef<HTMLAudioElement | null>(null);
+  
+  // Estados básicos
   const [isPlaying, setIsPlaying] = useState(false);
-  const [hasPlayedOnce, setHasPlayedOnce] = useState(false);
   const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
-  const [currentPlaylistId, setCurrentPlaylistId] = useState('webpage'); // Comenzar con la playlist general
-  const [isShuffleMode, setIsShuffleMode] = useState(true); // Activar shuffle por defecto
-  const [shuffledOrder, setShuffledOrder] = useState<number[]>([]);
-  const fadeIntervalRef = useRef<NodeJS.Timeout | null>(null);
-  const isPlayingRef = useRef(isPlaying); // Referencia para acceder al estado actual en los event listeners
+  const [currentPlaylistId, setCurrentPlaylistId] = useState('webpage');
+  const [hasPlayedOnce, setHasPlayedOnce] = useState(false);
+  const [isShuffleMode, setIsShuffleMode] = useState(false);
+  
+  // Estados para Jamendo
+  const [jamendoTracks, setJamendoTracks] = useState<Track[]>([]);
+  const [isLoadingJamendo, setIsLoadingJamendo] = useState(false);
 
-  // Mantener la referencia actualizada
+  // Cargar música de Jamendo cuando cambie la playlist
   useEffect(() => {
-    isPlayingRef.current = isPlaying;
-  }, [isPlaying]);
+    const loadJamendoMusic = async () => {
+      setIsLoadingJamendo(true);
+      try {
+        const category = currentPlaylistId === 'grimoire' ? 'study' : 'mystical';
+        console.log(`🎵 Cargando música de Jamendo para categoria: ${category}`);
+        
+        const tracks = await fetchJamendoMusic(category, 8);
+        if (tracks && tracks.length > 0) {
+          const convertedTracks = tracks.map(convertJamendoToMusicTrack);
+          setJamendoTracks(convertedTracks);
+          console.log(`✅ ${convertedTracks.length} pistas cargadas de Jamendo`);
+        } else {
+          console.warn('⚠️ No se encontraron pistas en Jamendo, usando fallback');
+          setJamendoTracks(jamendoFallbackTracks);
+        }
+      } catch (error) {
+        console.error('❌ Error cargando música de Jamendo:', error);
+        setJamendoTracks(jamendoFallbackTracks);
+      } finally {
+        setIsLoadingJamendo(false);
+      }
+    };
+
+    // Solo cargar si no tenemos pistas de Jamendo o si cambió la playlist
+    if (jamendoTracks.length === 0 || currentPlaylistId) {
+      loadJamendoMusic();
+    }
+  }, [currentPlaylistId, jamendoTracks.length]);
 
   // Cambiar playlist automáticamente según la ruta
   useEffect(() => {
@@ -62,152 +98,160 @@ export const AudioProvider = ({ children }: { children: ReactNode }) => {
     
     if (newPlaylistId !== currentPlaylistId) {
       setCurrentPlaylistId(newPlaylistId);
-      // Resetear el índice cuando cambia la playlist
       setCurrentTrackIndex(0);
-      console.log(`🎵 Playlist cambiada a: ${newPlaylistId === 'grimoire' ? 'Grimorio (estudio)' : 'General (mística)'}`);
     }
   }, [pathname, currentPlaylistId]);
+
+  // Crear elemento de audio una sola vez
+  useEffect(() => {
+    if (!audioRef.current) {
+      audioRef.current = new Audio();
+      audioRef.current.preload = 'metadata';
+      console.log("🎵 Elemento de audio creado");
+    }
+    
+    return () => {
+      if (audioRef.current) {
+        audioRef.current.pause();
+        audioRef.current = null;
+      }
+    };
+  }, []);
 
   // Obtener playlist actual
   const currentPlaylist = musicPlaylists.find(p => p.id === currentPlaylistId) || musicPlaylists[0];
   
-  // Convertir tracks de la playlist actual a formato compatible
-  const trackList: Track[] = currentPlaylist.tracks.map((track: MusicTrack) => ({
-    src: track.src,
-    title: track.title,
-    artist: track.artist,
-    credits: track.credits
-  }));
+  // Usar pistas de Jamendo si están disponibles, sino usar playlist local
+  const trackList: Track[] = jamendoTracks.length > 0 
+    ? jamendoTracks 
+    : currentPlaylist.tracks.map((track: MusicTrack) => ({
+        src: track.src,
+        title: track.title,
+        artist: track.artist,
+        credits: track.credits
+      }));
 
-  // Crear orden aleatorio si está en modo shuffle
-  useEffect(() => {
-    if (isShuffleMode && trackList.length > 0) {
-      const indices = Array.from({ length: trackList.length }, (_, i) => i);
-      const shuffled = [...indices].sort(() => Math.random() - 0.5);
-      setShuffledOrder(shuffled);
-    }
-  }, [isShuffleMode, trackList.length]);
-
-  // Obtener el índice real según el modo de reproducción
-  const getRealIndex = (displayIndex: number) => {
-    if (isShuffleMode && shuffledOrder.length > 0) {
-      return shuffledOrder[displayIndex] || 0;
-    }
-    return displayIndex;
+  // Obtener pista actual (con protección de índices)
+  const currentTrack = trackList[currentTrackIndex] || trackList[0] || {
+    src: '/musicafondo.mp3',
+    title: 'Música por defecto',
+    artist: 'El Conejo de Lunaria',
+    credits: 'Audio local'
   };
 
-  const currentTrack = trackList[getRealIndex(currentTrackIndex)] || trackList[0];
-
+  // Cargar nueva pista en el elemento de audio
   useEffect(() => {
-    console.log('Creando nuevo elemento de audio para:', currentTrack.title, 'URL:', currentTrack.src);
-    
-    const audio = new Audio();
-    audio.preload = "auto";
-    audio.crossOrigin = "anonymous";
-    audio.volume = 0.7;
-    audio.src = currentTrack.src; // Asignar src después de configurar propiedades
-    audioRef.current = audio;
+    if (audioRef.current && currentTrack.src) {
+      console.log(`🎵 Cargando pista: ${currentTrack.title} - ${currentTrack.src}`);
+      audioRef.current.src = currentTrack.src;
+      audioRef.current.load();
+    }
+  }, [currentTrack.src, currentTrack.title]);
 
-    const handleAudioEnd = () => {
-      console.log('Audio terminó, isPlaying:', isPlayingRef.current);
-      // Solo avanzar automáticamente si está reproduciéndose
-      if (isPlayingRef.current) {
-        setCurrentTrackIndex((prev) => (prev + 1) % trackList.length);
-      }
+  // Función para pasar a la siguiente pista
+  const nextTrack = useCallback(() => {
+    console.log("⏭️ Siguiente pista solicitada");
+    
+    if (isShuffleMode) {
+      // Modo aleatorio: seleccionar una pista diferente a la actual
+      let randomIndex;
+      do {
+        randomIndex = Math.floor(Math.random() * trackList.length);
+      } while (randomIndex === currentTrackIndex && trackList.length > 1);
+      
+      console.log(`🔀 Modo aleatorio: saltando a pista ${randomIndex}`);
+      setCurrentTrackIndex(randomIndex);
+    } else {
+      // Modo secuencial: siguiente pista en orden
+      const nextIndex = (currentTrackIndex + 1) % trackList.length;
+      console.log(`➡️ Siguiente pista: ${nextIndex}`);
+      setCurrentTrackIndex(nextIndex);
+    }
+    
+    // Si estaba reproduciendo, continuar reproduciendo la nueva pista
+    if (isPlaying && audioRef.current) {
+      setTimeout(() => {
+        audioRef.current?.play().catch(error => {
+          console.error("❌ Error al reproducir siguiente pista:", error);
+        });
+      }, 100); // Pequeño delay para permitir que se cargue la nueva pista
+    }
+  }, [currentTrackIndex, trackList.length, isPlaying, isShuffleMode]);
+
+  // Función para ir a la pista anterior
+  const prevTrack = useCallback(() => {
+    console.log("⏮️ Pista anterior solicitada");
+    
+    if (isShuffleMode) {
+      // En modo aleatorio, también ir a una pista aleatoria
+      let randomIndex;
+      do {
+        randomIndex = Math.floor(Math.random() * trackList.length);
+      } while (randomIndex === currentTrackIndex && trackList.length > 1);
+      
+      console.log(`🔀 Modo aleatorio: saltando a pista ${randomIndex}`);
+      setCurrentTrackIndex(randomIndex);
+    } else {
+      // Modo secuencial: pista anterior en orden
+      const prevIndex = currentTrackIndex === 0 ? trackList.length - 1 : currentTrackIndex - 1;
+      console.log(`⬅️ Pista anterior: ${prevIndex}`);
+      setCurrentTrackIndex(prevIndex);
+    }
+    
+    // Si estaba reproduciendo, continuar reproduciendo la nueva pista
+    if (isPlaying && audioRef.current) {
+      setTimeout(() => {
+        audioRef.current?.play().catch(error => {
+          console.error("❌ Error al reproducir pista anterior:", error);
+        });
+      }, 100);
+    }
+  }, [currentTrackIndex, trackList.length, isPlaying, isShuffleMode]);
+
+  // Configurar eventos del elemento de audio
+  useEffect(() => {
+    if (!audioRef.current) return;
+
+    const audio = audioRef.current;
+    
+    const handleEnded = () => {
+      console.log("🔚 Pista terminada, pasando a la siguiente automáticamente");
+      nextTrack();
     };
 
     const handleError = (error: Event) => {
-      console.error('Error cargando audio desde', currentTrack.src, ':', error);
-      // Pausar reproducción si hay error
+      console.error("❌ Error en elemento de audio:", error);
       setIsPlaying(false);
     };
 
-    const handleCanPlay = () => {
-      console.log('Audio listo para reproducir:', currentTrack.title);
-    };
-
     const handleLoadStart = () => {
-      console.log('Iniciando carga de:', currentTrack.src);
+      console.log("📡 Iniciando carga de audio...");
     };
 
-    const handleLoadedData = () => {
-      console.log('Datos cargados para:', currentTrack.title);
+    const handleCanPlay = () => {
+      console.log("✅ Audio listo para reproducir");
     };
 
-    audio.addEventListener('ended', handleAudioEnd);
+    audio.addEventListener('ended', handleEnded);
     audio.addEventListener('error', handleError);
-    audio.addEventListener('canplay', handleCanPlay);
     audio.addEventListener('loadstart', handleLoadStart);
-    audio.addEventListener('loadeddata', handleLoadedData);
+    audio.addEventListener('canplay', handleCanPlay);
 
     return () => {
-      if (fadeIntervalRef.current) clearInterval(fadeIntervalRef.current);
-      audio.removeEventListener('ended', handleAudioEnd);
+      audio.removeEventListener('ended', handleEnded);
       audio.removeEventListener('error', handleError);
-      audio.removeEventListener('canplay', handleCanPlay);
       audio.removeEventListener('loadstart', handleLoadStart);
-      audio.removeEventListener('loadeddata', handleLoadedData);
-      audio.pause();
-      audioRef.current = null;
-      console.log('Audio limpiado para:', currentTrack.title);
+      audio.removeEventListener('canplay', handleCanPlay);
     };
-  }, [currentTrackIndex, trackList.length, currentTrack.src, currentTrack.title]);
+  }, [nextTrack]);
 
-  useEffect(() => {
-    const handleVisibilityChange = () => {
-      const audio = audioRef.current;
-      if (!audio) return;
-
-      if (document.hidden) {
-        audio.pause();
-      } else {
-        if (isPlaying && hasPlayedOnce) {
-          audio.play().catch(error => console.error("Error al reanudar el audio:", error));
-        }
-      }
-    };
-
-    document.addEventListener('visibilitychange', handleVisibilityChange);
-    return () => document.removeEventListener('visibilitychange', handleVisibilityChange);
-  }, [isPlaying, hasPlayedOnce]);
-
-  const fadeAudio = useCallback((targetVolume: number, duration: number, onComplete?: () => void) => {
-    if (!audioRef.current) return;
-    if (fadeIntervalRef.current) clearInterval(fadeIntervalRef.current);
-
-    const audio = audioRef.current;
-    const startVolume = audio.volume;
-    const steps = 50;
-    const stepDuration = duration / steps;
-    let currentStep = 0;
-
-    fadeIntervalRef.current = setInterval(() => {
-      currentStep++;
-      const newVolume = startVolume + (targetVolume - startVolume) * (currentStep / steps);
-      audio.volume = Math.max(0, Math.min(1, newVolume));
-
-      if (currentStep >= steps) {
-        if (fadeIntervalRef.current) clearInterval(fadeIntervalRef.current);
-        if (onComplete) onComplete();
-      }
-    }, stepDuration);
-  }, []);
-
-  const nextTrack = useCallback(() => {
-    console.log("⏭️ Avanzando a la siguiente pista");
-    setCurrentTrackIndex((prev) => (prev + 1) % trackList.length);
-  }, [trackList.length]);
-
-  const prevTrack = useCallback(() => {
-    console.log("⏮️ Retrocediendo a la pista anterior");
-    setCurrentTrackIndex((prev) => (prev - 1 + trackList.length) % trackList.length);
-  }, [trackList.length]);
-
+  // Función para establecer una pista específica
   const setTrack = useCallback((index: number) => {
     if (index >= 0 && index < trackList.length) {
+      console.log(`🎯 Estableciendo pista ${index}: ${trackList[index]?.title}`);
       setCurrentTrackIndex(index);
     }
-  }, [trackList.length]);
+  }, [trackList]);
 
   // Función para cambiar de playlist
   const setPlaylist = useCallback((playlistId: string) => {
@@ -215,8 +259,40 @@ export const AudioProvider = ({ children }: { children: ReactNode }) => {
     if (playlist) {
       setCurrentPlaylistId(playlistId);
       setCurrentTrackIndex(0); // Reiniciar al primer track de la nueva playlist
+      
+      // Cargar pistas de Jamendo para la nueva playlist
+      const loadJamendoMusic = async () => {
+        setIsLoadingJamendo(true);
+        try {
+          const category = playlistId === 'grimoire' ? 'study' : 'mystical';
+          console.log(`🎵 Cargando música de Jamendo para categoria: ${category}`);
+          
+          const tracks = await fetchJamendoMusic(category);
+          if (tracks && tracks.length > 0) {
+            const convertedTracks = tracks.map(convertJamendoToMusicTrack);
+            setJamendoTracks(convertedTracks);
+            console.log(`✅ ${convertedTracks.length} pistas cargadas de Jamendo`);
+          } else {
+            console.warn('⚠️ No se encontraron pistas en Jamendo, usando fallback');
+            setJamendoTracks(jamendoFallbackTracks);
+          }
+        } catch (error) {
+          console.error('❌ Error cargando música de Jamendo:', error);
+          setJamendoTracks(jamendoFallbackTracks);
+        } finally {
+          setIsLoadingJamendo(false);
+        }
+      };
+      
+      loadJamendoMusic();
     }
   }, []);
+
+  // Función para alternar entre modo aleatorio y secuencial
+  const toggleShuffle = useCallback(() => {
+    setIsShuffleMode(!isShuffleMode);
+    setCurrentTrackIndex(0); // Reiniciar al primer track
+  }, [isShuffleMode]);
 
   const togglePlay = useCallback(async () => {
     console.log("🎵 togglePlay llamado, isPlaying:", isPlaying, "audioRef.current:", !!audioRef.current);
@@ -229,21 +305,40 @@ export const AudioProvider = ({ children }: { children: ReactNode }) => {
     const audio = audioRef.current;
 
     if (!isPlaying) {
-      console.log("▶️ Intentando reproducir...");
+      console.log("▶️ Intentando reproducir:", currentTrack.title);
+      
       try {
-        // Configurar volumen inicial
-        audio.volume = 0.7;
-        
-        // Reproducir directamente
+        // Verificar que el audio esté listo
+        if (audio.readyState < 2) {
+          console.log("⏳ Audio no está listo, esperando...");
+          await new Promise<void>((resolve) => {
+            const handleCanPlay = () => {
+              audio.removeEventListener('canplaythrough', handleCanPlay);
+              resolve();
+            };
+            audio.addEventListener('canplaythrough', handleCanPlay);
+            
+            // Timeout de seguridad
+            setTimeout(() => {
+              audio.removeEventListener('canplaythrough', handleCanPlay);
+              resolve();
+            }, 3000);
+          });
+        }
+
         await audio.play();
         setIsPlaying(true);
-        console.log("🎶 Audio reproduciendo exitosamente");
+        setHasPlayedOnce(true);
+        console.log("✅ Audio reproduciéndose correctamente");
         
-        if (!hasPlayedOnce) {
-          setHasPlayedOnce(true);
-        }
       } catch (error) {
         console.error("❌ Error al reproducir:", error);
+        console.error("❌ Detalles del error:", {
+          message: (error as Error).message,
+          src: currentTrack.src,
+          readyState: audio.readyState,
+          networkState: audio.networkState
+        });
         setIsPlaying(false);
       }
     } else {
@@ -252,12 +347,7 @@ export const AudioProvider = ({ children }: { children: ReactNode }) => {
       setIsPlaying(false);
       console.log("⏹️ Audio pausado");
     }
-  }, [isPlaying, hasPlayedOnce]);
-
-  const toggleShuffle = useCallback(() => {
-    setIsShuffleMode(!isShuffleMode);
-    setCurrentTrackIndex(0); // Reiniciar al primer track
-  }, [isShuffleMode]);
+  }, [isPlaying, hasPlayedOnce, currentTrack.title, currentTrack.src]);
 
   return (
     <AudioContext.Provider value={{ 
@@ -273,7 +363,8 @@ export const AudioProvider = ({ children }: { children: ReactNode }) => {
       setPlaylist,
       availablePlaylists: musicPlaylists,
       isShuffleMode,
-      toggleShuffle
+      toggleShuffle,
+      isLoadingJamendo
     }}>
       {children}
     </AudioContext.Provider>

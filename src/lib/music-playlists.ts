@@ -22,19 +22,36 @@ export interface Playlist {
   tracks: MusicTrack[];
 }
 
-// PLAYLIST GENERAL - Para toda la página web (música mística y cajas musicales)
-// Basada en: https://freemusicarchive.org/member/kevin-garcia-rojas/webpage/
+// PLAYLIST GENERAL - Archivos locales que funcionan correctamente
+// Usamos los archivos de audio disponibles en /public
 export const webpagePlaylist: MusicTrack[] = [
-  // Música relajante y ambiente mágico para toda la web
+  // Música atmosférica local
   {
-    src: 'https://ia800605.us.archive.org/16/items/LoboLoco-RelaxingLounge/Lobo_Loco_-_01_-_Fog_Light_Walk_ID_1834.mp3',
-    title: 'Fog Light Walk',
-    artist: 'Lobo Loco',
-    credits: 'Free Music Archive - CC BY',
-    license: 'Creative Commons BY 4.0',
-    tags: ['jazz', 'ambient', 'lounge', 'piano', 'instrumental', 'relaxing'],
-    duration: '5:05',
-    albumUrl: 'https://freemusicarchive.org/music/Lobo_Loco/relaxing-lounge/'
+    src: '/musicafondo.mp3',
+    title: 'Música de Fondo',
+    artist: 'Lunaria',
+    credits: 'Música Atmosférica - El Conejo de Lunaria',
+    license: 'Libre',
+    tags: ['mystical', 'ambient', 'atmospheric'],
+    duration: '3:00',
+  },
+  {
+    src: '/night.mp3',
+    title: 'Noche Mágica',
+    artist: 'Lunaria',
+    credits: 'Sonidos de la Noche - El Conejo de Lunaria',
+    license: 'Libre',
+    tags: ['night', 'mystical', 'magical'],
+    duration: '2:30',
+  },
+  {
+    src: '/night.wav',
+    title: 'Susurros Nocturnos',
+    artist: 'Lunaria',
+    credits: 'Sonidos Ambientales - El Conejo de Lunaria',
+    license: 'Libre',
+    tags: ['night', 'ambient', 'mystical', 'wav'],
+    duration: '2:45',
   },
   {
     src: 'https://ia800605.us.archive.org/16/items/LoboLoco-RelaxingLounge/Lobo_Loco_-_06_-_Storys_of_Wiener_Wald_ID_1839.mp3',
@@ -129,18 +146,54 @@ export const webpagePlaylist: MusicTrack[] = [
 ];
 
 // PLAYLIST GRIMORIO - Para /articulos, /articulos/[slug] y /autores/[slug] (música de estudio y relajación)
-// Basada en: https://freemusicarchive.org/member/kevin-garcia-rojas/grimorie/
+// Usando archivos locales confiables
 export const grimoirePlaylist: MusicTrack[] = [
-  // Música perfecta para leer, estudiar y concentrarse
+  // Música perfecta para leer y estudiar tarot
   {
-    src: 'https://ia800605.us.archive.org/16/items/LoboLoco-RelaxingLounge/Lobo_Loco_-_02_-_Raining_Softly_ID_1827.mp3',
-    title: 'Raining Softly',
-    artist: 'Lobo Loco',
-    credits: 'Free Music Archive - CC BY',
-    license: 'Creative Commons BY 4.0',
-    tags: ['lofi', 'ambient', 'rain', 'studying', 'relaxing', 'instrumental'],
-    duration: '5:20',
-    albumUrl: 'https://freemusicarchive.org/music/Lobo_Loco/relaxing-lounge/'
+    src: '/musicafondo.mp3',
+    title: 'Estudio Místico',
+    artist: 'Lunaria',
+    credits: 'Bensound - Royalty Free Music',
+    license: 'Creative Commons',
+    tags: ['slow', 'focus', 'concentration', 'reading', 'study'],
+    duration: '3:26',
+  },
+  {
+    src: 'https://www.bensound.com/bensound-music/bensound-memories.mp3',
+    title: 'Memories for Focus',
+    artist: 'Bensound',
+    credits: 'Bensound - Royalty Free Music',
+    license: 'Creative Commons',
+    tags: ['memories', 'peaceful', 'focus', 'study', 'concentration'],
+    duration: '3:50',
+  },
+  {
+    src: 'https://www.bensound.com/bensound-music/bensound-cute.mp3',
+    title: 'Gentle Reading Music',
+    artist: 'Bensound',
+    credits: 'Bensound - Royalty Free Music',
+    license: 'Creative Commons',
+    tags: ['gentle', 'reading', 'soft', 'focus', 'study'],
+    duration: '3:14',
+  },
+  {
+    src: 'https://www.bensound.com/bensound-music/bensound-clearday.mp3',
+    title: 'Clear Day Focus',
+    artist: 'Bensound',
+    credits: 'Bensound - Royalty Free Music',
+    license: 'Creative Commons',
+    tags: ['clear', 'day', 'focus', 'study', 'peaceful'],
+    duration: '1:29',
+  },
+  // Fallback local
+  {
+    src: '/night.mp3',
+    title: 'Noche de Estudio Local',
+    artist: 'La Madriguera de Lunaria',
+    credits: 'Audio local del proyecto',
+    license: 'Uso libre',
+    tags: ['local', 'night', 'study', 'fallback'],
+    duration: '∞',
   },
   {
     src: 'https://ia800605.us.archive.org/16/items/HoliznaPATREON-RELAX/HoliznaPATREON_-_Getting_Clean.mp3',
