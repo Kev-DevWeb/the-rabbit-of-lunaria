@@ -18,6 +18,11 @@ interface Article {
   slug: { current: string };
   publishedAt?: string;
   mainImage?: SanityImageSource & { alt?: string; width?: number; height?: number };
+  authors?: {
+    name: string;
+    slug: { current: string };
+    image?: SanityImageSource;
+  }[];
   categories: {
     title: string;
     description?: string;
@@ -69,6 +74,11 @@ export default function ArticulosContent() {
             ...,
             metadata
           }
+        },
+        "authors": authors[]->{
+          name,
+          slug,
+          image
         },
         "categories": categories[]->{
           title, 

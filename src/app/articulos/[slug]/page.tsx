@@ -16,7 +16,7 @@ interface Article {
   mainImage?: SanityImageSource & { alt?: string; asset?: { metadata?: { dimensions?: { width: number; height: number } } } };
   body: PortableTextBlock[]; // Portable Text content
   publishedAt: string;
-  author: { name: string };
+  authors?: { name: string; slug: { current: string } }[];
   description: string;
   metaTitle?: string;
   metaDescription?: string;
@@ -43,7 +43,7 @@ async function getArticle(slug: string): Promise<Article | null> {
     },
     body,
     publishedAt,
-    "author": author->{name},
+    "authors": authors[]->{name, slug},
     "description": pt::text(body),
     metaTitle,
     metaDescription,
@@ -102,13 +102,13 @@ const ptComponents = {
       const embedId = getYouTubeEmbedId(value.url);
       if (embedId) {
         return (
-          <div className="aspect-w-16 aspect-h-9 my-4">
+          <div className="relative w-full my-6" style={{ paddingBottom: '56.25%' /* 16:9 aspect ratio */ }}>
             <iframe
               src={`https://www.youtube.com/embed/${embedId}`}
               frameBorder="0"
               allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
               allowFullScreen
-              className="w-full h-full rounded-lg shadow-lg shadow-purple-900/50"
+              className="absolute top-0 left-0 w-full h-full rounded-lg shadow-lg shadow-purple-900/50"
             ></iframe>
           </div>
         );
@@ -140,7 +140,9 @@ export default async function ArticuloPage({ params }: { params: Promise<{ slug:
     "image": article.mainImage ? urlFor(article.mainImage).url() : '',
     "author": {
       "@type": "Person",
-      "name": article.author?.name || "La madriguera de Lunaria",
+      "name": article.authors && article.authors.length > 0 
+        ? article.authors.map(author => author.name).join(', ')
+        : "La madriguera de Lunaria",
     },
     "publisher": {
       "@type": "Organization",
@@ -165,7 +167,11 @@ export default async function ArticuloPage({ params }: { params: Promise<{ slug:
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
       <h1 className="text-4xl font-bold mb-2 text-center font-cinzel-decorative">{article.title}</h1>
-      <p className="text-center text-gray-400 mb-8">Aportado por: {article.author?.name || 'La Madriguera'}</p>
+      <p className="text-center text-gray-400 mb-8">
+        Aportado por: {article.authors && article.authors.length > 0 
+          ? article.authors.map(author => author.name).join(', ') 
+          : 'La Madriguera'}
+      </p>
       {article.mainImage && (
         <div className="mb-8">
           <Image
