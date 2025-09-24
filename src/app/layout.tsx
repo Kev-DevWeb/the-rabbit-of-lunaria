@@ -4,6 +4,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import { Cinzel_Decorative, Playfair_Display, Cormorant_Garamond } from "next/font/google";
 import "./globals.css";
 import { AudioProvider } from '@/context/AudioProvider';
+import { BackgroundMusicProvider } from '@/context/BackgroundMusicProvider';
 import Header from '@/components/Header';
 import AppFooter from '@/components/AppFooter';
 import FloatingMusicPlayer from '@/components/FloatingMusicPlayerGSAP';
@@ -79,6 +80,9 @@ export default function RootLayout({
 }>) {
   const pathname = usePathname()
   const isStudioPage = pathname.startsWith('/studio')
+  
+  // Determinar si estamos en grimorio
+  const isInGrimoire = pathname.startsWith('/articulos') || pathname.startsWith('/autores');
 
   return (
     <html lang="en">
@@ -95,19 +99,21 @@ export default function RootLayout({
       <body
         className={`${geistSans.variable} ${geistMono.variable} ${cinzelDecorative.variable} ${playfairDisplay.variable} ${cormorantGaramond.variable} antialiased bg-gray-900 text-white`}
       >
-        <AudioProvider>
-          <LenisProvider>
-            <div className="flex flex-col min-h-screen">
-              {!isStudioPage && <Header />}
-              <main className="flex-grow">
-                <PageTransition>{children}</PageTransition>
-              </main>
-              {!isStudioPage && <AppFooter />}
-              {/* Reproductor musical flotante global */}
-              {!isStudioPage && <FloatingMusicPlayer />}
-            </div>
-          </LenisProvider>
-        </AudioProvider>
+        <BackgroundMusicProvider>
+          <AudioProvider>
+            <LenisProvider>
+              <div className="flex flex-col min-h-screen">
+                {!isStudioPage && <Header />}
+                <main className="flex-grow">
+                  <PageTransition>{children}</PageTransition>
+                </main>
+                {!isStudioPage && <AppFooter />}
+                {/* Reproductor musical flotante - solo en grimorio */}
+                {!isStudioPage && isInGrimoire && <FloatingMusicPlayer />}
+              </div>
+            </LenisProvider>
+          </AudioProvider>
+        </BackgroundMusicProvider>
       </body>
     </html>
   );
