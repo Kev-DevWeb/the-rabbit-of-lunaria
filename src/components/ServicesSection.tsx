@@ -40,7 +40,7 @@ const ServicesSection = () => {
       const cards = cardsRef.current.querySelectorAll('.card-1, .card-2, .card-3');
       tl.fromTo(
         cards,
-        { autoAlpha: 0, y: 85, scale: 0.94, rotate: (i) => [-10, 5, -8][i] },
+        { autoAlpha: 0, y: 60, scale: 0.94, rotate: (i) => [-10, 5, -8][i] },
         {
           autoAlpha: 1,
           y: 0,
@@ -156,13 +156,13 @@ const ServicesSection = () => {
             />
             {/* Cartas (por encima de todo) */}
             <div ref={cardsRef} className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" style={{ zIndex: 10, width: '80%', height: '80%' }}>
-              <div className="absolute card-1 service-card" style={{ left: '15%', top: '10%' }}>
+              <div className="absolute card-1 service-card" style={{ left: '15%', top: '35%' }}>
                 <Image src="/cartablanca.jpg" alt="Carta de Tarot 1" width={120} height={200} className="rounded-lg shadow-lg" style={{ width: '100%', height: 'auto' }} />
               </div>
-              <div className="absolute card-2 service-card" style={{ left: '40%', top: '10%' }}>
+              <div className="absolute card-2 service-card" style={{ left: '40%', top: '35%' }}>
                 <Image src="/lunacarta.jpg" alt="Carta de Tarot 2" width={120} height={200} className="rounded-lg shadow-lg" style={{ width: '100%', height: 'auto' }} />
               </div>
-              <div className="absolute card-3 service-card" style={{ left: '65%', top: '10%' }}>
+              <div className="absolute card-3 service-card" style={{ left: '65%', top: '35%' }}>
                 <Image src="/cartamano.jpg" alt="Carta de Tarot 3" width={120} height={200} className="rounded-lg shadow-lg" style={{ width: '100%', height: 'auto' }} />
               </div>
             </div>

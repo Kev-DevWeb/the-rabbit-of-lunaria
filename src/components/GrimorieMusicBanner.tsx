@@ -6,7 +6,7 @@ import { Music, BookOpen, X, Play } from 'lucide-react';
 export default function GrimorieMusicBanner() {
   const [isVisible, setIsVisible] = useState(false);
   const [hasInteracted, setHasInteracted] = useState(false);
-  const { togglePlay } = useAudio();
+  const { togglePlay, currentTrack } = useAudio();
 
   // Mostrar el banner después de un breve delay
   useEffect(() => {
@@ -23,7 +23,12 @@ export default function GrimorieMusicBanner() {
   }, []);
 
   const handleAcceptMusic = () => {
-    togglePlay();
+    // Solo activar si hay una pista disponible
+    if (currentTrack && currentTrack.src && currentTrack.src !== '') {
+      togglePlay();
+    } else {
+      console.log('⚠️ No hay pista disponible para reproducir en la esfera');
+    }
     setHasInteracted(true);
     setIsVisible(false);
     sessionStorage.setItem('grimoire-music-banner-seen', 'true');

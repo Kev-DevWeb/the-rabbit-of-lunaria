@@ -326,13 +326,19 @@ export const AudioProvider: React.FC<AudioProviderProps> = ({ children }) => {
       console.error("❌ No hay elemento de audio disponible");
       return;
     }
+
+    // Verificar que tenemos una pista válida antes de continuar
+    if (!currentTrack.src || currentTrack.src === '') {
+      console.warn("⚠️ No hay pista válida para reproducir");
+      return;
+    }
     
     const audio = audioRef.current;
 
     if (!isPlaying) {
       console.log("▶️ Intentando reproducir:", currentTrack.title);
       
-      // Pausar YouTube cuando se reproduce música de la esfera
+      // Pausar YouTube cuando se reproduce música de la esfera (solo si tenemos pista válida)
       if (backgroundMusic.isPlaying) {
         console.log("🔇 Pausando YouTube para reproducir música de la esfera");
         backgroundMusic.pauseFromExternalPlayer();
