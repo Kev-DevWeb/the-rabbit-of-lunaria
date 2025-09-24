@@ -29,9 +29,16 @@ export const blockContentType = defineType({
         {title: 'H2', value: 'h2'},
         {title: 'H3', value: 'h3'},
         {title: 'H4', value: 'h4'},
+        {title: 'H5', value: 'h5'},
+        {title: 'H6', value: 'h6'},
         {title: 'Quote', value: 'blockquote'},
+        {title: 'Small Text', value: 'small'},
+        {title: 'Large Text', value: 'large'},
       ],
-      lists: [{title: 'Bullet', value: 'bullet'}],
+      lists: [
+        {title: 'Bullet Points', value: 'bullet'},
+        {title: 'Numbered List', value: 'number'},
+      ],
       // Marks let you mark up inline text in the Portable Text Editor
       marks: {
         // Decorators usually describe a single property – e.g. a typographic
@@ -39,6 +46,9 @@ export const blockContentType = defineType({
         decorators: [
           {title: 'Strong', value: 'strong'},
           {title: 'Emphasis', value: 'em'},
+          {title: 'Underline', value: 'underline'},
+          {title: 'Strike-through', value: 'strike-through'},
+          {title: 'Code', value: 'code'},
         ],
         // Annotations can be any object structure – e.g. a link or a footnote.
         annotations: [
@@ -53,6 +63,54 @@ export const blockContentType = defineType({
                 type: 'url',
               },
             ],
+          },
+          {
+            title: 'Color Text',
+            name: 'color',
+            type: 'object',
+            fields: [
+              {
+                title: 'Color',
+                name: 'hex',
+                type: 'string',
+                options: {
+                  list: [
+                    {title: 'Purple', value: '#a855f7'},
+                    {title: 'Pink', value: '#ec4899'},
+                    {title: 'Blue', value: '#3b82f6'},
+                    {title: 'Green', value: '#10b981'},
+                    {title: 'Yellow', value: '#f59e0b'},
+                    {title: 'Red', value: '#ef4444'},
+                    {title: 'Gray', value: '#6b7280'},
+                    {title: 'White', value: '#ffffff'},
+                    {title: 'Gold', value: '#d97706'},
+                  ]
+                }
+              }
+            ]
+          },
+          {
+            title: 'Font Size',
+            name: 'fontSize',
+            type: 'object',
+            fields: [
+              {
+                title: 'Size',
+                name: 'size',
+                type: 'string',
+                options: {
+                  list: [
+                    {title: 'Extra Small', value: 'xs'},
+                    {title: 'Small', value: 'sm'},
+                    {title: 'Normal', value: 'base'},
+                    {title: 'Large', value: 'lg'},
+                    {title: 'Extra Large', value: 'xl'},
+                    {title: '2X Large', value: '2xl'},
+                    {title: '3X Large', value: '3xl'},
+                  ]
+                }
+              }
+            ]
           },
         ],
       },

@@ -117,11 +117,43 @@ const ptComponents = {
     },
   },
   block: {
+    h1: ({ children }: {children?: React.ReactNode}) => <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold my-5 sm:my-7 text-purple-200">{children}</h1>,
     h2: ({ children }: {children?: React.ReactNode}) => <h2 className="text-xl sm:text-2xl lg:text-3xl font-bold my-4 sm:my-6 text-purple-300">{children}</h2>,
     h3: ({ children }: {children?: React.ReactNode}) => <h3 className="text-lg sm:text-xl lg:text-2xl font-semibold my-3 sm:my-5 text-purple-400">{children}</h3>,
     h4: ({ children }: {children?: React.ReactNode}) => <h4 className="text-base sm:text-lg lg:text-xl font-semibold my-3 sm:my-4 text-purple-400/80">{children}</h4>,
+    h5: ({ children }: {children?: React.ReactNode}) => <h5 className="text-sm sm:text-base lg:text-lg font-semibold my-2 sm:my-3 text-purple-400/70">{children}</h5>,
+    h6: ({ children }: {children?: React.ReactNode}) => <h6 className="text-xs sm:text-sm lg:text-base font-semibold my-2 text-purple-400/60">{children}</h6>,
     blockquote: ({ children }: {children?: React.ReactNode}) => <blockquote className="border-l-2 sm:border-l-4 border-purple-400 pl-2 sm:pl-4 italic my-4 sm:my-6 text-gray-300">{children}</blockquote>,
     normal: ({ children }: {children?: React.ReactNode}) => <p className="mb-4 sm:mb-6 text-gray-200 leading-relaxed sm:leading-loose">{children}</p>,
+    small: ({ children }: {children?: React.ReactNode}) => <p className="mb-3 sm:mb-4 text-sm text-gray-300 leading-relaxed">{children}</p>,
+    large: ({ children }: {children?: React.ReactNode}) => <p className="mb-5 sm:mb-7 text-lg sm:text-xl text-gray-100 leading-relaxed sm:leading-loose">{children}</p>,
+  },
+  list: {
+    bullet: ({ children }: {children?: React.ReactNode}) => <ul className="list-disc list-inside mb-4 sm:mb-6 text-gray-200 space-y-1 sm:space-y-2 ml-4">{children}</ul>,
+    number: ({ children }: {children?: React.ReactNode}) => <ol className="list-decimal list-inside mb-4 sm:mb-6 text-gray-200 space-y-1 sm:space-y-2 ml-4">{children}</ol>,
+  },
+  marks: {
+    strong: ({ children }: {children?: React.ReactNode}) => <strong className="font-bold text-purple-200">{children}</strong>,
+    em: ({ children }: {children?: React.ReactNode}) => <em className="italic text-purple-300">{children}</em>,
+    underline: ({ children }: {children?: React.ReactNode}) => <span className="underline">{children}</span>,
+    'strike-through': ({ children }: {children?: React.ReactNode}) => <span className="line-through opacity-75">{children}</span>,
+    code: ({ children }: {children?: React.ReactNode}) => <code className="bg-gray-800 text-purple-300 px-1 py-0.5 rounded text-sm font-mono">{children}</code>,
+    color: ({ children, value }: {children?: React.ReactNode, value?: {hex: string}}) => 
+      <span style={{ color: value?.hex || 'inherit' }}>{children}</span>,
+    fontSize: ({ children, value }: {children?: React.ReactNode, value?: {size: string}}) => {
+      const sizeClasses = {
+        xs: 'text-xs',
+        sm: 'text-sm', 
+        base: 'text-base',
+        lg: 'text-lg',
+        xl: 'text-xl',
+        '2xl': 'text-2xl',
+        '3xl': 'text-3xl'
+      };
+      return <span className={sizeClasses[value?.size as keyof typeof sizeClasses] || 'text-base'}>{children}</span>;
+    },
+    link: ({ children, value }: {children?: React.ReactNode, value?: {href: string}}) => 
+      <a href={value?.href} className="text-purple-400 hover:text-purple-300 underline transition-colors" target="_blank" rel="noopener noreferrer">{children}</a>
   }
 };
 
