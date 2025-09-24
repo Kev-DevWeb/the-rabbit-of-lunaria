@@ -1,14 +1,12 @@
 'use client';
 
 import React, { createContext, useContext, useRef, useState, useEffect, ReactNode } from 'react';
-import { usePathname } from 'next/navigation';
 import YouTubePlayerService, { YouTubePlayerState } from '@/lib/youtube-player';
 import { useMusicNotifications, MusicNotification } from '@/components/MusicNotificationFixed';
 
 interface BackgroundMusicContextType {
   isMuted: boolean;
   toggleMute: () => void;
-  isInGrimoire: boolean;
   // Nuevos estados para YouTube
   currentTrack: string | null;
   isPlaying: boolean;
@@ -51,7 +49,6 @@ interface BackgroundMusicProviderProps {
 }
 
 export const BackgroundMusicProvider: React.FC<BackgroundMusicProviderProps> = ({ children }) => {
-  const pathname = usePathname();
   const youtubePlayerRef = useRef<YouTubePlayerService | null>(null);
   const playerContainerRef = useRef<HTMLDivElement | null>(null);
   const lastTrackTitleRef = useRef<string | null>(null); // Usar ref en lugar de state
@@ -61,9 +58,6 @@ export const BackgroundMusicProvider: React.FC<BackgroundMusicProviderProps> = (
   
   // Sistema de notificaciones - usar el archivo arreglado
   const { notifications, showNotification, closeNotification } = useMusicNotifications();
-  
-  // Determinar si estamos en el grimorio
-  const isInGrimoire = pathname.startsWith('/articulos') || pathname.startsWith('/autores');
   
   // ID de la playlist de YouTube (extraído de la URL)
   const PLAYLIST_ID = 'PL4SJvJ-lWGWX2CFXEi7l92UJk-q91szHJ';
@@ -141,23 +135,7 @@ export const BackgroundMusicProvider: React.FC<BackgroundMusicProviderProps> = (
         });
     }
 
-    // Cleanup cuando salimos de página no-grimorio
-    if (isInGrimoire && youtubePlayerRef.current) {
-      youtubePlayerRef.current.pause();
-    }
-
-    return () => {
-      if (isInGrimoire && youtubePlayerRef.current) {
-        youtubePlayerRef.current.destroy();
-        youtubePlayerRef.current = null;
-        
-        if (playerContainerRef.current) {
-          document.body.removeChild(playerContainerRef.current);
-          playerContainerRef.current = null;
-        }
-      }
-    };
-  }, [isInGrimoire, isMuted, showNotification]);
+  }, [isMuted, showNotification]);
 
   const toggleMute = async () => {
     if (youtubePlayerRef.current) {
@@ -259,7 +237,6 @@ export const BackgroundMusicProvider: React.FC<BackgroundMusicProviderProps> = (
     <BackgroundMusicContext.Provider value={{
       isMuted,
       toggleMute,
-      isInGrimoire,
       currentTrack: youtubeState?.currentTrack?.title || null,
       isPlaying: youtubeState?.isPlaying || false,
       nextTrack,

@@ -129,12 +129,16 @@ const ptComponents = {
     large: ({ children }: {children?: React.ReactNode}) => <p className="mb-5 sm:mb-7 text-xl sm:text-2xl lg:text-3xl text-gray-100 leading-relaxed sm:leading-loose">{children}</p>,
   },
   list: {
-    bullet: ({ children }: {children?: React.ReactNode}) => <ul className="list-disc list-inside mb-4 sm:mb-6 text-lg sm:text-xl lg:text-2xl text-gray-200 space-y-2 sm:space-y-3 ml-4">{children}</ul>,
-    number: ({ children }: {children?: React.ReactNode}) => <ol className="list-decimal list-inside mb-4 sm:mb-6 text-lg sm:text-xl lg:text-2xl text-gray-200 space-y-2 sm:space-y-3 ml-4">{children}</ol>,
+    bullet: ({ children }: {children?: React.ReactNode}) => <ul className="list-disc list-inside mb-4 sm:mb-6 text-lg sm:text-xl lg:text-2xl text-gray-200 space-y-2 sm:space-y-3 ml-4 marker:text-purple-400">{children}</ul>,
+    number: ({ children }: {children?: React.ReactNode}) => <ol className="list-decimal list-inside mb-4 sm:mb-6 text-lg sm:text-xl lg:text-2xl text-gray-200 space-y-2 sm:space-y-3 ml-4 marker:text-purple-400">{children}</ol>,
+  },
+  listItem: {
+    bullet: ({ children }: {children?: React.ReactNode}) => <li className="mb-1 text-gray-200 marker:text-purple-400">{children}</li>,
+    number: ({ children }: {children?: React.ReactNode}) => <li className="mb-1 text-gray-200 marker:text-purple-400">{children}</li>,
   },
   marks: {
-    strong: ({ children }: {children?: React.ReactNode}) => <strong className="font-bold text-purple-200">{children}</strong>,
-    em: ({ children }: {children?: React.ReactNode}) => <em className="italic text-purple-300">{children}</em>,
+    strong: ({ children }: {children?: React.ReactNode}) => <strong className="font-bold text-purple-400">{children}</strong>,
+    em: ({ children }: {children?: React.ReactNode}) => <em className="italic text-purple-400">{children}</em>,
     underline: ({ children }: {children?: React.ReactNode}) => <span className="underline">{children}</span>,
     'strike-through': ({ children }: {children?: React.ReactNode}) => <span className="line-through opacity-75">{children}</span>,
     code: ({ children }: {children?: React.ReactNode}) => <code className="bg-gray-800 text-purple-300 px-2 py-1 rounded text-base sm:text-lg lg:text-xl font-mono">{children}</code>,
