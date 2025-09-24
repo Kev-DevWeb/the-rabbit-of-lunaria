@@ -5,6 +5,7 @@ import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useBackgroundMusic } from "@/context/BackgroundMusicProvider";
+import { useLenis } from "@/context/LenisProvider";
 import { SkipForward, SkipBack, Music, Play, Pause } from "lucide-react";
 
 gsap.registerPlugin(ScrollTrigger);
@@ -12,6 +13,7 @@ gsap.registerPlugin(ScrollTrigger);
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
   const headerRef = useRef<HTMLElement>(null);
+  const lenis = useLenis();
   const { 
     isMuted, 
     toggleMute, 
@@ -22,6 +24,9 @@ const Header = () => {
   } = useBackgroundMusic();
 
   useGSAP(() => {
+    const cleanupFunctions: (() => void)[] = [];
+
+    // Animated links
     const links = gsap.utils.toArray<Element>('.animated-link');
     links.forEach((link: Element) => {
       const onMouseEnter = () => {
@@ -33,13 +38,14 @@ const Header = () => {
       link.addEventListener('mouseenter', onMouseEnter);
       link.addEventListener('mouseleave', onMouseLeave);
 
-      // Cleanup
-      return () => {
+      // Store cleanup function
+      cleanupFunctions.push(() => {
         link.removeEventListener('mouseenter', onMouseEnter);
         link.removeEventListener('mouseleave', onMouseLeave);
-      }
+      });
     });
 
+    // Animate header background on scroll
     gsap.to(headerRef.current, {
       padding: "1rem 2rem",
       backgroundColor: "rgba(0, 0, 0, 0.8)",
@@ -52,7 +58,44 @@ const Header = () => {
       },
     });
 
-    const ctaButton = document.querySelector('.cta-button');
+    // Smooth header movement with Lenis integration
+    let currentY = 0;
+    let isAnimating = false;
+
+    const handleLenisScroll = ({ scroll }: { scroll: number }) => {
+      if (isAnimating) return;
+      
+      const scrollDirection = scroll > currentY ? 1 : -1;
+      const scrollSpeed = Math.abs(scroll - currentY);
+      
+      // Create subtle floating effect based on scroll
+      const targetY = Math.sin(scroll * 0.002) * 3; // Gentle sine wave movement
+      const targetRotation = scrollDirection * Math.min(scrollSpeed * 0.01, 1); // Rotation based on speed
+      
+      isAnimating = true;
+      gsap.to(headerRef.current, {
+        y: targetY,
+        rotationZ: targetRotation,
+        duration: 0.6,
+        ease: "power2.out",
+        onComplete: () => {
+          isAnimating = false;
+        }
+      });
+      
+      currentY = scroll;
+    };
+
+    // Listen to Lenis scroll events for perfect integration
+    if (lenis) {
+      lenis.on('scroll', handleLenisScroll);
+      cleanupFunctions.push(() => {
+        lenis.off('scroll', handleLenisScroll);
+      });
+    }
+
+    // CTA Button animation
+    const ctaButton = document.querySelector('.cta-button') as HTMLElement | null;
     if (ctaButton) {
       const onMouseEnter = () => {
         gsap.to(ctaButton, { rotation: 5, duration: 0.1, ease: 'power2.inOut', repeat: 1, yoyo: true });
@@ -63,17 +106,21 @@ const Header = () => {
       ctaButton.addEventListener('mouseenter', onMouseEnter);
       ctaButton.addEventListener('mouseleave', onMouseLeave);
 
-      // Cleanup
-      return () => {
-        ctaButton.removeEventListener('mouseenter', onMouseEnter);
-        ctaButton.removeEventListener('mouseleave', onMouseLeave);
-      }
+      cleanupFunctions.push(() => {
+        ctaButton?.removeEventListener('mouseenter', onMouseEnter);
+        ctaButton?.removeEventListener('mouseleave', onMouseLeave);
+      });
     }
+
+    // Return single cleanup function that calls all stored cleanup functions
+    return () => {
+      cleanupFunctions.forEach(cleanup => cleanup());
+    };
   }, { scope: headerRef });
 
 
   return (
-    <header ref={headerRef} className="absolute top-0 left-0 w-full p-4 sm:p-8 text-white z-50">
+    <header ref={headerRef} className="fixed top-0 left-0 w-full p-4 sm:p-8 text-white z-50 transition-all duration-300 will-change-transform">
       <nav className="container mx-auto flex justify-between items-center">
         <Link href="/" className="text-xl sm:text-2xl font-bold hover:text-gray-300 navbar-title animated-link">
           La madriguera de Lunaria
