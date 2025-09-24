@@ -96,17 +96,31 @@ export async function fetchJamendoTracksByIds(trackIds: string[]): Promise<Jamen
     
     const response = await fetch(url);
     
+    console.log(`📊 Respuesta de Jamendo (IDs específicos) - Status: ${response.status}, OK: ${response.ok}`);
+    
     if (!response.ok) {
+      const responseText = await response.text();
+      console.error(`❌ Error HTTP de Jamendo: ${response.status} ${response.statusText}`);
+      console.error(`❌ Respuesta completa:`, responseText);
       throw new Error(`Jamendo API error: ${response.status}`);
     }
 
     const data: JamendoResponse = await response.json();
+    console.log(`📊 Datos completos de respuesta Jamendo:`, data);
     
     if (data.headers.code !== 0) {
+      console.error(`❌ Error en headers de Jamendo: ${data.headers.error_message}`);
+      console.error(`❌ Headers completos:`, data.headers);
       throw new Error(`Jamendo API error: ${data.headers.error_message}`);
     }
 
     console.log(`✅ ${data.results.length} tracks específicos obtenidos de Jamendo`);
+    
+    // Mostrar cada track encontrado para debug
+    data.results.forEach((track, index) => {
+      console.log(`🎵 Track ${index + 1}: ID ${track.id} - "${track.name}" by ${track.artist_name}`);
+    });
+    
     return data.results;
     
   } catch (error) {
@@ -133,25 +147,30 @@ export async function fetchJamendoMusic(
       const specificTracks = await fetchJamendoTracksByIds(customTracks);
       if (specificTracks.length > 0) {
         return specificTracks;
-      } else {
-        console.warn(`⚠️ No se pudieron cargar tracks específicos, usando fallback local para mantener coherencia`);
-        return []; // Esto hará que use los fallback locales
       }
     }
 
     // Si no hay tracks personalizados, buscar por tags como antes
     const categoryConfig = jamendoCategories[category];
     
-    // Buscar por tags específicos para mantener coherencia
+    // Empezar con una consulta simple para debug
     const params = new URLSearchParams({
       client_id: JAMENDO_CLIENT_ID,
       format: 'json',
-      limit: limit.toString(),
-      tags: categoryConfig.tags,
-      include: 'musicinfo',
-      audioformat: 'mp3',
-      order: 'popularity_week'
+      limit: '10',
+      order: 'popularity_total'
     });
+
+    // Si necesitamos filtrar por categoría, comentar arriba y usar esto:
+    // const params = new URLSearchParams({
+    //   client_id: JAMENDO_CLIENT_ID,
+    //   format: 'json',
+    //   limit: limit.toString(),
+    //   tags: categoryConfig.tags,
+    //   include: 'musicinfo',
+    //   audioformat: 'mp3',
+    //   order: 'popularity_week'
+    // });
 
     const url = `${JAMENDO_API_BASE}/tracks/?${params}`;
     console.log(`🎵 Buscando música en Jamendo para categoria: ${category}`);
@@ -174,11 +193,11 @@ export async function fetchJamendoMusic(
       throw new Error(`Jamendo API error: ${data.headers.error_message}`);
     }
 
-    console.log(`✅ ${data.results.length} pistas obtenidas de Jamendo para categoria: ${category} (búsqueda por tags)`);
+    console.log(`✅ ${data.results.length} pistas obtenidas de Jamendo para categoria: ${category}`);
     
     // Log de las primeras pistas para debug
     if (data.results.length > 0) {
-      console.log(`🎵 Primera pista de ejemplo (tags ${categoryConfig.tags}):`, data.results[0]);
+      console.log(`🎵 Primera pista de ejemplo:`, data.results[0]);
     }
     
     return data.results;
