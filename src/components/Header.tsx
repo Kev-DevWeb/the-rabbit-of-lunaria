@@ -20,7 +20,7 @@ const Header = () => {
     isPlaying, 
     nextTrack, 
     previousTrack,
-    isProcessing 
+    isProcessing
   } = useBackgroundMusic();
 
   useGSAP(() => {
@@ -89,8 +89,8 @@ const Header = () => {
             <li><Link href="/citas" className="font-semibold px-4 py-2 rounded-full bg-purple-600/50 text-white ring-1 ring-purple-400 hover:bg-purple-600/80 transition-all shadow-[0_0_15px_rgba(168,85,247,0.6)] hover:shadow-[0_0_25px_rgba(168,85,247,0.8)] cta-button">Agendar Cita</Link></li>
           </ul>
           
-          {/* Controles de música YouTube - solo fuera del grimorio */}
-          {!isInGrimoire && (
+          {/* Controles de música YouTube - siempre visibles */}
+          {(
             <div className="flex items-center space-x-2 bg-purple-600/10 rounded-full p-1">
               {/* Canción actual */}
               {currentTrack && !isMuted && (
@@ -155,8 +155,8 @@ const Header = () => {
             <li><Link href="/articulos" className="block py-2 hover:text-gray-300 animated-link" onClick={() => setIsOpen(false)}>El grimorio de Lunaria</Link></li>
             <li><Link href="/citas" className="block py-2 px-5 rounded-full bg-purple-600/50 text-white ring-1 ring-purple-400 hover:bg-purple-600/80 transition-all shadow-[0_0_15px_rgba(168,85,247,0.6)]" onClick={() => setIsOpen(false)}>Agendar Cita</Link></li>
             
-            {/* Controles de música - solo fuera del grimorio */}
-            {!isInGrimoire && (
+            {/* Controles de música - siempre visibles */}
+            {(
               <>
                 {/* Canción actual */}
                 {currentTrack && !isMuted && (

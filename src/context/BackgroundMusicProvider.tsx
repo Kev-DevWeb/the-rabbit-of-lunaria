@@ -22,6 +22,9 @@ interface BackgroundMusicContextType {
   // Sistema de notificaciones
   notifications: MusicNotification[];
   closeNotification: (id: string) => void;
+  // Comunicación entre reproductores
+  pauseFromExternalPlayer: () => void;
+  resumeFromExternalPlayer: () => void;
 }
 
 const BackgroundMusicContext = createContext<BackgroundMusicContextType | undefined>(undefined);
@@ -70,7 +73,7 @@ export const BackgroundMusicProvider: React.FC<BackgroundMusicProviderProps> = (
 
   // Inicializar YouTube Player
   useEffect(() => {
-    if (!isInGrimoire && !youtubePlayerRef.current) {
+    if (!youtubePlayerRef.current) {
       // Crear container hidden para el player
       if (!playerContainerRef.current) {
         const container = document.createElement('div');
@@ -160,11 +163,18 @@ export const BackgroundMusicProvider: React.FC<BackgroundMusicProviderProps> = (
   }, [isInGrimoire, isMuted, showNotification]);
 
   const toggleMute = async () => {
-    if (youtubePlayerRef.current && !isInGrimoire) {
+    if (youtubePlayerRef.current) {
       try {
         // Cambiar estado inmediatamente para feedback del usuario
         setIsProcessing(true);
-        setIsMuted(prev => !prev);
+        const newMutedState = !isMuted;
+        setIsMuted(newMutedState);
+        
+        // Si se está activando YouTube, pausar música de la esfera
+        if (!newMutedState) {
+          console.log("🔇 Pausando música de la esfera por activar YouTube");
+          window.dispatchEvent(new CustomEvent('pauseAudioFromYoutube'));
+        }
         
         // Ejecutar fade en background
         await youtubePlayerRef.current.togglePlayPauseWithFade();
@@ -181,20 +191,20 @@ export const BackgroundMusicProvider: React.FC<BackgroundMusicProviderProps> = (
   };
 
   const nextTrack = () => {
-    if (youtubePlayerRef.current && !isInGrimoire) {
+    if (youtubePlayerRef.current) {
       youtubePlayerRef.current.nextTrack();
     }
   };
 
   const previousTrack = () => {
-    if (youtubePlayerRef.current && !isInGrimoire) {
+    if (youtubePlayerRef.current) {
       youtubePlayerRef.current.previousTrack();
     }
   };
 
   // Función para auto-reproducir después de animación
   const startMusicAfterAnimation = async () => {
-    if (youtubePlayerRef.current && !isInGrimoire && isMuted) {
+    if (youtubePlayerRef.current && isMuted) {
       try {
         console.log('🎬 Animación completada, iniciando música...');
         // Primero cambiar el estado local
@@ -212,7 +222,6 @@ export const BackgroundMusicProvider: React.FC<BackgroundMusicProviderProps> = (
     } else {
       console.log('🚫 Condiciones no cumplidas para auto-start:', {
         hasPlayer: !!youtubePlayerRef.current,
-        isInGrimoire,
         isMuted
       });
     }
@@ -230,12 +239,20 @@ export const BackgroundMusicProvider: React.FC<BackgroundMusicProviderProps> = (
 
   // Hacer testNotification disponible globalmente para debug
   if (typeof window !== 'undefined') {
-    (window as any).testNotification = testNotification;
-    (window as any).clearNotifications = () => {
+    (window as typeof window & { 
+      testNotification: typeof testNotification;
+      clearNotifications: () => void;
+      showManualNotification: () => void;
+    }).testNotification = testNotification;
+    (window as typeof window & { 
+      clearNotifications: () => void;
+    }).clearNotifications = () => {
       // Limpiar todas las notificaciones
       notifications.forEach(n => closeNotification(n.id));
     };
-    (window as any).showManualNotification = () => {
+    (window as typeof window & { 
+      showManualNotification: () => void;
+    }).showManualNotification = () => {
       console.log('🧪 Manual notification test...');
       showNotification(
         '🧪 Notificación Manual',
@@ -244,6 +261,18 @@ export const BackgroundMusicProvider: React.FC<BackgroundMusicProviderProps> = (
       );
     };
   }
+
+  // Funciones para comunicación con otros reproductores
+  const pauseFromExternalPlayer = () => {
+    if (youtubePlayerRef.current && youtubeState?.isPlaying) {
+      youtubePlayerRef.current.pause();
+    }
+  };
+
+  const resumeFromExternalPlayer = () => {
+    // Opcional: podrías implementar lógica para reanudar si es necesario
+    // Por ahora, solo pausamos cuando otro reproductor se activa
+  };
 
   return (
     <BackgroundMusicContext.Provider value={{
@@ -258,7 +287,9 @@ export const BackgroundMusicProvider: React.FC<BackgroundMusicProviderProps> = (
       startMusicAfterAnimation,
       isProcessing,
       notifications,
-      closeNotification
+      closeNotification,
+      pauseFromExternalPlayer,
+      resumeFromExternalPlayer
     }}>
       {children}
     </BackgroundMusicContext.Provider>

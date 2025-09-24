@@ -6,13 +6,7 @@ import { Music, X } from 'lucide-react';
 export interface MusicNotification {
   id: string;
   title: string;
-  c      // Evitar notificaciones duplicadas del mismo track en menos de 1 segundo
-      const hasDuplicate = prev.some(n => n.title === title && (Date.now() - n.timestamp) < 1000);
-      if (hasDuplicate) {
-        console.log('🚫 Duplicate notification prevented:', title);
-        return prev;
-      }
-      console.log('📋 Updated notifications list:', updated.map(n => n.title));annel: string;
+  channel: string;
   thumbnail?: string;
   timestamp: number;
 }

@@ -32,6 +32,7 @@ export default function GrimorieMusicBanner() {
   const handleDecline = () => {
     setIsVisible(false);
     sessionStorage.setItem('grimoire-music-banner-seen', 'true');
+    sessionStorage.setItem('grimoire-music-declined', 'true');
   };
 
   // No mostrar si ya interactuó o si no está visible

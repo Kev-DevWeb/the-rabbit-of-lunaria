@@ -18,15 +18,45 @@ export interface YouTubePlayerState {
   isMuted: boolean;
 }
 
+interface YouTubePlayer {
+  playVideo: () => void;
+  pauseVideo: () => void;
+  nextVideo: () => void;
+  previousVideo: () => void;
+  mute: () => void;
+  unMute: () => void;
+  setVolume: (volume: number) => void;
+  getVolume: () => number;
+  getPlayerState: () => number;
+  getCurrentTime: () => number;
+  getDuration: () => number;
+  getVideoUrl: () => string;
+  getPlaylist: () => string[];
+  getPlaylistIndex: () => number;
+  destroy: () => void;
+}
+
+interface YouTubeAPI {
+  Player: new (containerId: string, config: unknown) => YouTubePlayer;
+  PlayerState: {
+    UNSTARTED: number;
+    ENDED: number;
+    PLAYING: number;
+    PAUSED: number;
+    BUFFERING: number;
+    CUED: number;
+  };
+}
+
 declare global {
   interface Window {
     onYouTubeIframeAPIReady: () => void;
-    YT: any;
+    YT: YouTubeAPI;
   }
 }
 
 class YouTubePlayerService {
-  private player: any = null;
+  private player: YouTubePlayer | null = null;
   private playlistId: string;
   private onStateChangeCallback: ((state: YouTubePlayerState) => void) | null = null;
   private fadeInterval: NodeJS.Timeout | null = null;
@@ -63,7 +93,7 @@ class YouTubePlayerService {
     });
   }
 
-  private createPlayer(containerId: string, resolve: () => void, reject: (error: any) => void): void {
+  private createPlayer(containerId: string, resolve: () => void, reject: (error: Error) => void): void {
     try {
       this.player = new window.YT.Player(containerId, {
         height: '0',
@@ -83,24 +113,24 @@ class YouTubePlayerService {
           mute: 1 // Iniciar muteado para cumplir políticas de autoplay
         },
         events: {
-          onReady: (event: any) => {
+          onReady: (_event: unknown) => {
             console.log('🎥 YouTube Player ready');
             this.loadPlaylistInfo();
             this.currentState.isLoaded = true;
             this.updateState();
             resolve();
           },
-          onStateChange: (event: any) => {
-            this.handleStateChange(event);
+          onStateChange: (event: unknown) => {
+            this.handleStateChange(event as { data: number; target: YouTubePlayer });
           },
-          onError: (event: any) => {
+          onError: (event: unknown) => {
             console.error('❌ YouTube Player error:', event);
-            reject(event);
+            reject(new Error(`YouTube Player error: ${String(event)}`))
           }
         }
       });
     } catch (error) {
-      reject(error);
+      reject(error instanceof Error ? error : new Error(String(error)));
     }
   }
 
@@ -199,7 +229,7 @@ class YouTubePlayerService {
       .trim();
   }
 
-  private handleStateChange(event: any): void {
+  private handleStateChange(event: { data: number; target: YouTubePlayer }): void {
     const YT = window.YT;
     
     switch (event.data) {
@@ -349,7 +379,7 @@ class YouTubePlayerService {
         
         if (elapsed >= duration) {
           // Fade completado
-          this.player.setVolume(this.targetVolume);
+          this.player?.setVolume(this.targetVolume);
           clearInterval(this.fadeInterval!);
           this.fadeInterval = null;
           this.currentState.isMuted = false;
@@ -360,7 +390,7 @@ class YouTubePlayerService {
         } else {
           // Incrementar volumen gradualmente
           currentVolume = Math.min(this.targetVolume, volumeStep * (elapsed / stepDuration));
-          this.player.setVolume(currentVolume);
+          this.player?.setVolume(currentVolume);
         }
       }, 1000 / 60); // 60fps
     });
@@ -390,8 +420,8 @@ class YouTubePlayerService {
         
         if (elapsed >= duration) {
           // Fade completado
-          this.player.setVolume(0);
-          this.player.pauseVideo();
+          this.player?.setVolume(0);
+          this.player?.pauseVideo();
           clearInterval(this.fadeInterval!);
           this.fadeInterval = null;
           this.currentState.isMuted = true;
@@ -402,7 +432,7 @@ class YouTubePlayerService {
         } else {
           // Decrementar volumen gradualmente
           const currentVolume = Math.max(0, startVolume - (volumeStep * (elapsed / stepDuration)));
-          this.player.setVolume(currentVolume);
+          this.player?.setVolume(currentVolume);
         }
       }, 1000 / 60); // 60fps
     });

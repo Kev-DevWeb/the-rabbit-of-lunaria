@@ -2,6 +2,7 @@ import React, { createContext, useContext, useRef, useState, useEffect, useCallb
 import { usePathname } from 'next/navigation';
 import { musicPlaylists, getPlaylistByRoute, type Playlist, type MusicTrack } from '@/lib/music-playlists-simple';
 import { fetchJamendoMusic, convertJamendoToMusicTrack, jamendoFallbackTracks } from '@/lib/jamendo-api';
+import { useBackgroundMusic } from './BackgroundMusicProvider';
 
 interface Track {
   src: string;
@@ -28,6 +29,8 @@ interface AudioContextType {
   toggleShuffle: () => void;
   // Estado de carga de Jamendo
   isLoadingJamendo: boolean;
+  // Comunicación con otros reproductores
+  pauseFromExternalPlayer: () => void;
 }
 
 const AudioContext = createContext<AudioContextType | undefined>(undefined);
@@ -58,6 +61,30 @@ export const AudioProvider: React.FC<AudioProviderProps> = ({ children }) => {
   // Estados para Jamendo
   const [jamendoTracks, setJamendoTracks] = useState<Track[]>([]);
   const [isLoadingJamendo, setIsLoadingJamendo] = useState(false);
+  
+  // Comunicación con BackgroundMusicProvider (YouTube)
+  const backgroundMusic = useBackgroundMusic();
+  
+  // Función para pausar desde otro reproductor
+  const pauseFromExternalPlayer = useCallback(() => {
+    if (audioRef.current && isPlaying) {
+      console.log("🔇 Pausando música de la esfera por reproductor externo");
+      audioRef.current.pause();
+      setIsPlaying(false);
+    }
+  }, [isPlaying]);
+  
+  // Listener para pausar desde YouTube
+  useEffect(() => {
+    const handlePauseFromYoutube = () => {
+      pauseFromExternalPlayer();
+    };
+    
+    window.addEventListener('pauseAudioFromYoutube', handlePauseFromYoutube);
+    return () => {
+      window.removeEventListener('pauseAudioFromYoutube', handlePauseFromYoutube);
+    };
+  }, [pauseFromExternalPlayer]);
 
   // Cargar música de Jamendo cuando cambie la playlist
   useEffect(() => {
@@ -306,6 +333,12 @@ export const AudioProvider: React.FC<AudioProviderProps> = ({ children }) => {
     if (!isPlaying) {
       console.log("▶️ Intentando reproducir:", currentTrack.title);
       
+      // Pausar YouTube cuando se reproduce música de la esfera
+      if (backgroundMusic.isPlaying) {
+        console.log("🔇 Pausando YouTube para reproducir música de la esfera");
+        backgroundMusic.pauseFromExternalPlayer();
+      }
+      
       try {
         // Verificar que el audio esté listo
         if (audio.readyState < 2) {
@@ -346,7 +379,7 @@ export const AudioProvider: React.FC<AudioProviderProps> = ({ children }) => {
       setIsPlaying(false);
       console.log("⏹️ Audio pausado");
     }
-  }, [isPlaying, hasPlayedOnce, currentTrack.title, currentTrack.src]);
+  }, [isPlaying, hasPlayedOnce, currentTrack.title, currentTrack.src, backgroundMusic]);
 
   return (
     <AudioContext.Provider value={{ 
@@ -363,7 +396,8 @@ export const AudioProvider: React.FC<AudioProviderProps> = ({ children }) => {
       availablePlaylists: musicPlaylists,
       isShuffleMode,
       toggleShuffle,
-      isLoadingJamendo
+      isLoadingJamendo,
+      pauseFromExternalPlayer
     }}>
       {children}
     </AudioContext.Provider>
