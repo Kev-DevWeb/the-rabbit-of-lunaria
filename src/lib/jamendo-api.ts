@@ -82,12 +82,17 @@ export async function fetchJamendoTracksByIds(trackIds: string[]): Promise<Jamen
     const params = new URLSearchParams({
       client_id: JAMENDO_CLIENT_ID,
       format: 'json',
-      id: trackIds.join(','),
       include: 'musicinfo'
+    });
+
+    // Agregar cada ID como parámetro separado
+    trackIds.forEach(id => {
+      params.append('id', id);
     });
 
     const url = `${JAMENDO_API_BASE}/tracks/?${params}`;
     console.log(`🎯 Obteniendo tracks específicos de Jamendo: ${trackIds.join(', ')}`);
+    console.log(`🔗 URL específica de Jamendo: ${url}`);
     
     const response = await fetch(url);
     
@@ -128,30 +133,25 @@ export async function fetchJamendoMusic(
       const specificTracks = await fetchJamendoTracksByIds(customTracks);
       if (specificTracks.length > 0) {
         return specificTracks;
+      } else {
+        console.warn(`⚠️ No se pudieron cargar tracks específicos, usando fallback local para mantener coherencia`);
+        return []; // Esto hará que use los fallback locales
       }
     }
 
     // Si no hay tracks personalizados, buscar por tags como antes
     const categoryConfig = jamendoCategories[category];
     
-    // Empezar con una consulta simple para debug
+    // Buscar por tags específicos para mantener coherencia
     const params = new URLSearchParams({
       client_id: JAMENDO_CLIENT_ID,
       format: 'json',
-      limit: '10',
-      order: 'popularity_total'
+      limit: limit.toString(),
+      tags: categoryConfig.tags,
+      include: 'musicinfo',
+      audioformat: 'mp3',
+      order: 'popularity_week'
     });
-
-    // Si necesitamos filtrar por categoría, comentar arriba y usar esto:
-    // const params = new URLSearchParams({
-    //   client_id: JAMENDO_CLIENT_ID,
-    //   format: 'json',
-    //   limit: limit.toString(),
-    //   tags: categoryConfig.tags,
-    //   include: 'musicinfo',
-    //   audioformat: 'mp3',
-    //   order: 'popularity_week'
-    // });
 
     const url = `${JAMENDO_API_BASE}/tracks/?${params}`;
     console.log(`🎵 Buscando música en Jamendo para categoria: ${category}`);
@@ -174,11 +174,11 @@ export async function fetchJamendoMusic(
       throw new Error(`Jamendo API error: ${data.headers.error_message}`);
     }
 
-    console.log(`✅ ${data.results.length} pistas obtenidas de Jamendo para categoria: ${category}`);
+    console.log(`✅ ${data.results.length} pistas obtenidas de Jamendo para categoria: ${category} (búsqueda por tags)`);
     
     // Log de las primeras pistas para debug
     if (data.results.length > 0) {
-      console.log(`🎵 Primera pista de ejemplo:`, data.results[0]);
+      console.log(`🎵 Primera pista de ejemplo (tags ${categoryConfig.tags}):`, data.results[0]);
     }
     
     return data.results;
