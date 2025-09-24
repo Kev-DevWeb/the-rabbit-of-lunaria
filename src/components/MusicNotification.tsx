@@ -1,7 +1,8 @@
 'use client';
 
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import { Music, X } from 'lucide-react';
+import Image from 'next/image';
 
 export interface MusicNotification {
   id: string;
@@ -25,6 +26,13 @@ const MusicNotificationItem: React.FC<MusicNotificationProps> = ({
   const [isVisible, setIsVisible] = useState(false);
   const [isExiting, setIsExiting] = useState(false);
 
+  const handleClose = useCallback(() => {
+    setIsExiting(true);
+    setTimeout(() => {
+      onClose(notification.id);
+    }, 300); // Tiempo de la animación de salida
+  }, [notification.id, onClose]);
+
   useEffect(() => {
     // Animar entrada
     setTimeout(() => setIsVisible(true), 100);
@@ -35,14 +43,7 @@ const MusicNotificationItem: React.FC<MusicNotificationProps> = ({
     }, duration);
 
     return () => clearTimeout(autoCloseTimer);
-  }, [duration]);
-
-  const handleClose = () => {
-    setIsExiting(true);
-    setTimeout(() => {
-      onClose(notification.id);
-    }, 300); // Tiempo de la animación de salida
-  };
+  }, [duration, handleClose]);
 
   return (
     <div
@@ -81,9 +82,11 @@ const MusicNotificationItem: React.FC<MusicNotificationProps> = ({
         {/* Thumbnail */}
         {notification.thumbnail && (
           <div className="flex-shrink-0">
-            <img
+            <Image
               src={notification.thumbnail}
               alt="Thumbnail"
+              width={48}
+              height={48}
               className="w-12 h-12 rounded-md object-cover border border-purple-500/20"
               onError={(e) => {
                 // Fallback si no carga la imagen

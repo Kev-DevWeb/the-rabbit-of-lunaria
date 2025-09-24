@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useRef, useState, useEffect, useCallback, ReactNode } from 'react';
 import { usePathname } from 'next/navigation';
-import { musicPlaylists, getPlaylistByRoute, type Playlist, type MusicTrack } from '@/lib/music-playlists-simple';
+import { musicPlaylists, type Playlist, type MusicTrack } from '@/lib/music-playlists-simple';
 import { fetchJamendoMusic, convertJamendoToMusicTrack, jamendoFallbackTracks } from '@/lib/jamendo-api';
 import { useBackgroundMusic } from './BackgroundMusicProvider';
 
@@ -55,7 +55,6 @@ export const AudioProvider: React.FC<AudioProviderProps> = ({ children }) => {
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTrackIndex, setCurrentTrackIndex] = useState(0);
   const [currentPlaylistId, setCurrentPlaylistId] = useState('webpage');
-  const [hasPlayedOnce, setHasPlayedOnce] = useState(false);
   const [isShuffleMode, setIsShuffleMode] = useState(false);
   
   // Estados para Jamendo
@@ -94,7 +93,7 @@ export const AudioProvider: React.FC<AudioProviderProps> = ({ children }) => {
         const category = currentPlaylistId === 'grimoire' ? 'study' : 'mystical';
         console.log(`🎵 Cargando música de Jamendo para categoria: ${category}`);
         
-        const tracks = await fetchJamendoMusic(category, 8);
+        const tracks = await fetchJamendoMusic(category);
         if (tracks && tracks.length > 0) {
           const convertedTracks = tracks.map(convertJamendoToMusicTrack);
           setJamendoTracks(convertedTracks);
@@ -360,7 +359,6 @@ export const AudioProvider: React.FC<AudioProviderProps> = ({ children }) => {
 
         await audio.play();
         setIsPlaying(true);
-        setHasPlayedOnce(true);
         console.log("✅ Audio reproduciéndose correctamente");
         
       } catch (error) {
@@ -379,7 +377,7 @@ export const AudioProvider: React.FC<AudioProviderProps> = ({ children }) => {
       setIsPlaying(false);
       console.log("⏹️ Audio pausado");
     }
-  }, [isPlaying, hasPlayedOnce, currentTrack.title, currentTrack.src, backgroundMusic]);
+  }, [isPlaying, currentTrack.title, currentTrack.src, backgroundMusic]);
 
   return (
     <AudioContext.Provider value={{ 

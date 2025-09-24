@@ -113,7 +113,7 @@ class YouTubePlayerService {
           mute: 1 // Iniciar muteado para cumplir políticas de autoplay
         },
         events: {
-          onReady: (_event: unknown) => {
+          onReady: () => {
             console.log('🎥 YouTube Player ready');
             this.loadPlaylistInfo();
             this.currentState.isLoaded = true;

@@ -16,16 +16,10 @@ export interface PixabayAudioTrack {
   name: string;
 }
 
-interface PixabayAudioResponse {
-  total: number;
-  totalHits: number;
-  hits: PixabayAudioTrack[];
-}
+
 
 // Nota: Pixabay no tiene API de música disponible públicamente
 // Usaremos archivos locales que ya funcionan
-const PIXABAY_API_KEY = process.env.PIXABAY_API_KEY || '';
-const PIXABAY_MUSIC_FALLBACK = true; // Activar modo fallback
 
 // Categorías de música para diferentes secciones
 export const musicCategories = {
@@ -35,7 +29,7 @@ export const musicCategories = {
   atmospheric: ['atmospheric', 'cinematic', 'dark ambient', 'mystery']
 };
 
-export async function fetchPixabayMusic(category: keyof typeof musicCategories, perPage: number = 20): Promise<PixabayAudioTrack[]> {
+export async function fetchPixabayMusic(category: keyof typeof musicCategories): Promise<PixabayAudioTrack[]> {
   try {
     // Pixabay no tiene API de música disponible, devolver array vacío
     // para que el sistema use las pistas de fallback locales

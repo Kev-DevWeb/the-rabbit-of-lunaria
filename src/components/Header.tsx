@@ -5,7 +5,7 @@ import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useBackgroundMusic } from "@/context/BackgroundMusicProvider";
-import { Volume2, VolumeX, SkipForward, SkipBack, Music, Play, Pause } from "lucide-react";
+import { SkipForward, SkipBack, Music, Play, Pause } from "lucide-react";
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -15,9 +15,7 @@ const Header = () => {
   const { 
     isMuted, 
     toggleMute, 
-    isInGrimoire, 
     currentTrack, 
-    isPlaying, 
     nextTrack, 
     previousTrack,
     isProcessing

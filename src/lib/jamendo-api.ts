@@ -136,8 +136,7 @@ export async function fetchJamendoTracksByIds(trackIds: string[]): Promise<Jamen
 
 // Función principal para buscar música en Jamendo
 export async function fetchJamendoMusic(
-  category: keyof typeof jamendoCategories, 
-  limit: number = 20
+  category: keyof typeof jamendoCategories
 ): Promise<JamendoTrack[]> {
   try {
     if (!JAMENDO_CLIENT_ID || JAMENDO_CLIENT_ID === 'YOUR_CLIENT_ID') {
@@ -156,7 +155,6 @@ export async function fetchJamendoMusic(
     }
 
     // Si no hay tracks personalizados, buscar por tags como antes
-    const categoryConfig = jamendoCategories[category];
     
     // Empezar con una consulta simple para debug
     const params = new URLSearchParams({

@@ -1,7 +1,7 @@
 'use client';
 
 import { useAudio } from '@/context/AudioProvider';
-import { useState, useEffect, useRef } from 'react';
+import { useState, useRef } from 'react';
 import { gsap } from 'gsap';
 import { useGSAP } from '@gsap/react';
 
@@ -220,8 +220,8 @@ export default function FloatingMusicPlayer() {
       {/* Esfera flotante principal */}
       <div
         ref={sphereRef}
-        className={`fixed transition-all duration-300 cursor-pointer select-none music-player-sphere ${
-          isExpanded ? 'w-80 h-auto' : 'w-16 h-16'
+        className={`fixed transition-all duration-300 select-none music-player-sphere ${
+          isExpanded ? 'w-80 h-auto cursor-pointer' : `w-16 h-16 ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`
         }`}
         style={{
           left: isExpanded ? '20px' : `${position.x}px`,

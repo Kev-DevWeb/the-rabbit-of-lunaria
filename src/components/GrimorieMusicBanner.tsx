@@ -1,12 +1,12 @@
 'use client';
 import { useState, useEffect } from 'react';
 import { useAudio } from '@/context/AudioProvider';
-import { Volume2, VolumeX, Music, BookOpen, X, Play, Pause } from 'lucide-react';
+import { Music, BookOpen, X, Play } from 'lucide-react';
 
 export default function GrimorieMusicBanner() {
   const [isVisible, setIsVisible] = useState(false);
   const [hasInteracted, setHasInteracted] = useState(false);
-  const { isPlaying, togglePlay, currentTrack } = useAudio();
+  const { togglePlay } = useAudio();
 
   // Mostrar el banner después de un breve delay
   useEffect(() => {

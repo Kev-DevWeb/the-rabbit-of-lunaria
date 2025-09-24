@@ -1,6 +1,6 @@
 'use client';
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import { useBackgroundMusic } from '@/context/BackgroundMusicProvider';
 import { Music, X } from 'lucide-react';
 
@@ -24,6 +24,13 @@ const MusicNotificationComponent: React.FC<MusicNotificationProps> = ({
   const [isVisible, setIsVisible] = React.useState(false);
   const [isExiting, setIsExiting] = React.useState(false);
 
+  const handleClose = useCallback(() => {
+    setIsExiting(true);
+    setTimeout(() => {
+      onClose(notification.id);
+    }, 300); // Tiempo de la animación de salida
+  }, [notification.id, onClose]);
+
   React.useEffect(() => {
     // Aparecer con animación
     setTimeout(() => setIsVisible(true), 100);
@@ -34,14 +41,7 @@ const MusicNotificationComponent: React.FC<MusicNotificationProps> = ({
     }, duration);
 
     return () => clearTimeout(autoCloseTimer);
-  }, [duration]);
-
-  const handleClose = () => {
-    setIsExiting(true);
-    setTimeout(() => {
-      onClose(notification.id);
-    }, 300); // Tiempo de la animación de salida
-  };
+  }, [duration, handleClose]);
 
   return (
     <div

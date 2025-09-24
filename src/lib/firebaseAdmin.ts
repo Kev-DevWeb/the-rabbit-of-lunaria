@@ -17,7 +17,6 @@ if (!admin.apps.length) {
       credential: admin.credential.cert(serviceAccount),
       databaseURL: `https://${process.env.NEXT_PUBLIC_FIREBASE_PROJECT_ID}.firebaseio.com`,
     });
-    console.log('Firebase Admin SDK inicializado correctamente desde la variable de entorno.');
 
   } catch (error) {
     console.error('Error al inicializar Firebase Admin:', error);
