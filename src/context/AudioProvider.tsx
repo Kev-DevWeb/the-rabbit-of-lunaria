@@ -84,10 +84,9 @@ export const AudioProvider: React.FC<AudioProviderProps> = ({ children }) => {
       }
     };
 
-    // Solo cargar si no tenemos pistas de Jamendo o si cambió la playlist
-    if (jamendoTracks.length === 0 || currentPlaylistId) {
-      loadJamendoMusic();
-    }
+    // Cargar siempre para debug - más tarde optimizamos
+    console.log(`🔄 Forzando carga de Jamendo para playlist: ${currentPlaylistId}`);
+    loadJamendoMusic();
   }, [currentPlaylistId, jamendoTracks.length]);
 
   // Cambiar playlist automáticamente según la ruta
