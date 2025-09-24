@@ -1,6 +1,7 @@
 "use client";
 import { useState, useEffect } from 'react';
 import StarrySky from "../components/StarrySky";
+import { useBackgroundMusic } from '@/context/BackgroundMusicProvider';
 import MagicHeroSection from "../components/MagicHeroSection";
 import ServicesSection from '../components/ServicesSection';
 import CommunitySection from '../components/CommunitySection';
@@ -9,6 +10,7 @@ import FloatingButton from "../components/FloatingButton";
 export default function Home() {
   const [isCinematicDone, setIsCinematicDone] = useState(false);
   const [showCinematic, setShowCinematic] = useState(false);
+  const { startMusicAfterAnimation } = useBackgroundMusic();
 
   // Controlar si la StarrySky+audio deben mostrarse esta sesion
   useEffect(() => {
@@ -32,6 +34,11 @@ export default function Home() {
     setIsCinematicDone(true);
     setShowCinematic(false);
     sessionStorage.setItem('starrySkyShown', 'true');
+    
+    // Iniciar música automáticamente después de la animación
+    setTimeout(() => {
+      startMusicAfterAnimation();
+    }, 1000); // Esperar 1 segundo para que termine la transición
   };
 
   return (

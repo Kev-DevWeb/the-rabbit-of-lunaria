@@ -8,6 +8,7 @@ import { BackgroundMusicProvider } from '@/context/BackgroundMusicProvider';
 import Header from '@/components/Header';
 import AppFooter from '@/components/AppFooter';
 import FloatingMusicPlayer from '@/components/FloatingMusicPlayerGSAP';
+import { GlobalMusicNotifications } from '@/components/GlobalMusicNotifications';
 import Script from 'next/script';
 
 const geistSans = Geist({
@@ -110,6 +111,8 @@ export default function RootLayout({
                 {!isStudioPage && <AppFooter />}
                 {/* Reproductor musical flotante - solo en grimorio */}
                 {!isStudioPage && isInGrimoire && <FloatingMusicPlayer />}
+                {/* Sistema de notificaciones de música */}
+                <GlobalMusicNotifications />
               </div>
             </LenisProvider>
           </AudioProvider>

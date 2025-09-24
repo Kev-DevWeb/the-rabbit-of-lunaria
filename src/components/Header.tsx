@@ -5,14 +5,23 @@ import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
 import { useBackgroundMusic } from "@/context/BackgroundMusicProvider";
-import { Volume2, VolumeX } from "lucide-react";
+import { Volume2, VolumeX, SkipForward, SkipBack, Music, Play, Pause } from "lucide-react";
 
 gsap.registerPlugin(ScrollTrigger);
 
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
   const headerRef = useRef<HTMLElement>(null);
-  const { isMuted, toggleMute, isInGrimoire } = useBackgroundMusic();
+  const { 
+    isMuted, 
+    toggleMute, 
+    isInGrimoire, 
+    currentTrack, 
+    isPlaying, 
+    nextTrack, 
+    previousTrack,
+    isProcessing 
+  } = useBackgroundMusic();
 
   useGSAP(() => {
     const links = gsap.utils.toArray<Element>('.animated-link');
@@ -80,15 +89,45 @@ const Header = () => {
             <li><Link href="/citas" className="font-semibold px-4 py-2 rounded-full bg-purple-600/50 text-white ring-1 ring-purple-400 hover:bg-purple-600/80 transition-all shadow-[0_0_15px_rgba(168,85,247,0.6)] hover:shadow-[0_0_25px_rgba(168,85,247,0.8)] cta-button">Agendar Cita</Link></li>
           </ul>
           
-          {/* Botón de mutear - solo fuera del grimorio */}
+          {/* Controles de música YouTube - solo fuera del grimorio */}
           {!isInGrimoire && (
-            <button 
-              onClick={toggleMute}
-              className="p-2 rounded-full bg-purple-600/20 hover:bg-purple-600/40 transition-all duration-300 text-white/80 hover:text-white"
-              aria-label={isMuted ? "Activar música" : "Silenciar música"}
-            >
-              {isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
-            </button>
+            <div className="flex items-center space-x-2 bg-purple-600/10 rounded-full p-1">
+              {/* Canción actual */}
+              {currentTrack && !isMuted && (
+                <div className="hidden lg:flex items-center space-x-2 px-3 max-w-48">
+                  <Music size={14} className="text-purple-400 animate-pulse" />
+                  <span className="text-xs text-white/80 truncate">{currentTrack}</span>
+                </div>
+              )}
+              
+              {/* Controles */}
+              <button 
+                onClick={previousTrack}
+                className="p-2 rounded-full hover:bg-purple-600/40 transition-all duration-300 text-white/60 hover:text-white disabled:opacity-50"
+                aria-label="Canción anterior"
+                disabled={isMuted || isProcessing}
+              >
+                <SkipBack size={16} />
+              </button>
+              
+              <button 
+                onClick={toggleMute}
+                className={`p-2 rounded-full bg-purple-600/20 hover:bg-purple-600/40 transition-all duration-300 text-white/80 hover:text-white ${isProcessing ? 'animate-pulse' : ''}`}
+                aria-label={!isMuted ? "Pausar música" : "Reproducir música"}
+                disabled={isProcessing}
+              >
+                {!isMuted ? <Pause size={18} /> : <Play size={18} />}
+              </button>
+              
+              <button 
+                onClick={nextTrack}
+                className="p-2 rounded-full hover:bg-purple-600/40 transition-all duration-300 text-white/60 hover:text-white disabled:opacity-50"
+                aria-label="Siguiente canción"
+                disabled={isMuted || isProcessing}
+              >
+                <SkipForward size={16} />
+              </button>
+            </div>
           )}
         </div>
 
@@ -116,18 +155,52 @@ const Header = () => {
             <li><Link href="/articulos" className="block py-2 hover:text-gray-300 animated-link" onClick={() => setIsOpen(false)}>El grimorio de Lunaria</Link></li>
             <li><Link href="/citas" className="block py-2 px-5 rounded-full bg-purple-600/50 text-white ring-1 ring-purple-400 hover:bg-purple-600/80 transition-all shadow-[0_0_15px_rgba(168,85,247,0.6)]" onClick={() => setIsOpen(false)}>Agendar Cita</Link></li>
             
-            {/* Botón de mutear - solo fuera del grimorio */}
+            {/* Controles de música - solo fuera del grimorio */}
             {!isInGrimoire && (
-              <li>
-                <button 
-                  onClick={toggleMute}
-                  className="flex items-center space-x-2 py-2 px-4 rounded-full bg-purple-600/20 hover:bg-purple-600/40 transition-all duration-300 text-white/80 hover:text-white"
-                  aria-label={isMuted ? "Activar música" : "Silenciar música"}
-                >
-                  {isMuted ? <VolumeX size={20} /> : <Volume2 size={20} />}
-                  <span className="text-sm">{isMuted ? "Música OFF" : "Música ON"}</span>
-                </button>
-              </li>
+              <>
+                {/* Canción actual */}
+                {currentTrack && !isMuted && (
+                  <li className="text-center">
+                    <div className="flex items-center justify-center space-x-2 py-2 text-purple-300">
+                      <Music size={16} className="animate-pulse" />
+                      <span className="text-xs truncate max-w-48">{currentTrack}</span>
+                    </div>
+                  </li>
+                )}
+                
+                {/* Controles */}
+                <li>
+                  <div className="flex items-center justify-center space-x-3 py-2">
+                    <button 
+                      onClick={previousTrack}
+                      className="p-2 hover:bg-white/10 rounded-full transition-colors disabled:opacity-50"
+                      aria-label="Canción anterior"
+                      disabled={isMuted || isProcessing}
+                    >
+                      <SkipBack size={18} className="text-white/60" />
+                    </button>
+                    
+                    <button 
+                      onClick={toggleMute}
+                      className={`flex items-center space-x-2 py-2 px-4 rounded-full bg-purple-600/20 hover:bg-purple-600/40 transition-all duration-300 text-white/80 hover:text-white ${isProcessing ? 'animate-pulse' : ''}`}
+                      aria-label={!isMuted ? "Pausar música" : "Reproducir música"}
+                      disabled={isProcessing}
+                    >
+                      {!isMuted ? <Pause size={20} /> : <Play size={20} />}
+                      <span className="text-sm">{!isMuted ? "Pausar" : "Reproducir"}</span>
+                    </button>
+                    
+                    <button 
+                      onClick={nextTrack}
+                      className="p-2 hover:bg-white/10 rounded-full transition-colors disabled:opacity-50"
+                      aria-label="Siguiente canción"
+                      disabled={isMuted || isProcessing}
+                    >
+                      <SkipForward size={18} className="text-white/60" />
+                    </button>
+                  </div>
+                </li>
+              </>
             )}
           </ul>
         </div>

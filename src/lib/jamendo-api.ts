@@ -44,14 +44,14 @@ const JAMENDO_CLIENT_ID = process.env.NEXT_PUBLIC_JAMENDO_CLIENT_ID || 'YOUR_CLI
 // study: Para el grimorio (artículos y autores)
 export const jamendoCategories = {
   mystical: {
-    tags: 'lofi,ambient,meditation,mystical,atmospheric',
-    acoustictags: 'calm,peaceful,spiritual',
-    genre: 'lofi'
+    tags: 'lofi',
+    acoustictags: 'calm,peaceful',
+    genre: 'jazz'
   },
   study: {
-    tags: 'lofi,instrumental,piano,chill,focus',
-    acoustictags: 'calm,peaceful,happy',
-    genre: 'lofi'
+    tags: 'lofi',
+    acoustictags: 'calm',
+    genre: 'jazz'
   }
 };
 
@@ -60,12 +60,12 @@ export const jamendoCategories = {
 // study: Para el grimorio (artículos y autores)
 export const customJamendoTracks = {
   mystical: [
-    // IDs temporalmente deshabilitados - usar búsqueda automática
-    // '1416550', '1588568', '1532813', '1343800', '1901440', '516471', '1163742', '455743'
+   
+    '1416550', '1588568', '1532813', '1343800', '1901440', '516471', '1163742', '455743'
   ],
   study: [
-    // IDs temporalmente deshabilitados - usar búsqueda automática
-    // '1954189', '2208903', '2204826', '2206240', '1931247', '1861777', '2257436', '2257436','1864302','1862242'  
+    
+     '1954189', '2208903', '2204826', '2206240', '1931247', '1861777', '2257436', '2257436','1864302','1862242'  
   ]
 };
 

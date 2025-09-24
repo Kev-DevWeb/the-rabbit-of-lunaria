@@ -2,11 +2,26 @@
 
 import React, { createContext, useContext, useRef, useState, useEffect, ReactNode } from 'react';
 import { usePathname } from 'next/navigation';
+import YouTubePlayerService, { YouTubePlayerState } from '@/lib/youtube-player';
+import { useMusicNotifications, MusicNotification } from '@/components/MusicNotificationFixed';
 
 interface BackgroundMusicContextType {
   isMuted: boolean;
   toggleMute: () => void;
   isInGrimoire: boolean;
+  // Nuevos estados para YouTube
+  currentTrack: string | null;
+  isPlaying: boolean;
+  nextTrack: () => void;
+  previousTrack: () => void;
+  youtubeState: YouTubePlayerState | null;
+  // Función para iniciar después de animación
+  startMusicAfterAnimation: () => void;
+  // Estado para feedback inmediato
+  isProcessing: boolean;
+  // Sistema de notificaciones
+  notifications: MusicNotification[];
+  closeNotification: (id: string) => void;
 }
 
 const BackgroundMusicContext = createContext<BackgroundMusicContextType | undefined>(undefined);
@@ -19,74 +34,231 @@ export const useBackgroundMusic = () => {
   return context;
 };
 
+// Hook específico para notificaciones que usa el contexto
+export const useGlobalMusicNotifications = () => {
+  const context = useContext(BackgroundMusicContext);
+  if (!context) {
+    throw new Error('useGlobalMusicNotifications debe ser usado dentro de BackgroundMusicProvider');
+  }
+  return {
+    notifications: context.notifications,
+    closeNotification: context.closeNotification
+  };
+};
+
 interface BackgroundMusicProviderProps {
   children: ReactNode;
 }
 
 export const BackgroundMusicProvider: React.FC<BackgroundMusicProviderProps> = ({ children }) => {
   const pathname = usePathname();
-  const audioRef = useRef<HTMLAudioElement | null>(null);
-  const [isMuted, setIsMuted] = useState(false);
+  const youtubePlayerRef = useRef<YouTubePlayerService | null>(null);
+  const playerContainerRef = useRef<HTMLDivElement | null>(null);
+  const lastTrackTitleRef = useRef<string | null>(null); // Usar ref en lugar de state
+  const [isMuted, setIsMuted] = useState(true); // Empezar muteado por políticas de autoplay
+  const [youtubeState, setYoutubeState] = useState<YouTubePlayerState | null>(null);
+  const [isProcessing, setIsProcessing] = useState(false);
+  
+  // Sistema de notificaciones - usar el archivo arreglado
+  const { notifications, showNotification, closeNotification } = useMusicNotifications();
   
   // Determinar si estamos en el grimorio
   const isInGrimoire = pathname.startsWith('/articulos') || pathname.startsWith('/autores');
   
-  // Inicializar audio
+  // ID de la playlist de YouTube (extraído de la URL)
+  const PLAYLIST_ID = 'PL4SJvJ-lWGWX2CFXEi7l92UJk-q91szHJ';
+
+  // Inicializar YouTube Player
   useEffect(() => {
-    if (!audioRef.current) {
-      audioRef.current = new Audio('/musicafondo.mp3');
-      audioRef.current.loop = true;
-      audioRef.current.volume = 0.3; // Volumen suave para música de fondo
+    if (!isInGrimoire && !youtubePlayerRef.current) {
+      // Crear container hidden para el player
+      if (!playerContainerRef.current) {
+        const container = document.createElement('div');
+        container.id = 'youtube-player-bg';
+        container.style.position = 'fixed';
+        container.style.top = '-1000px';
+        container.style.left = '-1000px';
+        container.style.width = '1px';
+        container.style.height = '1px';
+        container.style.opacity = '0';
+        container.style.pointerEvents = 'none';
+        document.body.appendChild(container);
+        playerContainerRef.current = container;
+      }
+
+      // Inicializar YouTube Player Service
+      youtubePlayerRef.current = new YouTubePlayerService(PLAYLIST_ID);
+      
+      youtubePlayerRef.current.initialize('youtube-player-bg')
+        .then(() => {
+          console.log('🎥 YouTube Player initialized successfully');
+          
+          // Configurar callback de cambios de estado
+          youtubePlayerRef.current?.onStateChange((state) => {
+            setYoutubeState(state);
+            
+            // Mostrar notificación cuando cambia la canción
+            const lastTrackTitle = lastTrackTitleRef.current;
+            console.log('📊 Notification check:', {
+              hasTrack: !!state.currentTrack,
+              trackTitle: state.currentTrack?.title,
+              lastTrackTitle,
+              titleChanged: state.currentTrack?.title !== lastTrackTitle,
+              isPlaying: state.isPlaying,
+              isMuted: state.isMuted,
+              providerMuted: isMuted
+            });
+            
+            // Mostrar notificación solo si:
+            // 1. Hay track actual
+            // 2. El título cambió (nueva canción) 
+            // 3. Está reproduciéndose
+            // 4. No está muteado
+            if (state.currentTrack && 
+                state.currentTrack.title !== lastTrackTitle && 
+                state.isPlaying && 
+                !state.isMuted) {
+              
+              // Actualizar el ref del último track INMEDIATAMENTE
+              lastTrackTitleRef.current = state.currentTrack.title;
+              
+              console.log('🔔 Showing notification for:', state.currentTrack.title);
+              showNotification(
+                state.currentTrack.title,
+                state.currentTrack.channelTitle,
+                state.currentTrack.thumbnail
+              );
+            } else {
+              console.log('❌ Notification blocked - conditions not met');
+            }
+          });
+          
+          // Aplicar estado de mute inicial
+          youtubePlayerRef.current?.setMuted(isMuted);
+        })
+        .catch((error) => {
+          console.error('❌ Error initializing YouTube Player:', error);
+        });
     }
 
-    const audio = audioRef.current;
-
-    // Solo reproducir si NO estamos en el grimorio
-    if (!isInGrimoire && !isMuted) {
-      const playPromise = audio.play();
-      
-      if (playPromise !== undefined) {
-        playPromise.catch(error => {
-          console.log('🎵 Audio requiere interacción del usuario:', error);
-        });
-      }
-    } else {
-      audio.pause();
+    // Cleanup cuando salimos de página no-grimorio
+    if (isInGrimoire && youtubePlayerRef.current) {
+      youtubePlayerRef.current.pause();
     }
 
     return () => {
-      if (audio && !audio.paused) {
-        audio.pause();
-      }
-    };
-  }, [isInGrimoire, isMuted]);
-
-  const toggleMute = () => {
-    setIsMuted(prev => {
-      const newMutedState = !prev;
-      
-      if (audioRef.current) {
-        if (newMutedState || isInGrimoire) {
-          audioRef.current.pause();
-        } else if (!isInGrimoire) {
-          const playPromise = audioRef.current.play();
-          if (playPromise !== undefined) {
-            playPromise.catch(error => {
-              console.log('🎵 Audio requiere interacción del usuario:', error);
-            });
-          }
+      if (isInGrimoire && youtubePlayerRef.current) {
+        youtubePlayerRef.current.destroy();
+        youtubePlayerRef.current = null;
+        
+        if (playerContainerRef.current) {
+          document.body.removeChild(playerContainerRef.current);
+          playerContainerRef.current = null;
         }
       }
-      
-      return newMutedState;
-    });
+    };
+  }, [isInGrimoire, isMuted, showNotification]);
+
+  const toggleMute = async () => {
+    if (youtubePlayerRef.current && !isInGrimoire) {
+      try {
+        // Cambiar estado inmediatamente para feedback del usuario
+        setIsProcessing(true);
+        setIsMuted(prev => !prev);
+        
+        // Ejecutar fade en background
+        await youtubePlayerRef.current.togglePlayPauseWithFade();
+        
+        setIsProcessing(false);
+        // El estado se actualiza automáticamente via callback
+      } catch (error) {
+        console.error('❌ Error en toggle fade:', error);
+        setIsProcessing(false);
+        // Revertir estado si hay error
+        setIsMuted(prev => !prev);
+      }
+    }
   };
+
+  const nextTrack = () => {
+    if (youtubePlayerRef.current && !isInGrimoire) {
+      youtubePlayerRef.current.nextTrack();
+    }
+  };
+
+  const previousTrack = () => {
+    if (youtubePlayerRef.current && !isInGrimoire) {
+      youtubePlayerRef.current.previousTrack();
+    }
+  };
+
+  // Función para auto-reproducir después de animación
+  const startMusicAfterAnimation = async () => {
+    if (youtubePlayerRef.current && !isInGrimoire && isMuted) {
+      try {
+        console.log('🎬 Animación completada, iniciando música...');
+        // Primero cambiar el estado local
+        setIsProcessing(true);
+        setIsMuted(false);
+        
+        await youtubePlayerRef.current.fadeIn(3000); // 3 segundos de fade in
+        
+        setIsProcessing(false);
+        console.log('✅ Música iniciada post-animación exitosamente');
+      } catch (error) {
+        console.error('❌ Error iniciando música post-animación:', error);
+        setIsProcessing(false);
+      }
+    } else {
+      console.log('🚫 Condiciones no cumplidas para auto-start:', {
+        hasPlayer: !!youtubePlayerRef.current,
+        isInGrimoire,
+        isMuted
+      });
+    }
+  };
+
+  // Función de prueba para notificaciones
+  const testNotification = () => {
+    console.log('🧪 Testing notification system...');
+    showNotification(
+      '♫ Canción de Prueba',
+      'Playlist de Lunaria',
+      'https://img.youtube.com/vi/dQw4w9WgXcQ/default.jpg'
+    );
+  };
+
+  // Hacer testNotification disponible globalmente para debug
+  if (typeof window !== 'undefined') {
+    (window as any).testNotification = testNotification;
+    (window as any).clearNotifications = () => {
+      // Limpiar todas las notificaciones
+      notifications.forEach(n => closeNotification(n.id));
+    };
+    (window as any).showManualNotification = () => {
+      console.log('🧪 Manual notification test...');
+      showNotification(
+        '🧪 Notificación Manual',
+        'Sistema de Prueba',
+        'https://img.youtube.com/vi/dQw4w9WgXcQ/default.jpg'
+      );
+    };
+  }
 
   return (
     <BackgroundMusicContext.Provider value={{
       isMuted,
       toggleMute,
-      isInGrimoire
+      isInGrimoire,
+      currentTrack: youtubeState?.currentTrack?.title || null,
+      isPlaying: youtubeState?.isPlaying || false,
+      nextTrack,
+      previousTrack,
+      youtubeState,
+      startMusicAfterAnimation,
+      isProcessing,
+      notifications,
+      closeNotification
     }}>
       {children}
     </BackgroundMusicContext.Provider>

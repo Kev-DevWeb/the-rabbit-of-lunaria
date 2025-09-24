@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Prueba de Notificaciones de Música</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            padding: 20px;
+            background: #1a1a1a;
+            color: white;
+        }
+        .test-button {
+            background: #4CAF50;
+            color: white;
+            border: none;
+            padding: 15px 30px;
+            font-size: 16px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 10px;
+        }
+        .test-button:hover {
+            background: #45a049;
+        }
+        .log-area {
+            background: #2a2a2a;
+            padding: 20px;
+            border-radius: 5px;
+            margin: 20px 0;
+            font-family: 'Courier New', monospace;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        .notification {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 15px 20px;
+            border-radius: 8px;
+            border-left: 4px solid #8B5CF6;
+            max-width: 300px;
+            z-index: 1000;
+            opacity: 0;
+            transform: translateX(100%);
+            transition: all 0.3s ease-in-out;
+        }
+        .notification.show {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        .notification.exit {
+            opacity: 0;
+            transform: translateX(100%);
+        }
+        .notification-content {
+            display: flex;
+            align-items: center;
+        }
+        .notification-text {
+            flex: 1;
+        }
+        .notification-title {
+            font-weight: bold;
+            margin-bottom: 4px;
+        }
+        .notification-channel {
+            font-size: 0.9em;
+            opacity: 0.8;
+        }
+    </style>
+</head>
+<body>
+    <h1>🎵 Prueba del Sistema de Notificaciones de Música</h1>
+    
+    <div>
+        <button class="test-button" onclick="showTestNotification()">
+            🔔 Mostrar Notificación de Prueba
+        </button>
+        
+        <button class="test-button" onclick="simulateTrackChange()">
+            🎶 Simular Cambio de Canción
+        </button>
+        
+        <button class="test-button" onclick="testMultipleNotifications()">
+            🎵 Prueba Múltiples Notificaciones
+        </button>
+        
+        <button class="test-button" onclick="clearLogs()">
+            🧹 Limpiar Logs
+        </button>
+    </div>
+
+    <div class="log-area" id="logArea">
+        📋 Logs aparecerán aquí...\n
+    </div>
+
+    <script>
+        let notificationId = 0;
+        const logArea = document.getElementById('logArea');
+
+        function log(message) {
+            const timestamp = new Date().toLocaleTimeString();
+            logArea.textContent += `[${timestamp}] ${message}\n`;
+            logArea.scrollTop = logArea.scrollHeight;
+            console.log(`[${timestamp}] ${message}`);
+        }
+
+        function showNotification(title, channel, thumbnail, duration = 4000) {
+            const id = `notification-${++notificationId}`;
+            log(`🔔 Creando notificación: "${title}" - ${channel}`);
+            
+            const notification = document.createElement('div');
+            notification.className = 'notification';
+            notification.id = id;
+            
+            notification.innerHTML = `
+                <div class="notification-content">
+                    <div class="notification-text">
+                        <div class="notification-title">${title}</div>
+                        <div class="notification-channel">${channel}</div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(notification);
+            
+            // Mostrar con animación
+            setTimeout(() => {
+                notification.classList.add('show');
+                log(`✅ Notificación mostrada: ${id}`);
+            }, 100);
+            
+            // Auto cerrar
+            setTimeout(() => {
+                notification.classList.add('exit');
+                log(`⏰ Auto-cerrando notificación: ${id}`);
+                
+                setTimeout(() => {
+                    if (notification.parentNode) {
+                        notification.parentNode.removeChild(notification);
+                        log(`🗑️ Notificación eliminada: ${id}`);
+                    }
+                }, 300);
+            }, duration);
+            
+            return id;
+        }
+
+        function showTestNotification() {
+            log('🧪 Iniciando prueba de notificación...');
+            showNotification(
+                '♫ Canción de Prueba',
+                'Playlist de Lunaria',
+                'https://img.youtube.com/vi/dQw4w9WgXcQ/default.jpg'
+            );
+        }
+
+        function simulateTrackChange() {
+            log('🎶 Simulando cambio de canción...');
+            const tracks = [
+                { title: '♫ Místicos Vientos', channel: 'Playlist de Lunaria' },
+                { title: '♫ Luna Cresciente', channel: 'Playlist de Lunaria' },
+                { title: '♫ Bosque Encantado', channel: 'Playlist de Lunaria' },
+                { title: '♫ Ritual Nocturno', channel: 'Playlist de Lunaria' }
+            ];
+            
+            const randomTrack = tracks[Math.floor(Math.random() * tracks.length)];
+            log(`🔄 Track seleccionado: ${randomTrack.title}`);
+            
+            showNotification(randomTrack.title, randomTrack.channel);
+        }
+
+        function testMultipleNotifications() {
+            log('🎵 Probando múltiples notificaciones...');
+            
+            setTimeout(() => simulateTrackChange(), 0);
+            setTimeout(() => simulateTrackChange(), 1000);
+            setTimeout(() => simulateTrackChange(), 2000);
+            setTimeout(() => simulateTrackChange(), 3000);
+        }
+
+        function clearLogs() {
+            logArea.textContent = '📋 Logs limpiados...\n';
+            log('🧹 Sistema de logs reiniciado');
+        }
+
+        // Log inicial
+        log('🚀 Sistema de notificaciones inicializado');
+        log('💡 Usa los botones para probar diferentes escenarios');
+        log('🎯 Verifica que las notificaciones aparezcan en la esquina superior derecha');
+    </script>
+</body>
+</html>
