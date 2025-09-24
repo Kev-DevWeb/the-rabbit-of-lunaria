@@ -10,7 +10,6 @@ import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
 import Image from 'next/image';
 import { BookOpen, Sparkles, Search } from 'lucide-react';
-import GrimorieMusicBanner from './GrimorieMusicBanner';
 
 // Define types for our Sanity data
 interface Category {
@@ -321,9 +320,6 @@ export default function ArticulosContent() {
           </div>
         </div>
       </div>
-
-      {/* Banner musical del grimorio */}
-      <GrimorieMusicBanner />
 
       {/* Buscador elegante */}
       <div className="mb-12 max-w-4xl mx-auto">

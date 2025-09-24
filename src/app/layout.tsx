@@ -3,11 +3,9 @@ import { usePathname } from 'next/navigation'
 import { Geist, Geist_Mono } from "next/font/google";
 import { Cinzel_Decorative, Playfair_Display, Cormorant_Garamond } from "next/font/google";
 import "./globals.css";
-import { AudioProvider } from '@/context/AudioProvider';
 import { BackgroundMusicProvider } from '@/context/BackgroundMusicProvider';
 import Header from '@/components/Header';
 import AppFooter from '@/components/AppFooter';
-import FloatingMusicPlayer from '@/components/FloatingMusicPlayerGSAP';
 import { GlobalMusicNotifications } from '@/components/GlobalMusicNotifications';
 import Script from 'next/script';
 
@@ -81,9 +79,6 @@ export default function RootLayout({
 }>) {
   const pathname = usePathname()
   const isStudioPage = pathname.startsWith('/studio')
-  
-  // Determinar si estamos en grimorio
-  const isInGrimoire = pathname.startsWith('/articulos') || pathname.startsWith('/autores');
 
   return (
     <html lang="en">
@@ -101,21 +96,17 @@ export default function RootLayout({
         className={`${geistSans.variable} ${geistMono.variable} ${cinzelDecorative.variable} ${playfairDisplay.variable} ${cormorantGaramond.variable} antialiased bg-gray-900 text-white`}
       >
         <BackgroundMusicProvider>
-          <AudioProvider>
-            <LenisProvider>
-              <div className="flex flex-col min-h-screen">
-                {!isStudioPage && <Header />}
-                <main className="flex-grow">
-                  <PageTransition>{children}</PageTransition>
-                </main>
-                {!isStudioPage && <AppFooter />}
-                {/* Reproductor musical flotante - solo en grimorio */}
-                {!isStudioPage && isInGrimoire && <FloatingMusicPlayer />}
-                {/* Sistema de notificaciones de música */}
-                <GlobalMusicNotifications />
-              </div>
-            </LenisProvider>
-          </AudioProvider>
+          <LenisProvider>
+            <div className="flex flex-col min-h-screen">
+              {!isStudioPage && <Header />}
+              <main className="flex-grow">
+                <PageTransition>{children}</PageTransition>
+              </main>
+              {!isStudioPage && <AppFooter />}
+              {/* Sistema de notificaciones de música */}
+              <GlobalMusicNotifications />
+            </div>
+          </LenisProvider>
         </BackgroundMusicProvider>
       </body>
     </html>

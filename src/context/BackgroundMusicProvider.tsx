@@ -22,9 +22,6 @@ interface BackgroundMusicContextType {
   // Sistema de notificaciones
   notifications: MusicNotification[];
   closeNotification: (id: string) => void;
-  // Comunicación entre reproductores
-  pauseFromExternalPlayer: () => void;
-  resumeFromExternalPlayer: () => void;
 }
 
 const BackgroundMusicContext = createContext<BackgroundMusicContextType | undefined>(undefined);
@@ -170,11 +167,7 @@ export const BackgroundMusicProvider: React.FC<BackgroundMusicProviderProps> = (
         const newMutedState = !isMuted;
         setIsMuted(newMutedState);
         
-        // Si se está activando YouTube, pausar música de la esfera
-        if (!newMutedState) {
-          console.log("🔇 Pausando música de la esfera por activar YouTube");
-          window.dispatchEvent(new CustomEvent('pauseAudioFromYoutube'));
-        }
+        // Ya no necesitamos pausar otros reproductores
         
         // Ejecutar fade en background
         await youtubePlayerRef.current.togglePlayPauseWithFade();
@@ -262,18 +255,6 @@ export const BackgroundMusicProvider: React.FC<BackgroundMusicProviderProps> = (
     };
   }
 
-  // Funciones para comunicación con otros reproductores
-  const pauseFromExternalPlayer = () => {
-    if (youtubePlayerRef.current && youtubeState?.isPlaying) {
-      youtubePlayerRef.current.pause();
-    }
-  };
-
-  const resumeFromExternalPlayer = () => {
-    // Opcional: podrías implementar lógica para reanudar si es necesario
-    // Por ahora, solo pausamos cuando otro reproductor se activa
-  };
-
   return (
     <BackgroundMusicContext.Provider value={{
       isMuted,
@@ -287,9 +268,7 @@ export const BackgroundMusicProvider: React.FC<BackgroundMusicProviderProps> = (
       startMusicAfterAnimation,
       isProcessing,
       notifications,
-      closeNotification,
-      pauseFromExternalPlayer,
-      resumeFromExternalPlayer
+      closeNotification
     }}>
       {children}
     </BackgroundMusicContext.Provider>

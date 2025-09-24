@@ -112,15 +112,15 @@ const ServicesSection = () => {
   }, []);
 
   return (
-    <section ref={sectionRef} className="relative w-full h-screen flex flex-col items-center justify-center text-white bg-transparent p-0 m-0 mb-16">
+    <section ref={sectionRef} className="relative w-full min-h-screen flex flex-col items-center justify-center text-white bg-transparent p-0 m-0 mb-16">
       <div className="text-center max-w-3xl p-8 relative z-10">
         <h2 className="text-3xl md:text-4xl font-bold font-cinzel-decorative service-title">Lecturas de Tarot</h2>
         <p className="text-base md:text-lg mt-4 service-text">
           A través del tarot puedo ayudarte a establecer un canal con tu guardián espiritual.
           Recibe consejos, advertencias y la guía que necesitas para tu camino. También podemos explorar memorias de tu vida pasada para entender mejor tu presente.
         </p>
-        <div className="w-full flex justify-center">
-          <div className="relative flex items-center justify-center mt-12 w-full" style={{ minHeight: '390px', height: '64vh', maxHeight: 520 }}>
+        <div className="w-full flex justify-center mb-8">
+          <div className="relative flex items-center justify-center mt-12 w-full" style={{ minHeight: '390px', height: '50vh', maxHeight: 420 }}>
             {/* Mesa de madera (imagen) */}
             <div
               ref={tableRef}
@@ -141,10 +141,10 @@ const ServicesSection = () => {
                 style={{ objectFit: 'cover' }}
               />
             </div>
-            {/* Mantel morado, ahora posicionado absolutamente sobre la mesa */}
+            {/* Mantel morado, centrado sobre la mesa */}
             <div
               ref={mantelRef}
-              className="absolute w-[78%] h-[66%]" // w-11/12 de 85% y h-4/5 de 83%
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[78%] h-[66%]"
               style={{
                 background: 'linear-gradient(180deg, #a259ff 80%, #511583 100%)',
                 borderRadius: '40px',
@@ -168,7 +168,12 @@ const ServicesSection = () => {
             </div>
           </div>
         </div>
-        <Link href="/citas" className="hidden md:inline-block mt-10 px-8 py-3 bg-indigo-600 hover:bg-indigo-700 transition-colors rounded-full text-lg font-bold text-white shadow-xl">Agenda una cita</Link>
+        {/* Botón fuera del área de la mesa para evitar superposiciones */}
+        <div className="relative z-20 mt-8">
+          <Link href="/citas" className="inline-block px-8 py-3 bg-indigo-600 hover:bg-indigo-700 transition-colors rounded-full text-lg font-bold text-white shadow-xl">
+            Agenda una cita
+          </Link>
+        </div>
       </div>
     </section>
   );
