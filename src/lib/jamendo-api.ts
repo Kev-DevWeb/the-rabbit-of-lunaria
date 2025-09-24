@@ -44,14 +44,14 @@ const JAMENDO_CLIENT_ID = process.env.NEXT_PUBLIC_JAMENDO_CLIENT_ID || 'YOUR_CLI
 // study: Para el grimorio (artículos y autores)
 export const jamendoCategories = {
   mystical: {
-    tags: 'ambient,meditation,mystical,newage,atmospheric',
+    tags: 'lofi,ambient,meditation,mystical,atmospheric',
     acoustictags: 'calm,peaceful,spiritual',
-    genre: 'ambient'
+    genre: 'lofi'
   },
   study: {
-    tags: 'instrumental,piano,classical,focus,lofi',
+    tags: 'lofi,instrumental,piano,chill,focus',
     acoustictags: 'calm,peaceful,happy',
-    genre: 'classical'
+    genre: 'lofi'
   }
 };
 
@@ -60,10 +60,12 @@ export const jamendoCategories = {
 // study: Para el grimorio (artículos y autores)
 export const customJamendoTracks = {
   mystical: [
-    '1416550', '1588568', '1532813', '1343800', '1901440', '516471', '1163742', '455743'
+    // IDs temporalmente deshabilitados - usar búsqueda automática
+    // '1416550', '1588568', '1532813', '1343800', '1901440', '516471', '1163742', '455743'
   ],
   study: [
-    '1954189', '2208903', '2204826', '2206240', '1931247', '1861777', '2257436', '2257436','1864302','1862242'
+    // IDs temporalmente deshabilitados - usar búsqueda automática
+    // '1954189', '2208903', '2204826', '2206240', '1931247', '1861777', '2257436', '2257436','1864302','1862242'  
   ]
 };
 
@@ -107,6 +109,9 @@ export async function fetchJamendoTracksByIds(trackIds: string[]): Promise<Jamen
 
     const data: JamendoResponse = await response.json();
     console.log(`📊 Datos completos de respuesta Jamendo:`, data);
+    console.log(`📊 Headers de respuesta:`, data.headers);
+    console.log(`📊 Results array:`, data.results);
+    console.log(`📊 Cantidad de results:`, data.results ? data.results.length : 'No results');
     
     if (data.headers.code !== 0) {
       console.error(`❌ Error en headers de Jamendo: ${data.headers.error_message}`);

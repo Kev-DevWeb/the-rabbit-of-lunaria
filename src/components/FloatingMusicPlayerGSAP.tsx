@@ -207,16 +207,27 @@ export default function FloatingMusicPlayer() {
   };
 
   return (
-    <>
+    <div className="music-player-container" style={{ 
+      position: 'fixed', 
+      top: 0, 
+      left: 0, 
+      width: '100%', 
+      height: '100%', 
+      pointerEvents: 'none', 
+      zIndex: 9999,
+      isolation: 'isolate'
+    }}>
       {/* Esfera flotante principal */}
       <div
         ref={sphereRef}
-        className={`fixed z-50 transition-all duration-300 cursor-pointer select-none ${
+        className={`fixed transition-all duration-300 cursor-pointer select-none music-player-sphere ${
           isExpanded ? 'w-80 h-auto' : 'w-16 h-16'
         }`}
         style={{
           left: isExpanded ? '20px' : `${position.x}px`,
           bottom: isExpanded ? '20px' : `${position.y}px`,
+          pointerEvents: 'auto',
+          zIndex: 1
         }}
         onMouseDown={handleMouseDown}
         onClick={isExpanded ? undefined : () => setIsExpanded(true)}
@@ -227,11 +238,11 @@ export default function FloatingMusicPlayer() {
             {/* Brillo de fondo (como el botón de agendar cita) */}
             <div 
               ref={glowRef}
-              className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full blur-lg opacity-60"
+              className="absolute inset-0 bg-gradient-to-r from-purple-600 to-pink-600 rounded-full blur-lg opacity-60 music-animation"
             />
             
             {/* Esfera principal */}
-            <div className="relative w-16 h-16 bg-gradient-to-br from-purple-500 via-purple-600 to-pink-600 rounded-full shadow-2xl border-2 border-purple-300/30 flex items-center justify-center overflow-hidden">
+            <div className="relative w-16 h-16 bg-gradient-to-br from-purple-500 via-purple-600 to-pink-600 rounded-full shadow-2xl border-2 border-purple-300/30 flex items-center justify-center overflow-hidden music-animation">
               {/* Brillo interno */}
               <div className="absolute inset-0 bg-gradient-to-t from-transparent via-white/10 to-white/20 rounded-full" />
               
@@ -355,10 +366,11 @@ export default function FloatingMusicPlayer() {
       {/* Overlay para cerrar cuando se hace clic fuera */}
       {isExpanded && (
         <div
-          className="fixed inset-0 z-40 bg-black/20 backdrop-blur-sm"
+          className="fixed inset-0 bg-black/20 backdrop-blur-sm"
+          style={{ pointerEvents: 'auto', zIndex: 0 }}
           onClick={() => setIsExpanded(false)}
         />
       )}
-    </>
+    </div>
   );
 }

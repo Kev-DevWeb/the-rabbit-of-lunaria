@@ -120,3 +120,28 @@ strong, b, .font-bold {
     color: #ddd6fe; /* purple-200 - morado lila más claro para contraste */
   }
 }
+
+/* Proteger el reproductor musical de animaciones externas */
+.music-player-sphere {
+  /* Aislamiento completo del reproductor */
+  isolation: isolate !important;
+  transform-style: flat !important;
+  position: fixed !important;
+  z-index: 9999 !important;
+}
+
+.music-player-sphere,
+.music-player-sphere *:not(.music-animation) {
+  transform: none !important;
+  animation: none !important;
+  will-change: auto !important;
+  rotate: none !important;
+  scale: none !important;
+  translate: none !important;
+}
+
+/* Excepto las animaciones propias del reproductor */
+.music-player-sphere .music-animation {
+  transform: revert !important;
+  animation: revert !important;
+}
