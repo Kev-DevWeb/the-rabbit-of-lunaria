@@ -107,3 +107,16 @@ h1, h2 {
     transform: translateY(0);
   }
 }
+
+/* Estilos personalizados para negritas */
+strong, b, .font-bold {
+  color: #c4b5fd; /* purple-300 - morado lila claro */
+  font-weight: 700;
+}
+
+/* Para modo oscuro, un tono ligeramente más claro */
+@media (prefers-color-scheme: dark) {
+  strong, b, .font-bold {
+    color: #ddd6fe; /* purple-200 - morado lila más claro para contraste */
+  }
+}
