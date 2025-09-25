@@ -208,42 +208,72 @@ export default function ArticulosContent() {
               <Link 
                 key={article._id}
                 href={`/articulos/${article.slug.current}`}
-                className="group flex items-center py-2 px-3 rounded-md hover:bg-purple-800/20 transition-all duration-300 article-entry"
+                className="group block py-2 px-3 rounded-md hover:bg-purple-800/20 transition-all duration-300 article-entry"
               >
-                {/* Imagen del artículo - Más pequeña para formato de libro */}
-                {article.mainImage && (
-                  <div className="flex-shrink-0 mr-3">
-                    <Image
-                      src={urlFor(article.mainImage).width(40).height(40).url()}
-                      alt={article.mainImage.alt || article.title}
-                      width={40}
-                      height={40}
-                      className="w-10 h-10 object-cover rounded border border-purple-500/30 group-hover:border-purple-400/50 transition-colors"
-                    />
+                {/* Layout Mobile - Stack vertical */}
+                <div className="sm:hidden">
+                  <div className="flex items-start space-x-3">
+                    {/* Imagen del artículo */}
+                    {article.mainImage && (
+                      <div className="flex-shrink-0">
+                        <Image
+                          src={urlFor(article.mainImage).width(48).height(48).url()}
+                          alt={article.mainImage.alt || article.title}
+                          width={48}
+                          height={48}
+                          className="w-12 h-12 object-cover rounded border border-purple-500/30 group-hover:border-purple-400/50 transition-colors"
+                        />
+                      </div>
+                    )}
+                    
+                    <div className="flex-1 min-w-0">
+                      <div className="flex items-center mb-1">
+                        <div className="w-1 h-1 bg-yellow-400 rounded-full group-hover:bg-yellow-300 transition-colors mr-2 flex-shrink-0"></div>
+                      </div>
+                      <h3 className="text-gray-200 group-hover:text-yellow-100 transition-colors font-medium text-sm leading-tight">
+                        {article.title}
+                      </h3>
+                    </div>
                   </div>
-                )}
-                
-                <div className="flex items-center flex-grow min-w-0">
-                  {/* Punto de índice más pequeño */}
-                  <div className="w-1 h-1 bg-yellow-400 rounded-full group-hover:bg-yellow-300 transition-colors mr-2 flex-shrink-0"></div>
-                  <span className="text-gray-200 group-hover:text-yellow-100 transition-colors font-medium text-sm sm:text-base lg:text-base flex-grow truncate">
-                    {article.title}
+                </div>
+
+                {/* Layout Desktop - Horizontal con línea punteada */}
+                <div className="hidden sm:flex items-center">
+                  {/* Imagen del artículo */}
+                  {article.mainImage && (
+                    <div className="flex-shrink-0 mr-3">
+                      <Image
+                        src={urlFor(article.mainImage).width(40).height(40).url()}
+                        alt={article.mainImage.alt || article.title}
+                        width={40}
+                        height={40}
+                        className="w-10 h-10 object-cover rounded border border-purple-500/30 group-hover:border-purple-400/50 transition-colors"
+                      />
+                    </div>
+                  )}
+                  
+                  <div className="flex items-center flex-grow min-w-0">
+                    {/* Punto de índice más pequeño */}
+                    <div className="w-1 h-1 bg-yellow-400 rounded-full group-hover:bg-yellow-300 transition-colors mr-2 flex-shrink-0"></div>
+                    <span className="text-gray-200 group-hover:text-yellow-100 transition-colors font-medium text-base lg:text-base flex-grow truncate">
+                      {article.title}
+                    </span>
+                  </div>
+                  
+                  {/* Línea punteada estilo índice de libro */}
+                  <div className="flex-grow mx-3 border-b border-dotted border-purple-400/30 group-hover:border-purple-300/50 transition-colors min-w-8"></div>
+                  
+                  {/* Fecha como "número de página" */}
+                  <span className="text-purple-300 group-hover:text-purple-200 font-mono text-xs transition-colors min-w-16 text-right flex-shrink-0">
+                    {article.publishedAt 
+                      ? new Date(article.publishedAt).toLocaleDateString('es-ES', { 
+                          day: '2-digit', 
+                          month: '2-digit'
+                        })
+                      : 'S/F'
+                    }
                   </span>
                 </div>
-                
-                {/* Línea punteada estilo índice de libro */}
-                <div className="flex-grow mx-3 border-b border-dotted border-purple-400/30 group-hover:border-purple-300/50 transition-colors min-w-8"></div>
-                
-                {/* Fecha como "número de página" */}
-                <span className="text-purple-300 group-hover:text-purple-200 font-mono text-xs transition-colors min-w-16 text-right flex-shrink-0">
-                  {article.publishedAt 
-                    ? new Date(article.publishedAt).toLocaleDateString('es-ES', { 
-                        day: '2-digit', 
-                        month: '2-digit'
-                      })
-                    : 'S/F'
-                  }
-                </span>
               </Link>
             ))}
           </div>
