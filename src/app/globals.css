@@ -97,6 +97,38 @@ h1, h2 {
   animation: flicker 1.5s infinite;
 }
 
+/* Sanity Studio scroll fixes */
+/* Ensure proper scrolling in Sanity Studio */
+[data-ui="Card"],
+[data-ui="Flex"],
+[data-ui="Stack"] {
+  overflow-y: auto !important;
+  max-height: none !important;
+}
+
+/* Fix for body/form scrolling in Sanity Studio */
+[data-testid="field-body"],
+[data-testid="body-field"],
+.pt-editor,
+.pt-editor__container {
+  overflow-y: auto !important;
+  max-height: 70vh !important;
+  min-height: 200px;
+}
+
+/* Ensure scroll works in form containers */
+[role="dialog"] [data-ui="Card"],
+[data-ui="Dialog"] [data-ui="Card"] {
+  overflow-y: auto !important;
+  max-height: 80vh !important;
+}
+
+/* Fix for portable text editor */
+[data-portable-text-editor] {
+  overflow-y: auto !important;
+  max-height: 60vh !important;
+}
+
 @keyframes fadeIn {
   from {
     opacity: 0;

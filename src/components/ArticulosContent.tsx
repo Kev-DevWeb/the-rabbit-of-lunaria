@@ -65,7 +65,7 @@ export default function ArticulosContent() {
 
     async function fetchArticles() {
       setLoading(true);
-      const sanityQuery = `*[_type == "post"] | order(publishedAt asc) {
+      const sanityQuery = `*[_type == "post"] {
         _id,
         title,
         slug,
@@ -86,24 +86,33 @@ export default function ArticulosContent() {
           title, 
           description,
           slug,
+          orderRank,
           parent->{
             title,
             slug,
+            orderRank,
             parent->{
               title,
               slug,
+              orderRank,
               parent->{
                 title,
                 slug,
+                orderRank,
                 parent->{
                   title,
-                  slug
+                  slug,
+                  orderRank
                 }
               }
             }
           }
-        }
-      }`;
+        },
+        // Calculate category hierarchy depth and order for sorting
+        "categoryOrder": categories[0].orderRank,
+        "parentOrder": categories[0].parent.orderRank,
+        "grandParentOrder": categories[0].parent.parent.orderRank
+      } | order(grandParentOrder asc, parentOrder asc, categoryOrder asc, publishedAt asc)`;
       const fetchedArticles = await client.fetch<Article[]>(sanityQuery);
       setArticles(fetchedArticles);
       setLoading(false);
@@ -133,10 +142,39 @@ export default function ArticulosContent() {
   const createNestedStructure = (articles: Article[]): Record<string, CategoryNode> => {
     const structure: Record<string, CategoryNode> = {};
     
+    // Primero agrupamos por categorías y ordenamos
+    const groupedArticles: { [key: string]: Article[] } = {};
+    
     articles.forEach(article => {
       if (!article.categories?.[0]) return;
       
       const categoryPath = getCategoryPath(article.categories[0]);
+      const fullPath = categoryPath.join(' > ');
+      
+      if (!groupedArticles[fullPath]) {
+        groupedArticles[fullPath] = [];
+      }
+      groupedArticles[fullPath].push(article);
+    });
+    
+    // Ordenar las claves por jerarquía (categorías padre primero)
+    const sortedPaths = Object.keys(groupedArticles).sort((a, b) => {
+      const pathA = a.split(' > ');
+      const pathB = b.split(' > ');
+      
+      // Comparar por profundidad primero (categorías padre primero)
+      if (pathA.length !== pathB.length) {
+        return pathA.length - pathB.length;
+      }
+      
+      // Si tienen la misma profundidad, ordenar alfabéticamente
+      return a.localeCompare(b, 'es', { sensitivity: 'base' });
+    });
+    
+    // Construir estructura ordenada
+    sortedPaths.forEach(fullPath => {
+      const articles = groupedArticles[fullPath];
+      const categoryPath = fullPath.split(' > ');
       let current = structure;
       
       // Navegar/crear la estructura anidada
@@ -144,15 +182,15 @@ export default function ArticulosContent() {
         if (!current[categoryName]) {
           current[categoryName] = {
             title: categoryName,
-            description: index === categoryPath.length - 1 ? article.categories[0].description : '',
+            description: index === categoryPath.length - 1 ? articles[0]?.categories[0].description : '',
             subcategories: {},
             articles: []
           };
         }
         
-        // Si es la última categoría en el path, agregar el artículo
+        // Si es la última categoría en el path, agregar los artículos
         if (index === categoryPath.length - 1) {
-          current[categoryName].articles.push(article);
+          current[categoryName].articles.push(...articles);
         } else {
           current = current[categoryName].subcategories;
         }

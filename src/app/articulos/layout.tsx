@@ -26,12 +26,32 @@ export default function ArticulosLayout({
   useEffect(() => {
     async function fetchArticles() {
       try {
-        const sanityQuery = `*[_type == "post"] | order(publishedAt asc) {
+        const sanityQuery = `*[_type == "post"] {
           _id,
           title,
           slug,
-          publishedAt
-        }`;
+          publishedAt,
+          "categories": categories[]->{
+            title,
+            orderRank,
+            parent->{
+              title,
+              orderRank,
+              parent->{
+                title,
+                orderRank,
+                parent->{
+                  title,
+                  orderRank
+                }
+              }
+            }
+          },
+          // Calculate category hierarchy for sorting
+          "categoryOrder": categories[0].orderRank,
+          "parentOrder": categories[0].parent.orderRank,
+          "grandParentOrder": categories[0].parent.parent.orderRank
+        } | order(grandParentOrder asc, parentOrder asc, categoryOrder asc, publishedAt asc)`;
         const fetchedArticles = await client.fetch<Article[]>(sanityQuery);
         setArticles(fetchedArticles);
       } catch (error) {
@@ -56,41 +76,80 @@ export default function ArticulosLayout({
       <div className="relative container mx-auto px-4 py-8 text-white">
         {children}
 
-        {/* Navigation Buttons */}
+        {/* Navigation Buttons - Responsive Design */}
         {currentSlug && !loading && (
-          <div className="mt-12 flex justify-between items-center">
-            {prevArticle ? (
+          <div className="mt-12">
+            {/* Mobile Layout - Stacked vertical */}
+            <div className="block md:hidden space-y-3">
               <Link 
-                href={`/articulos/${prevArticle.slug.current}`} 
-                className="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg shadow-lg transition-colors duration-300"
+                href="/articulos" 
+                className="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-md shadow-lg transition-colors duration-300 text-center block"
               >
-                ← Página Anterior
+                📖 Regresar al Índice
               </Link>
-            ) : (
-              <span className="px-6 py-3 bg-gray-700 text-gray-400 rounded-lg cursor-not-allowed">
-                ← Página Anterior
-              </span>
-            )}
+              <div className="flex space-x-2">
+                {prevArticle ? (
+                  <Link 
+                    href={`/articulos/${prevArticle.slug.current}`} 
+                    className="flex-1 px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm rounded-md shadow-lg transition-colors duration-300 text-center"
+                  >
+                    ← Anterior
+                  </Link>
+                ) : (
+                  <span className="flex-1 px-3 py-2 bg-gray-700 text-gray-400 text-sm rounded-md cursor-not-allowed text-center">
+                    ← Anterior
+                  </span>
+                )}
+                {nextArticle ? (
+                  <Link 
+                    href={`/articulos/${nextArticle.slug.current}`} 
+                    className="flex-1 px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm rounded-md shadow-lg transition-colors duration-300 text-center"
+                  >
+                    Siguiente →
+                  </Link>
+                ) : (
+                  <span className="flex-1 px-3 py-2 bg-gray-700 text-gray-400 text-sm rounded-md cursor-not-allowed text-center">
+                    Siguiente →
+                  </span>
+                )}
+              </div>
+            </div>
 
-            <Link 
-              href="/articulos" 
-              className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-lg transition-colors duration-300"
-            >
-              Regresar al Índice
-            </Link>
+            {/* Desktop Layout - Horizontal */}
+            <div className="hidden md:flex justify-between items-center">
+              {prevArticle ? (
+                <Link 
+                  href={`/articulos/${prevArticle.slug.current}`} 
+                  className="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg shadow-lg transition-colors duration-300"
+                >
+                  ← Página Anterior
+                </Link>
+              ) : (
+                <span className="px-6 py-3 bg-gray-700 text-gray-400 rounded-lg cursor-not-allowed">
+                  ← Página Anterior
+                </span>
+              )}
 
-            {nextArticle ? (
               <Link 
-                href={`/articulos/${nextArticle.slug.current}`} 
-                className="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg shadow-lg transition-colors duration-300"
+                href="/articulos" 
+                className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-lg transition-colors duration-300"
               >
-                Página Siguiente →
+                📖 Regresar al Índice
               </Link>
-            ) : (
-              <span className="px-6 py-3 bg-gray-700 text-gray-400 rounded-lg cursor-not-allowed">
-                Página Siguiente →
-              </span>
-            )}
+
+              {nextArticle ? (
+                <Link 
+                  href={`/articulos/${nextArticle.slug.current}`} 
+                  className="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg shadow-lg transition-colors duration-300"
+                >
+                  Página Siguiente →
+                </Link>
+              ) : (
+                <span className="px-6 py-3 bg-gray-700 text-gray-400 rounded-lg cursor-not-allowed">
+                  Página Siguiente →
+                </span>
+              )}
+            </div>
           </div>
         )}
       </div>
