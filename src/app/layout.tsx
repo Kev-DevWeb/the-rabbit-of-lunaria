@@ -93,13 +93,13 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${cinzelDecorative.variable} ${playfairDisplay.variable} ${cormorantGaramond.variable} antialiased bg-gray-900 text-white`}
+        className={`${geistSans.variable} ${geistMono.variable} ${cinzelDecorative.variable} ${playfairDisplay.variable} ${cormorantGaramond.variable} antialiased bg-gray-900 text-white overflow-x-hidden`}
       >
         <BackgroundMusicProvider>
           <LenisProvider>
-            <div className="flex flex-col min-h-screen">
+            <div className="flex flex-col min-h-screen overflow-x-hidden">
               {!isStudioPage && <Header />}
-              <main className="flex-grow">
+              <main className="flex-grow overflow-x-hidden">
                 <PageTransition>{children}</PageTransition>
               </main>
               {!isStudioPage && <AppFooter />}
