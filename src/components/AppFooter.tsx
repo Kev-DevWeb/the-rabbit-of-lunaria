@@ -103,7 +103,7 @@ const AppFooter = () => {
                     className="text-indigo-400 hover:text-indigo-300 transition-colors font-medium inline-flex items-center gap-1"
                   >
                     <Instagram className="w-3 h-3" />
-                    WoolySolid619
+                    WoolySolid0619
                   </a>
                 </p>
               </div>
