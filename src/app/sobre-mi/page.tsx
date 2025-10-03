@@ -32,6 +32,7 @@ const SobreMiPage = () => {
   const typewriterRef = useRef(null);
   
   const [isHoveringRabbit, setIsHoveringRabbit] = useState(false);
+  const [clickMessage, setClickMessage] = useState("");
 
   useEffect(() => {
     const tl = gsap.timeline();
@@ -48,7 +49,7 @@ const SobreMiPage = () => {
         duration: 0.5,
         onComplete: () => {
           gsap.to(typewriterRef.current, {
-            text: "Tarotista • 21 Arcanos Mayores • Comunicación Espiritual • Protecciones Básicas",
+            text: "Tarotista usando los 21 Arcanos Mayores • Comunicación Espiritual •",
             duration: 3,
             ease: "none",
           });
@@ -171,6 +172,68 @@ const SobreMiPage = () => {
     });
   };
 
+  const handleRabbitClick = () => {
+    // Array de mensajes aleatorios
+    const messages = [
+      "¡Los conejos te envían buena suerte! 🐰✨",
+      "¡La magia fluye a tu alrededor! 🌙💫",
+      "¡Tu guardián espiritual te sonríe! 🌟",
+      "¡Las estrellas se alinean para ti! ⭐️🔮",
+      "¡Que la luz te guíe siempre! 💜✨",
+      "¡Los conejos danzan en tu honor! 🐇🎵",
+      "¡La madriguera te da la bienvenida! 🏠💫"
+    ];
+    
+    const randomMessage = messages[Math.floor(Math.random() * messages.length)];
+    setClickMessage(randomMessage);
+    
+    // Animación de salto del conejo
+    gsap.timeline()
+      .to(rabbitRef.current, {
+        y: -50,
+        scale: 1.4,
+        rotation: 360,
+        duration: 0.4,
+        ease: "power2.out"
+      })
+      .to(rabbitRef.current, {
+        y: 0,
+        scale: 1.05,
+        rotation: 0,
+        duration: 0.6,
+        ease: "bounce.out"
+      });
+    
+    // Crear muchas partículas mágicas en explosión
+    for (let i = 0; i < 20; i++) {
+      const particle = document.createElement('div');
+      const colors = ['bg-purple-400', 'bg-pink-400', 'bg-yellow-400', 'bg-blue-400', 'bg-green-400'];
+      const randomColor = colors[Math.floor(Math.random() * colors.length)];
+      particle.className = `absolute w-3 h-3 ${randomColor} rounded-full opacity-90 shadow-lg`;
+      particle.style.left = '50%';
+      particle.style.top = '50%';
+      rabbitRef.current?.appendChild(particle);
+      
+      const angle = (Math.PI * 2 * i) / 20;
+      const distance = 150 + Math.random() * 100;
+      
+      gsap.to(particle, {
+        x: Math.cos(angle) * distance,
+        y: Math.sin(angle) * distance,
+        scale: 0,
+        opacity: 0,
+        duration: 1.5,
+        ease: "power2.out",
+        onComplete: () => particle.remove()
+      });
+    }
+    
+    // Limpiar mensaje después de 3 segundos
+    setTimeout(() => {
+      setClickMessage("");
+    }, 3000);
+  };
+
   return (
     <div className="bg-black relative overflow-hidden">
       {/* Elementos flotantes mágicos */}
@@ -234,8 +297,8 @@ const SobreMiPage = () => {
                   una herramienta poderosa de sabiduría ancestral para conectar corazones y acompañar almas.
                 </p>
                 <p className="text-gray-200 leading-relaxed mb-4 text-base sm:text-lg">
-                  Además del tarot, canalizo la comunicación con entidades espirituales y ofrezco protecciones energéticas básicas. 
-                  Creé <span className="text-purple-300 font-semibold">La Madriguera de Lunaria</span> como 
+                  Mi enfoque principal es acompañarte en tu camino espiritual a través del tarot y enseñar a nuevos brujitos 
+                  los misterios de esta hermosa práctica. Creé <span className="text-purple-300 font-semibold">La Madriguera de Lunaria</span> como 
                   el refugio que a mí me hubiera gustado encontrar cuando inicié este camino: un lugar sin juicios, 
                   lleno de comprensión y donde cada pregunta espiritual es bienvenida.
                 </p>
@@ -258,9 +321,10 @@ const SobreMiPage = () => {
             <div className="flex flex-col items-center">
               <div 
                 ref={rabbitRef}
-                className="relative cursor-pointer group mb-8"
+                className="relative cursor-pointer group mb-8 transition-all duration-300"
                 onMouseEnter={handleRabbitHover}
                 onMouseLeave={handleRabbitLeave}
+                onClick={handleRabbitClick}
               >
                 <div className="absolute inset-0 bg-gradient-to-r from-purple-500/30 to-pink-500/30 rounded-full blur-xl scale-150 group-hover:scale-175 transition-transform duration-300"></div>
                 <Image
@@ -268,11 +332,16 @@ const SobreMiPage = () => {
                   alt="Conejos Mágicos"
                   width={240}
                   height={240}
-                  className="relative z-10 w-60 h-60 filter invert drop-shadow-2xl"
+                  className="relative z-10 w-60 h-60 filter invert drop-shadow-2xl transition-all duration-300 group-hover:drop-shadow-[0_0_20px_rgba(168,85,247,0.8)]"
                 />
-                {isHoveringRabbit && (
-                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-purple-800/90 text-white px-3 py-1 rounded-full text-sm whitespace-nowrap">
+                {isHoveringRabbit && !clickMessage && (
+                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-purple-800/90 text-white px-3 py-1 rounded-full text-sm whitespace-nowrap animate-bounce">
                     ¡Haz clic para una sorpresa! ✨
+                  </div>
+                )}
+                {clickMessage && (
+                  <div className="absolute -top-16 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-3 rounded-full text-base font-bold whitespace-nowrap shadow-2xl animate-pulse z-50">
+                    {clickMessage}
                   </div>
                 )}
               </div>
@@ -316,15 +385,15 @@ const SobreMiPage = () => {
                 </ul>
               </div>
 
-              {/* Protecciones Básicas */}
+              {/* Enseñanza de Tarot */}
               <div className="bg-gradient-to-br from-green-800/40 to-emerald-800/30 backdrop-blur-lg rounded-xl p-6 border border-green-400/30 hover:border-green-400/60 transition-all duration-300 hover:scale-105">
-                <Gem className="w-12 h-12 text-green-300 mb-4" />
-                <h4 className="text-xl font-semibold text-green-200 mb-3">Protecciones Energéticas</h4>
+                <BookOpen className="w-12 h-12 text-green-300 mb-4" />
+                <h4 className="text-xl font-semibold text-green-200 mb-3">Enseñanza de Tarot</h4>
                 <ul className="text-gray-300 space-y-2 text-sm">
-                  <li>• Limpieza Energética Básica</li>
-                  <li>• Escudos de Protección</li>
-                  <li>• Consejos de Autocuidado Espiritual</li>
-                  <li>• Rituales de Purificación</li>
+                  <li>• Clases para Nuevos Brujitos</li>
+                  <li>• Arcanos Mayores en Profundidad</li>
+                  <li>• Desarrollo de Intuición</li>
+                  <li>• Práctica Guiada y Acompañamiento</li>
                 </ul>
               </div>
 
