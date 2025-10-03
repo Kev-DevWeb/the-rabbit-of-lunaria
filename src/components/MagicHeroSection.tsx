@@ -127,11 +127,11 @@ const MagicHeroSection = () => {
       <div className="absolute inset-0 z-30 flex items-center justify-center pointer-events-none">
         <div className="relative w-full h-full text-center text-white">
           {/* Texto movido más abajo para no tapar las imágenes */}
-          <div className="absolute top-[70%] left-1/2 -translate-x-1/2 w-full z-10 main-text px-4">
-            <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-6 px-4" style={{ textShadow: '2px 2px 4px black, 0 0 1.5em black, 0 0 0.3em black' }}>
+          <div className="absolute top-[70%] left-1/2 -translate-x-1/2 w-full z-10 main-text px-4 max-w-7xl">
+            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-6 px-4" style={{ textShadow: '2px 2px 4px black, 0 0 1.5em black, 0 0 0.3em black' }}>
               Encuentra claridad y consejo a través de tu guardián espiritual
             </h2>
-            <p className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl px-4" style={{ textShadow: '2px 2px 4px black, 0 0 1.5em black, 0 0 0.3em black' }}>
+            <p className="text-xl sm:text-2xl md:text-3xl lg:text-4xl px-4" style={{ textShadow: '2px 2px 4px black, 0 0 1.5em black, 0 0 0.3em black' }}>
               El tarot es una guía amorosa que te ayuda a comprenderte y escuchar a tu guardián.
             </p>
           </div>
