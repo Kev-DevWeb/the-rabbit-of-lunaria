@@ -33,6 +33,30 @@ body {
   }
 }
 
+/* Aumentar tamaño de todos los párrafos globalmente */
+p {
+  font-size: 1.125rem; /* 18px base */
+  line-height: 1.75;
+}
+
+@media (min-width: 640px) {
+  p {
+    font-size: 1.25rem; /* 20px en sm */
+  }
+}
+
+@media (min-width: 768px) {
+  p {
+    font-size: 1.375rem; /* 22px en md */
+  }
+}
+
+@media (min-width: 1024px) {
+  p {
+    font-size: 1.5rem; /* 24px en lg */
+  }
+}
+
 h1, h2 {
   font-family: var(--font-cinzel-decorative);
 }

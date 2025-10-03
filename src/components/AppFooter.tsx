@@ -1,5 +1,5 @@
 'use client';
-import { useRef, useState, useEffect } from 'react';
+import { useRef } from 'react';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -9,20 +9,9 @@ gsap.registerPlugin(ScrollTrigger);
 
 const AppFooter = () => {
   const footerRef = useRef<HTMLElement>(null);
-  const [isVisible, setIsVisible] = useState(false);
-
-  // Fallback: mostrar el footer después de 100ms si GSAP no carga
-  useEffect(() => {
-    const timeout = setTimeout(() => {
-      setIsVisible(true);
-    }, 100);
-    return () => clearTimeout(timeout);
-  }, []);
 
   useGSAP(() => {
     if (!footerRef.current) return;
-    
-    setIsVisible(true);
     
     gsap.from(footerRef.current, {
       autoAlpha: 0,
@@ -41,7 +30,6 @@ const AppFooter = () => {
     <footer 
       ref={footerRef} 
       className="relative w-full overflow-hidden bg-gradient-to-b from-gray-900 via-purple-950 to-black border-t border-purple-500/30"
-      style={{ opacity: isVisible ? 1 : 0, transition: 'opacity 0.3s ease-in' }}
     >
       {/* Estrellas decorativas de fondo */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-30">
