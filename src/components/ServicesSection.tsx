@@ -158,13 +158,17 @@ const ServicesSection = () => {
   }, []);
 
   return (
-    <section ref={sectionRef} className="relative w-full min-h-screen flex flex-col items-center justify-center text-white bg-transparent p-0 m-0 mb-16">
-      <div className="text-center max-w-3xl p-8 relative z-10">
-        <h2 className="text-3xl md:text-4xl font-bold font-cinzel-decorative service-title">Lecturas de Tarot</h2>
-        <p className="text-base md:text-lg mt-4 service-text">
-          A través del tarot puedo ayudarte a establecer un canal con tu guardián espiritual.
-          Recibe consejos, advertencias y la guía que necesitas para tu camino. También podemos explorar memorias de tu vida pasada para entender mejor tu presente.
-        </p>
+    <section ref={sectionRef} className="relative w-full min-h-screen flex flex-col items-center justify-center text-white bg-transparent p-0 m-0 mb-16 overflow-x-hidden">
+      <div className="text-center max-w-4xl px-4 sm:px-6 md:px-8 py-8 relative z-10 w-full">
+        <h2 className="text-3xl md:text-4xl lg:text-5xl font-bold font-cinzel-decorative service-title break-words mb-6">Lecturas de Tarot</h2>
+        <div className="space-y-4 service-text">
+          <p className="text-lg md:text-xl lg:text-2xl break-words leading-relaxed mx-auto max-w-3xl">
+            A través del tarot puedo ayudarte a establecer un canal con tu guardián espiritual.
+          </p>
+          <p className="text-lg md:text-xl lg:text-2xl break-words leading-relaxed mx-auto max-w-3xl">
+            Recibe consejos, advertencias y la guía que necesitas para tu camino. También podemos explorar memorias de tu vida pasada para entender mejor tu presente.
+          </p>
+        </div>
         <div className="w-full flex justify-center mb-8">
           <div className="relative flex items-center justify-center mt-12 w-full max-w-4xl mx-auto" style={{ minHeight: '390px', height: '50vh', maxHeight: '420px', aspectRatio: '16/9' }}>
             {/* Mesa de madera (imagen) */}
