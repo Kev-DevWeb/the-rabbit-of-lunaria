@@ -131,7 +131,7 @@ const Header = () => {
           <ul className="flex space-x-6">
             <li><Link href="/sobre-mi" className="animated-link">Sobre mí</Link></li>
             <li><Link href="/articulos" className="animated-link whitespace-nowrap">El grimorio de Lunaria</Link></li>
-            <li><Link href="/citas" className="font-semibold px-4 py-2 rounded-full bg-purple-600/50 text-white ring-1 ring-purple-400 hover:bg-purple-600/80 transition-all shadow-[0_0_15px_rgba(168,85,247,0.6)] hover:shadow-[0_0_25px_rgba(168,85,247,0.8)] cta-button">Agendar Cita</Link></li>
+            <li><Link href="/citas" className="font-semibold px-4 py-2 rounded-full bg-purple-600/50 text-white ring-1 ring-purple-400 hover:bg-purple-600/80 transition-all shadow-[0_0_15px_rgba(168,85,247,0.6)] hover:shadow-[0_0_25px_rgba(168,85,247,0.8)] cta-button whitespace-nowrap">Agendar</Link></li>
           </ul>
           
           {/* Controles de música YouTube - siempre visibles */}

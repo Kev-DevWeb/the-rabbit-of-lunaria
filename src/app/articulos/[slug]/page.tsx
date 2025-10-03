@@ -58,24 +58,46 @@ export async function generateMetadata({ params }: { params: Promise<{ slug:stri
   const article = await getArticle(slug);
 
   if (!article) {
-    return {};
+    return {
+      title: 'Artículo no encontrado',
+      description: 'El artículo que buscas no existe en nuestro grimorio.'
+    };
   }
 
   const title = article.metaTitle || article.title;
   const description = article.metaDescription || article.description.substring(0, 155);
-  const url = `https://the-rabbit-of-lunaria.vercel.app/articulos/${article.slug.current}`;
+  const url = `https://www.themadrigueradelunaria.com/articulos/${article.slug.current}`;
   const imageUrl = article.mainImage ? urlFor(article.mainImage).width(1200).height(630).url() : '';
+  const authorName = article.authors?.[0]?.name || 'Arledge Brer';
 
   return {
     title,
     description,
-    keywords: article.keywords || [],
+    keywords: article.keywords || ['tarot', 'espiritualidad', 'magia', 'brujería'],
+    authors: [{ name: authorName }],
     openGraph: {
       title,
       description,
       url,
       type: 'article',
-      images: imageUrl ? [{ url: imageUrl }] : [],
+      publishedTime: article.publishedAt,
+      authors: [authorName],
+      siteName: 'La Madriguera de Lunaria',
+      images: imageUrl ? [{ 
+        url: imageUrl,
+        width: 1200,
+        height: 630,
+        alt: title
+      }] : [],
+    },
+    twitter: {
+      card: 'summary_large_image',
+      title,
+      description,
+      images: imageUrl ? [imageUrl] : [],
+    },
+    alternates: {
+      canonical: url,
     },
   };
 }

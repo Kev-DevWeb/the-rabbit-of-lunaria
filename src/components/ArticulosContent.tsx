@@ -332,10 +332,10 @@ export default function ArticulosContent() {
     categoryBlocks.forEach((block, index) => {
       gsap.from(block as HTMLElement, {
         opacity: 0,
-        y: 50,
-        duration: 0.8,
+        y: 30,
+        duration: 0.4,
         ease: 'power3.out',
-        delay: index * 0.1,
+        delay: index * 0.05,
         scrollTrigger: {
           trigger: block as HTMLElement,
           start: 'top 85%',
@@ -348,9 +348,9 @@ export default function ArticulosContent() {
     articleItems.forEach((item, index) => {
       gsap.from(item as HTMLElement, {
         opacity: 0,
-        x: -30,
-        duration: 0.5,
-        delay: index * 0.05,
+        x: -20,
+        duration: 0.3,
+        delay: index * 0.02,
         ease: 'power3.out',
         scrollTrigger: {
           trigger: item as HTMLElement,

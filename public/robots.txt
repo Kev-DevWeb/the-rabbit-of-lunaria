@@ -1,0 +1,13 @@
+# robots.txt para La Madriguera de Lunaria
+User-agent: *
+Allow: /
+Allow: /sobre-mi
+Allow: /articulos
+Allow: /citas
+Allow: /confirmation
+Disallow: /api/
+Disallow: /studio
+Disallow: /studio/*
+
+# Sitemap
+Sitemap: https://www.themadrigueradelunaria.com/sitemap.xml

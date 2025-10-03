@@ -36,11 +36,11 @@ const HangingElements = () => {
   return (
     <div className="absolute inset-0 w-full h-full pointer-events-none z-0">
       {/* Composición en capas superpuestas - centrada - MÁS GRANDE */}
-      <div className="absolute top-[15%] left-1/2 -translate-x-1/2 -translate-y-1/2 hanging-moon">
+      <div className="absolute top-[15%] left-1/2 -translate-x-1/2 -translate-y-1/2 hanging-moon z-30">
         <div className="relative w-96 h-96 flex items-center justify-center" style={{ filter: 'drop-shadow(0 0 30px rgba(255, 255, 255, 0.6))' }}>
           
-          {/* Capa 1: Luna de fondo - CELL_Luna.png - MÁS GRANDE */}
-          <div className="absolute inset-0 flex items-center justify-center">
+          {/* Capa 1: Luna de fondo - CELL_Luna.png - MÁS ARRIBA */}
+          <div className="absolute inset-0 flex items-center justify-center" style={{ transform: 'translateY(-30px)' }}>
             <div className="relative w-80 h-80">
               <Image 
                 src="/CELL_Luna.png" 
@@ -52,8 +52,8 @@ const HangingElements = () => {
             </div>
           </div>
           
-          {/* Capa 2: Conejo grande SOBRE la luna - CELL_Conejo.png - MÁS GRANDE */}
-          <div className="absolute inset-0 flex items-center justify-center z-10">
+          {/* Capa 2: Conejo grande SOBRE la luna - CELL_Conejo.png - MÁS ABAJO */}
+          <div className="absolute inset-0 flex items-center justify-center z-10" style={{ transform: 'translateY(15px)' }}>
             <Image 
               src="/CELL_Conejo.png" 
               alt="Conejo de Lunaria" 
@@ -67,7 +67,7 @@ const HangingElements = () => {
           {/* Capa 3: Grimorio SOBRE el conejo (frente) - con animación hover - Ligeramente más abajo */}
           <div 
             className="absolute inset-0 flex items-center justify-center z-20 pointer-events-auto cursor-pointer"
-            style={{ transform: 'translateY(25px)' }}
+            style={{ transform: 'translateY(40px)' }}
             onMouseEnter={() => setIsHovering(true)}
             onMouseLeave={() => setIsHovering(false)}
           >
@@ -83,11 +83,11 @@ const HangingElements = () => {
         </div>
       </div>
       
-      {/* Estrellas decorativas - MÁS GRANDES */}
-      <div className="absolute top-[40%] left-[20%] -translate-y-1/2 hanging-star1">
+      {/* Estrellas decorativas - MÁS GRANDES - Ocultas en móvil para evitar superposición */}
+      <div className="hidden sm:block absolute top-[40%] left-[20%] -translate-y-1/2 hanging-star1 z-10">
         <Image src="/estrella.svg" alt="Estrella" width={80} height={80} />
       </div>
-      <div className="absolute top-[35%] right-[20%] -translate-y-1/2 hanging-star2">
+      <div className="hidden sm:block absolute top-[35%] right-[20%] -translate-y-1/2 hanging-star2 z-10">
         <Image src="/estrella.svg" alt="Estrella" width={60} height={60} />
       </div>
     </div>
@@ -128,10 +128,10 @@ const MagicHeroSection = () => {
         <div className="relative w-full h-full text-center text-white">
           {/* Texto movido más abajo para no tapar las imágenes */}
           <div className="absolute top-[70%] left-1/2 -translate-x-1/2 w-full z-10 main-text px-4">
-            <h2 className="text-3xl md:text-5xl lg:text-6xl font-bold mb-6 px-4" style={{ textShadow: '2px 2px 4px black, 0 0 1.5em black, 0 0 0.3em black' }}>
+            <h2 className="text-4xl sm:text-5xl md:text-6xl lg:text-7xl font-bold mb-6 px-4" style={{ textShadow: '2px 2px 4px black, 0 0 1.5em black, 0 0 0.3em black' }}>
               Encuentra claridad y consejo a través de tu guardián espiritual
             </h2>
-            <p className="text-xl md:text-2xl lg:text-3xl px-4" style={{ textShadow: '2px 2px 4px black, 0 0 1.5em black, 0 0 0.3em black' }}>
+            <p className="text-xl sm:text-2xl md:text-3xl lg:text-4xl px-4" style={{ textShadow: '2px 2px 4px black, 0 0 1.5em black, 0 0 0.3em black' }}>
               El tarot es una guía amorosa que te ayuda a comprenderte y escuchar a tu guardián.
             </p>
           </div>

@@ -57,8 +57,8 @@ const SobreMiPage = () => {
       }, "-=0.5"
     )
     .fromTo(textRef.current,
-      { opacity: 0, y: 50 },
-      { opacity: 1, y: 0, duration: 1, ease: "power3.out" }, "-=0.5"
+      { opacity: 0 },
+      { opacity: 1, duration: 0.8, ease: "power3.out" }, "-=0.5"
     )
     .fromTo(cardsContainerRef.current,
       { opacity: 0, y: 30 },
@@ -282,10 +282,10 @@ const SobreMiPage = () => {
           </div>
 
           {/* Main Content */}
-          <div className="grid lg:grid-cols-2 gap-12 items-center">
+          <div className="grid lg:grid-cols-2 gap-12 items-start">
             
             {/* Text Content */}
-            <div ref={textRef} className="space-y-6">
+            <div ref={textRef} className="space-y-6 min-h-[600px]">
               <div className="bg-gradient-to-br from-purple-900/30 to-pink-900/20 backdrop-blur-lg rounded-2xl p-8 border border-purple-500/20 shadow-2xl">
                 <h2 className="text-2xl sm:text-3xl font-bold mb-6 text-purple-300 flex items-center gap-3">
                   <Heart className="w-8 h-8 text-pink-400" />

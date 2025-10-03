@@ -166,15 +166,15 @@ const ServicesSection = () => {
           Recibe consejos, advertencias y la guía que necesitas para tu camino. También podemos explorar memorias de tu vida pasada para entender mejor tu presente.
         </p>
         <div className="w-full flex justify-center mb-8">
-          <div className="relative flex items-center justify-center mt-12 w-full" style={{ minHeight: '390px', height: '50vh', maxHeight: 420 }}>
+          <div className="relative flex items-center justify-center mt-12 w-full max-w-4xl mx-auto" style={{ minHeight: '390px', height: '50vh', maxHeight: '420px', aspectRatio: '16/9' }}>
             {/* Mesa de madera (imagen) */}
             <div
               ref={tableRef}
               className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
               aria-hidden="true"
               style={{
-                width: '85%',
-                height: '83%',
+                width: 'min(85%, 600px)',
+                height: 'min(83%, 400px)',
                 zIndex: 0,
               }}
             >
@@ -190,8 +190,10 @@ const ServicesSection = () => {
             {/* Mantel morado, centrado sobre la mesa */}
             <div
               ref={mantelRef}
-              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[78%] h-[66%]"
+              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
               style={{
+                width: 'min(78%, 500px)',
+                height: 'min(66%, 320px)',
                 background: 'linear-gradient(180deg, #a259ff 80%, #511583 100%)',
                 borderRadius: '40px',
                 boxShadow: '0 12px 36px 0 #24001730 inset, 0 8px 16px #bfa7f944 inset',
@@ -201,16 +203,16 @@ const ServicesSection = () => {
               }}
             />
             {/* Cartas (por encima de todo) - Layout responsivo */}
-            <div ref={cardsRef} className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" style={{ zIndex: 10, width: '80%', height: '80%' }}>
+            <div ref={cardsRef} className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" style={{ zIndex: 10, width: 'min(80%, 480px)', height: 'min(80%, 350px)' }}>
               {/* Desktop layout - 3 cartas horizontales */}
               <div className="hidden sm:block">
-                <div className="absolute card-1 service-card" style={{ left: '15%', top: '35%' }}>
+                <div className="absolute card-1 service-card" style={{ left: '15%', top: '35%', maxWidth: '120px' }}>
                   <Image src="/cartablanca.jpg" alt="Carta de Tarot 1" width={120} height={200} className="rounded-lg shadow-lg" style={{ width: '100%', height: 'auto' }} />
                 </div>
-                <div className="absolute card-2 service-card" style={{ left: '40%', top: '35%' }}>
+                <div className="absolute card-2 service-card" style={{ left: '40%', top: '35%', maxWidth: '120px' }}>
                   <Image src="/lunacarta.jpg" alt="Carta de Tarot 2" width={120} height={200} className="rounded-lg shadow-lg" style={{ width: '100%', height: 'auto' }} />
                 </div>
-                <div className="absolute card-3 service-card" style={{ left: '65%', top: '35%' }}>
+                <div className="absolute card-3 service-card" style={{ left: '65%', top: '35%', maxWidth: '120px' }}>
                   <Image src="/cartamano.jpg" alt="Carta de Tarot 3" width={120} height={200} className="rounded-lg shadow-lg" style={{ width: '100%', height: 'auto' }} />
                 </div>
               </div>

@@ -141,7 +141,7 @@ const StarrySky = ({ onComplete }: StarrySkyProps) => {
       style={{ minHeight: '600px', perspective: '1000px' }}
     >
       <audio ref={audioRef} src="/night.mp3" preload="auto" />
-      <div className="relative z-20 w-[300px] h-[500px] md:w-[350px] md:h-[600px] door-frame">
+      <div className="relative z-20 w-[300px] h-[500px] md:w-[350px] md:h-[600px] door-frame mx-auto">
         <div className="relative w-full h-full overflow-hidden rounded-lg">
           <div className="absolute inset-0 z-10 forest-scene-portal">
             <ForestScene />

@@ -43,7 +43,12 @@ const FloatingButton = () => {
       ref={buttonRef}
       href="/citas"
       className="fixed bottom-8 right-8 z-[100] bg-indigo-600 transition-colors text-white font-bold px-6 py-3 rounded-full shadow-2xl text-lg animate-bounce"
-      style={{ letterSpacing: 1 }}
+      style={{ 
+        letterSpacing: 1,
+        maxWidth: '200px',
+        textAlign: 'center',
+        fontSize: 'clamp(0.875rem, 1rem, 1.125rem)', // Tamaño de texto responsive que no crece con zoom
+      }}
     >
       Agenda una cita
     </Link>

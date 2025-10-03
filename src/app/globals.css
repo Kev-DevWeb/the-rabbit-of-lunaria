@@ -23,6 +23,14 @@ body {
   background: var(--background);
   color: var(--foreground);
   font-family: var(--font-cormorant-garamond);
+  font-size: 18px; /* Aumentar tamaño base de 16px a 18px */
+  line-height: 1.7; /* Mejorar legibilidad */
+}
+
+@media (max-width: 768px) {
+  body {
+    font-size: 17px; /* Ligeramente más pequeño en móvil pero aún más grande que antes */
+  }
 }
 
 h1, h2 {
