@@ -3,7 +3,7 @@ import { useRef } from 'react';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { Music, Heart, Moon, Sparkles } from 'lucide-react';
+import { Music, Heart, Moon, Sparkles, Instagram, Palette, Code } from 'lucide-react';
 
 gsap.registerPlugin(ScrollTrigger);
 
@@ -66,7 +66,7 @@ const AppFooter = () => {
         <div className="w-full h-px bg-gradient-to-r from-transparent via-purple-500/50 to-transparent mb-6"></div>
 
         {/* Sección de créditos */}
-        <div className="grid md:grid-cols-2 gap-4 mb-6">
+        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
           {/* Crédito musical */}
           <div className="bg-purple-900/20 backdrop-blur-sm rounded-lg p-4 border border-purple-500/20 hover:border-purple-500/40 transition-all duration-300">
             <div className="flex items-start gap-3">
@@ -87,6 +87,27 @@ const AppFooter = () => {
             </div>
           </div>
 
+          {/* Crédito ilustraciones Grimorio */}
+          <div className="bg-indigo-900/20 backdrop-blur-sm rounded-lg p-4 border border-indigo-500/20 hover:border-indigo-500/40 transition-all duration-300">
+            <div className="flex items-start gap-3">
+              <Palette className="w-5 h-5 text-indigo-400 mt-1 flex-shrink-0" />
+              <div>
+                <h4 className="text-indigo-300 font-semibold mb-1 text-sm">Ilustración Grimorio</h4>
+                <p className="text-gray-400 text-xs leading-relaxed">
+                  Ilustraciones y animación del grimorio por <a 
+                    href="https://www.instagram.com/woolysolid0619_oficial/" 
+                    target="_blank" 
+                    rel="noopener noreferrer"
+                    className="text-indigo-400 hover:text-indigo-300 transition-colors font-medium inline-flex items-center gap-1"
+                  >
+                    <Instagram className="w-3 h-3" />
+                    WoolySolid619
+                  </a>
+                </p>
+              </div>
+            </div>
+          </div>
+
           {/* Mensaje de amor y luz */}
           <div className="bg-pink-900/20 backdrop-blur-sm rounded-lg p-4 border border-pink-500/20 hover:border-pink-500/40 transition-all duration-300">
             <div className="flex items-start gap-3">
@@ -101,14 +122,61 @@ const AppFooter = () => {
           </div>
         </div>
 
+        {/* Créditos de recursos visuales */}
+        <div className="bg-gray-900/40 backdrop-blur-sm rounded-lg p-4 border border-gray-500/20 mb-6">
+          <p className="text-gray-400 text-xs text-center leading-relaxed">
+            <span className="text-gray-300 font-medium">Recursos visuales:</span> Las demás ilustraciones fueron extraídas de{' '}
+            <a 
+              href="https://www.freepik.com/" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-blue-400 hover:text-blue-300 underline decoration-blue-500/50 hover:decoration-blue-300 transition-colors"
+            >
+              Freepik
+            </a>
+            {' '}y{' '}
+            <a 
+              href="https://www.pexels.com/" 
+              target="_blank" 
+              rel="noopener noreferrer"
+              className="text-green-400 hover:text-green-300 underline decoration-green-500/50 hover:decoration-green-300 transition-colors"
+            >
+              Pexels
+            </a>
+          </p>
+        </div>
+
         {/* Copyright y derechos */}
-        <div className="text-center">
+        <div className="text-center mb-4">
           <p className="text-gray-400 text-sm mb-2">
             &copy; {new Date().getFullYear()} La Madriguera de Lunaria
           </p>
           <p className="text-gray-500 text-xs">
             Todos los derechos reservados • Hecho con magia y propósito ✨
           </p>
+        </div>
+
+        {/* Línea divisoria */}
+        <div className="w-full h-px bg-gradient-to-r from-transparent via-purple-500/30 to-transparent mb-4"></div>
+
+        {/* Crédito de desarrollo */}
+        <div className="flex justify-center">
+          <a 
+            href="https://www.devvisualstudio.com/" 
+            target="_blank" 
+            rel="noopener noreferrer"
+            className="group bg-gradient-to-r from-purple-900/30 to-indigo-900/30 backdrop-blur-sm rounded-lg px-6 py-3 border border-purple-500/30 hover:border-purple-500/60 transition-all duration-300 hover:scale-105"
+          >
+            <div className="flex items-center gap-3">
+              <Code className="w-5 h-5 text-purple-400 group-hover:text-purple-300 transition-colors" />
+              <div className="text-left">
+                <p className="text-xs text-gray-400">Desarrollado por</p>
+                <p className="text-sm font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 bg-clip-text text-transparent group-hover:from-purple-300 group-hover:via-pink-300 group-hover:to-purple-300 transition-all">
+                  DevVisual Studio
+                </p>
+              </div>
+            </div>
+          </a>
         </div>
       </div>
 
