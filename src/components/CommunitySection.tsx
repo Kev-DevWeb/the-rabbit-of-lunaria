@@ -1,6 +1,7 @@
 "use client";
 import React, { useRef } from 'react';
 import Image from 'next/image';
+import Link from 'next/link';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
@@ -123,6 +124,26 @@ const CommunitySection = () => {
           <p className="text-base md:text-lg italic text-purple-200 leading-relaxed">
             Disfruta tu estadía en Lunaria y recuerda: <span className="font-bold text-pink-300">sé tú mismo</span>, porque en la magia, la autenticidad es el hechizo más poderoso de todos. ✨
           </p>
+        </div>
+
+        {/* Botón llamativo para el Grimorio */}
+        <div className="mt-12 mb-8">
+          <Link 
+            href="/articulos"
+            className="group relative inline-flex items-center gap-3 px-10 py-5 bg-gradient-to-r from-purple-600 via-pink-600 to-purple-600 hover:from-purple-500 hover:via-pink-500 hover:to-purple-500 text-white font-bold text-xl md:text-2xl rounded-full shadow-2xl hover:shadow-purple-500/50 transition-all duration-300 hover:scale-105 overflow-hidden"
+          >
+            {/* Efecto de brillo animado */}
+            <div className="absolute inset-0 bg-gradient-to-r from-transparent via-white/20 to-transparent -translate-x-full group-hover:translate-x-full transition-transform duration-1000"></div>
+            
+            {/* Contenido del botón */}
+            <BookOpen className="w-7 h-7 group-hover:rotate-12 transition-transform duration-300" />
+            <span className="relative z-10">Comenzar a Aprender</span>
+            <Sparkles className="w-7 h-7 group-hover:rotate-12 transition-transform duration-300" />
+            
+            {/* Partículas decorativas */}
+            <div className="absolute -top-1 -right-1 w-3 h-3 bg-yellow-300 rounded-full animate-ping"></div>
+            <div className="absolute -bottom-1 -left-1 w-2 h-2 bg-pink-300 rounded-full animate-pulse"></div>
+          </Link>
         </div>
         
         <div className="flex items-end justify-center w-full mt-16 gap-8 md:gap-12 relative" style={{ minHeight: '180px' }}>
