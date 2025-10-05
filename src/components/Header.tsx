@@ -129,6 +129,7 @@ const Header = () => {
         {/* Desktop Menu */}
         <div className="hidden md:flex items-center space-x-6">
           <ul className="flex space-x-6">
+            <li><Link href="/" className="animated-link">Inicio</Link></li>
             <li><Link href="/sobre-mi" className="animated-link">Sobre mí</Link></li>
             <li><Link href="/articulos" className="animated-link whitespace-nowrap">El grimorio de Lunaria</Link></li>
             <li><Link href="/citas" className="font-semibold px-4 py-2 rounded-full bg-purple-600/50 text-white ring-1 ring-purple-400 hover:bg-purple-600/80 transition-all shadow-[0_0_15px_rgba(168,85,247,0.6)] hover:shadow-[0_0_25px_rgba(168,85,247,0.8)] cta-button whitespace-nowrap">Agendar</Link></li>
@@ -196,6 +197,7 @@ const Header = () => {
       {isOpen && (
         <div className="md:hidden mt-4">
           <ul className="flex flex-col items-center space-y-4 bg-black bg-opacity-80 backdrop-blur-sm p-4 rounded-lg">
+            <li><Link href="/" className="block py-2 hover:text-gray-300 animated-link" onClick={() => setIsOpen(false)}>Inicio</Link></li>
             <li><Link href="/sobre-mi" className="block py-2 hover:text-gray-300 animated-link" onClick={() => setIsOpen(false)}>Sobre mí</Link></li>
             <li><Link href="/articulos" className="block py-2 hover:text-gray-300 animated-link" onClick={() => setIsOpen(false)}>El grimorio de Lunaria</Link></li>
             <li><Link href="/citas" className="block py-2 px-5 rounded-full bg-purple-600/50 text-white ring-1 ring-purple-400 hover:bg-purple-600/80 transition-all shadow-[0_0_15px_rgba(168,85,247,0.6)]" onClick={() => setIsOpen(false)}>Agendar Cita</Link></li>
