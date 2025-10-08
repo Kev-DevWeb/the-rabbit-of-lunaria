@@ -49,7 +49,7 @@ const SobreMiPage = () => {
         duration: 0.5,
         onComplete: () => {
           gsap.to(typewriterRef.current, {
-            text: "Tarotista usando los 21 Arcanos Mayores • Comunicación Espiritual •",
+            text: "• Tarotista usando los 22 Arcanos Mayores • Comunicación Espiritual •",
             duration: 3,
             ease: "none",
           });
@@ -293,7 +293,7 @@ const SobreMiPage = () => {
                 </h2>
                 <p className="text-gray-200 leading-relaxed mb-4 text-base sm:text-lg">
                   ¡Hola, hermoso ser! Soy Arledge Brer, y me emociona tenerte aquí en este espacio sagrado. 
-                  Soy un tarotista que trabaja específicamente con los 21 Arcanos Mayores, encontrando en estas cartas 
+                  Soy un tarotista que trabaja específicamente con los 22 Arcanos Mayores, encontrando en estas cartas 
                   una herramienta poderosa de sabiduría ancestral para conectar corazones y acompañar almas.
                 </p>
                 <p className="text-gray-200 leading-relaxed mb-4 text-base sm:text-lg">
