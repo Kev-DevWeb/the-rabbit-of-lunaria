@@ -27,6 +27,11 @@ body {
   line-height: 1.7; /* Mejorar legibilidad */
 }
 
+/* No aplicar overflow-x-hidden en Sanity Studio */
+body:not(:has([data-sanity])) {
+  overflow-x: hidden;
+}
+
 @media (max-width: 768px) {
   body {
     font-size: 17px; /* Ligeramente más pequeño en móvil pero aún más grande que antes */
@@ -146,6 +151,29 @@ h1, h2 {
   overflow-y: auto !important;
   max-height: 70vh !important;
   min-height: 200px;
+}
+
+/* Sanity Studio - Asegurar que el scroll funcione correctamente */
+/* Resetear overflow para todo el Studio */
+[data-sanity],
+[data-sanity] * {
+  overflow: revert !important;
+}
+
+/* Asegurar que los editores de texto tengan scroll */
+[data-portable-text-editor],
+[data-testid="pt-editor"],
+.pt-editor {
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  max-height: none !important;
+  height: auto !important;
+}
+
+/* Contenedores de formularios */
+[data-ui="Card"],
+[data-ui="Dialog"] {
+  overflow-y: auto !important;
 }
 
 /* Ensure scroll works in form containers */
