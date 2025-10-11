@@ -143,6 +143,24 @@ h1, h2 {
   max-height: none !important;
 }
 
+/* Eliminar scroll horizontal en cada línea del editor de texto */
+.pt-editor__line, [data-portable-text-editor] .pt-editor__line {
+  overflow-x: visible !important;
+  white-space: pre-wrap !important;
+  word-break: break-word !important;
+  max-width: 100% !important;
+}
+
+/* Forzar el scroll vertical en el editor y permitir la rueda del ratón */
+.pt-editor, [data-portable-text-editor], [data-testid="pt-editor"] {
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  max-height: 70vh !important;
+  min-height: 200px !important;
+  height: auto !important;
+  overscroll-behavior: contain !important;
+}
+
 /* Fix for body/form scrolling in Sanity Studio */
 [data-testid="field-body"],
 [data-testid="body-field"],
