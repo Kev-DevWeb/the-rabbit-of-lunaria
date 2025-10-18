@@ -36,6 +36,7 @@
     "react-dom": "19.1.0",
     "react-pageflip": "^2.0.3",
     "sanity": "^4.9.0",
+    "sanity-plugin-media": "^4.0.0",
     "split-type": "^0.3.4",
     "styled-components": "^6.1.19",
     "three": "^0.179.1",

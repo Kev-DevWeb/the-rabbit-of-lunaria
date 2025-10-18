@@ -134,77 +134,13 @@ h1, h2 {
   animation: flicker 1.5s infinite;
 }
 
-/* Sanity Studio scroll fixes */
-/* Ensure proper scrolling in Sanity Studio */
-[data-ui="Card"],
-[data-ui="Flex"],
-[data-ui="Stack"] {
-  overflow-y: auto !important;
-  max-height: none !important;
-}
+/* ===== SANITY STUDIO - CONFIGURACIÓN MÍNIMA ===== */
+/* Los estilos principales están en src/sanity/studio.css */
 
-/* Eliminar scroll horizontal en cada línea del editor de texto */
-.pt-editor__line, [data-portable-text-editor] .pt-editor__line {
+/* Asegurar que el Studio no herede overflow-x-hidden del sitio */
+[data-ui="AppLayout"],
+[data-ui="RootPortal"] {
   overflow-x: visible !important;
-  white-space: pre-wrap !important;
-  word-break: break-word !important;
-  max-width: 100% !important;
-}
-
-/* Forzar el scroll vertical en el editor y permitir la rueda del ratón */
-.pt-editor, [data-portable-text-editor], [data-testid="pt-editor"] {
-  overflow-y: auto !important;
-  overflow-x: hidden !important;
-  max-height: 70vh !important;
-  min-height: 200px !important;
-  height: auto !important;
-  overscroll-behavior: contain !important;
-}
-
-/* Fix for body/form scrolling in Sanity Studio */
-[data-testid="field-body"],
-[data-testid="body-field"],
-.pt-editor,
-.pt-editor__container {
-  overflow-y: auto !important;
-  max-height: 70vh !important;
-  min-height: 200px;
-}
-
-/* Sanity Studio - Asegurar que el scroll funcione correctamente */
-/* Resetear overflow para todo el Studio */
-[data-sanity],
-[data-sanity] * {
-  overflow: revert !important;
-}
-
-/* Asegurar que los editores de texto tengan scroll */
-[data-portable-text-editor],
-[data-testid="pt-editor"],
-.pt-editor {
-  overflow-y: auto !important;
-  overflow-x: hidden !important;
-  max-height: none !important;
-  height: auto !important;
-}
-
-/* Contenedores de formularios */
-[data-ui="Card"],
-[data-ui="Dialog"] {
-  overflow-y: auto !important;
-}
-
-/* Ensure scroll works in form containers */
-[role="dialog"] [data-ui="Card"],
-[data-ui="Dialog"] [data-ui="Card"] {
-  overflow-y: auto !important;
-  max-height: 80vh !important;
-}
-
-/* Fix for portable text editor */
-[data-portable-text-editor] {
-  overflow-y: auto !important;
-  max-height: 60vh !important;
 }
 
 @keyframes fadeIn {

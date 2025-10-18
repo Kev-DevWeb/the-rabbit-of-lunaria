@@ -1,0 +1,121 @@
+/* ========================================
+   SANITY STUDIO - ESTILOS PERSONALIZADOS
+   ======================================== */
+
+/* ===== SCROLL Y OVERFLOW ===== */
+
+/* Contenedor principal del editor portable text */
+[data-testid="pt-editor"],
+[data-portable-text-editor] {
+  overflow-y: auto !important;
+  overflow-x: hidden !important;
+  max-height: 65vh !important;
+  min-height: 400px !important;
+  scroll-behavior: smooth !important;
+}
+
+/* Eliminar scroll horizontal en elementos inline del editor */
+[data-slate-editor] [data-slate-node="element"],
+[data-slate-node="text"],
+[contenteditable="true"] > *:not([data-slate-editor]) {
+  overflow: visible !important;
+  white-space: pre-wrap !important;
+  word-wrap: break-word !important;
+  overflow-wrap: break-word !important;
+}
+
+/* Elementos de bloque del editor */
+.pt-block,
+[data-slate-node="element"][data-slate-inline="false"] {
+  max-width: 100% !important;
+  overflow-wrap: break-word !important;
+}
+
+/* Asegurar que el contenido editable se ajuste */
+[contenteditable="true"] {
+  overflow-wrap: break-word !important;
+  word-break: break-word !important;
+  hyphens: auto !important;
+}
+
+/* ===== CONTENEDORES DE FORMULARIO ===== */
+
+/* Formularios y diálogos */
+[data-ui="FormBuilder"],
+[data-ui="Dialog"] > div {
+  overflow-y: auto !important;
+  max-height: calc(100vh - 150px) !important;
+}
+
+/* Cards dentro de diálogos */
+[role="dialog"] [data-ui="Card"],
+[data-ui="Dialog"] [data-ui="Card"] {
+  overflow-y: visible !important;
+  max-height: none !important;
+}
+
+/* ===== MEJORAS VISUALES ===== */
+
+/* Mejorar la legibilidad del editor */
+[data-portable-text-editor] {
+  font-size: 16px !important;
+  line-height: 1.6 !important;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif !important;
+}
+
+/* Toolbar del editor */
+[data-testid="pt-editor__toolbar"] {
+  position: sticky !important;
+  top: 0 !important;
+  z-index: 10 !important;
+  background: white !important;
+  border-bottom: 1px solid #e0e0e0 !important;
+  padding: 8px !important;
+}
+
+/* Mejorar el contraste de los placeholders */
+[data-slate-placeholder] {
+  opacity: 0.5 !important;
+}
+
+/* ===== ELEMENTOS ESPECÍFICOS ===== */
+
+/* Imágenes en el editor */
+[data-sanity-image] {
+  max-width: 100% !important;
+  height: auto !important;
+  border-radius: 8px !important;
+  margin: 16px 0 !important;
+}
+
+/* Links en el editor */
+[data-sanity-link] {
+  color: #2563eb !important;
+  text-decoration: underline !important;
+}
+
+/* Code blocks */
+[data-slate-node] code {
+  background: #f3f4f6 !important;
+  padding: 2px 6px !important;
+  border-radius: 4px !important;
+  font-family: "Courier New", monospace !important;
+}
+
+/* ===== LISTAS ===== */
+
+/* Mejorar el espaciado de listas */
+[data-list-item] {
+  margin: 8px 0 !important;
+}
+
+/* ===== RESPONSIVE ===== */
+
+@media (max-width: 768px) {
+  [data-testid="pt-editor"],
+  [data-portable-text-editor] {
+    max-height: 50vh !important;
+    min-height: 300px !important;
+  }
+}
+

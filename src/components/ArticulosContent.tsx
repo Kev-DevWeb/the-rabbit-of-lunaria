@@ -102,7 +102,27 @@ export default function ArticulosContent() {
                 parent->{
                   title,
                   slug,
-                  orderRank
+                  orderRank,
+                  parent->{
+                    title,
+                    slug,
+                    orderRank,
+                    parent->{
+                      title,
+                      slug,
+                      orderRank,
+                      parent->{
+                        title,
+                        slug,
+                        orderRank,
+                        parent->{
+                          title,
+                          slug,
+                          orderRank
+                        }
+                      }
+                    }
+                  }
                 }
               }
             }
@@ -205,20 +225,29 @@ export default function ArticulosContent() {
 
   // Función para renderizar categorías anidadas recursivamente
   const renderCategoryNode = (categoryName: string, categoryNode: CategoryNode, level: number = 0): React.ReactNode => {
-    // Sangrías responsive: móvil (8px), tablet (16px), desktop (24px)
+    // Sangrías progresivas para hasta 8 niveles: cada nivel añade 12px
     const paddingClass = level === 0 ? '' : 
-                        level === 1 ? 'pl-2 sm:pl-4 lg:pl-6' : 
-                        level === 2 ? 'pl-4 sm:pl-8 lg:pl-12' : 
-                                     'pl-6 sm:pl-12 lg:pl-16';
+                        level === 1 ? 'pl-3' :   // 12px
+                        level === 2 ? 'pl-6' :   // 24px
+                        level === 3 ? 'pl-9' :   // 36px
+                        level === 4 ? 'pl-12' :  // 48px
+                        level === 5 ? 'pl-[3.75rem]' :  // 60px
+                        level === 6 ? 'pl-[4.5rem]' :   // 72px
+                        level === 7 ? 'pl-[5.25rem]' :  // 84px
+                                     'pl-24';    // 96px (nivel 8+)
     
     // Tamaños responsive de texto: móvil más grande, tablet intermedio, desktop igual
     const titleSize = level === 0 ? 'text-xl sm:text-2xl lg:text-2xl' : 
                       level === 1 ? 'text-lg sm:text-xl lg:text-xl' : 
-                                   'text-base sm:text-lg lg:text-lg';
+                      level >= 2 && level <= 4 ? 'text-base sm:text-lg lg:text-lg' :
+                                   'text-sm sm:text-base lg:text-base'; // niveles 5+
     const sparkleSize = level === 0 ? 'w-4 h-4 sm:w-5 sm:h-5' : 
                         level === 1 ? 'w-3 h-3 sm:w-4 sm:h-4' : 
                                      'w-3 h-3';
-    const marginBottom = level === 0 ? 'mb-6 sm:mb-8' : level === 1 ? 'mb-4 sm:mb-6' : 'mb-3 sm:mb-4';
+    const marginBottom = level === 0 ? 'mb-6 sm:mb-8' : 
+                        level === 1 ? 'mb-4 sm:mb-6' : 
+                        level >= 2 && level <= 4 ? 'mb-3 sm:mb-4' :
+                                     'mb-2 sm:mb-3'; // niveles 5+
     
     return (
       <div key={`${categoryName}-${level}`} className={`${marginBottom} ${paddingClass} last:mb-0 category-section`}>
@@ -231,17 +260,17 @@ export default function ArticulosContent() {
             </h3>
           </div>
           {categoryNode.description && (
-            <p className="text-purple-200 font-serif italic text-xs sm:text-sm mb-2 ml-2 sm:ml-4 lg:ml-7">
+            <p className="text-purple-200 font-serif italic text-xs sm:text-sm mb-2 ml-6">
               {categoryNode.description}
             </p>
           )}
           {/* Línea decorativa más sutil y corta - responsive */}
-          <div className="h-px bg-gradient-to-r from-purple-400 to-transparent w-16 sm:w-24 lg:w-32 ml-2 sm:ml-4 lg:ml-7"></div>
+          <div className="h-px bg-gradient-to-r from-purple-400 to-transparent w-16 sm:w-24 lg:w-32 ml-6"></div>
         </div>
 
         {/* Artículos de esta categoría */}
         {categoryNode.articles.length > 0 && (
-          <div className="space-y-1 mb-4 sm:mb-6 ml-2 sm:ml-4 lg:ml-7">
+          <div className="space-y-1 mb-4 sm:mb-6 ml-6">
             {categoryNode.articles.map((article) => (
               <Link 
                 key={article._id}
