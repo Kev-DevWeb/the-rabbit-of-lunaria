@@ -146,62 +146,155 @@ export default function BookshelfGrimorio() {
   };
 
   // Función para obtener la categoría raíz
-  const getRootCategory = (category: Category): string => {
+  const getRootCategory = (category: Category): Category => {
     let current = category;
     while (current.parent) {
       current = current.parent;
     }
-    return current.title;
+    return current;
   };
 
-  // Organizar artículos por categorías con colores consistentes
-  const organizeByCategories = (articles: Article[]): CategoryGroup[] => {
-    const categoryMap = new Map<string, CategoryGroup>();
+  // Función para calcular color degradado según profundidad
+  const getColorForDepth = (baseColor: string, depth: number): string => {
+    // Convertir hex a RGB
+    const r = parseInt(baseColor.slice(1, 3), 16);
+    const g = parseInt(baseColor.slice(3, 5), 16);
+    const b = parseInt(baseColor.slice(5, 7), 16);
+    
+    // Aclarar el color progresivamente según la profundidad
+    // Nivel 1 (raíz): color base
+    // Nivel 2: +15% brillo
+    // Nivel 3: +30% brillo
+    // Nivel 4+: +45% brillo
+    const brightnessIncrease = Math.min(depth - 1, 3) * 0.15;
+    
+    const newR = Math.min(255, Math.floor(r + (255 - r) * brightnessIncrease));
+    const newG = Math.min(255, Math.floor(g + (255 - g) * brightnessIncrease));
+    const newB = Math.min(255, Math.floor(b + (255 - b) * brightnessIncrease));
+    
+    return `#${newR.toString(16).padStart(2, '0')}${newG.toString(16).padStart(2, '0')}${newB.toString(16).padStart(2, '0')}`;
+  };
+
+  // Interface para artículos con metadata de categoría
+  interface ArticleWithCategory extends Article {
+    categoryPath: string[];
+    depth: number;
+    color: string;
+    fullPath: string;
+  }
+
+  // Organizar artículos por ESTANTE (categoría raíz)
+  const organizeByRootCategory = (articles: Article[]): CategoryGroup[] => {
     const rootColorMap = new Map<string, string>();
     let colorIndex = 0;
 
-    articles.forEach(article => {
-      if (!article.categories?.[0]) return;
+    // Primero, enriquecer cada artículo con metadata de categoría
+    const enrichedArticles: ArticleWithCategory[] = articles
+      .filter(article => article.categories?.[0])
+      .map(article => {
+        const category = article.categories[0];
+        const categoryPath = getCategoryPath(category);
+        const rootCategory = getRootCategory(category);
+        const rootTitle = rootCategory.title;
+        const depth = categoryPath.length;
 
-      const category = article.categories[0];
-      const categoryPath = getCategoryPath(category);
-      const fullPath = categoryPath.join(' > ');
-      const rootCategory = getRootCategory(category);
-      const depth = categoryPath.length;
+        // Asignar color base a la categoría raíz
+        if (!rootColorMap.has(rootTitle)) {
+          rootColorMap.set(rootTitle, bookColors[colorIndex % bookColors.length]);
+          colorIndex++;
+        }
 
-      // Asignar color basado en la categoría raíz
-      if (!rootColorMap.has(rootCategory)) {
-        rootColorMap.set(rootCategory, bookColors[colorIndex % bookColors.length]);
-        colorIndex++;
-      }
+        const baseColor = rootColorMap.get(rootTitle)!;
+        const color = getColorForDepth(baseColor, depth);
 
-      const color = rootColorMap.get(rootCategory)!;
-
-      if (!categoryMap.has(fullPath)) {
-        categoryMap.set(fullPath, {
-          name: fullPath,
-          description: category.description,
+        return {
+          ...article,
+          categoryPath,
+          depth,
           color,
-          articles: [],
-          depth
-        });
+          fullPath: categoryPath.join(' > ')
+        };
+      });
+
+    // Agrupar por categoría raíz
+    const rootGroups = new Map<string, ArticleWithCategory[]>();
+    enrichedArticles.forEach(article => {
+      const rootTitle = article.categoryPath[0];
+      if (!rootGroups.has(rootTitle)) {
+        rootGroups.set(rootTitle, []);
       }
-
-      categoryMap.get(fullPath)!.articles.push(article);
+      rootGroups.get(rootTitle)!.push(article);
     });
 
-    // Ordenar por profundidad y nombre
-    return Array.from(categoryMap.values()).sort((a, b) => {
-      if (a.depth !== b.depth) return a.depth - b.depth;
-      return a.name.localeCompare(b.name, 'es');
+    // Ordenar artículos dentro de cada grupo por jerarquía
+    rootGroups.forEach((articles, rootTitle) => {
+      articles.sort((a, b) => {
+        // Ordenar por path completo para mantener jerarquía
+        for (let i = 0; i < Math.max(a.categoryPath.length, b.categoryPath.length); i++) {
+          if (!a.categoryPath[i]) return -1; // A es más corto (padre primero)
+          if (!b.categoryPath[i]) return 1;  // B es más corto
+          if (a.categoryPath[i] !== b.categoryPath[i]) {
+            return a.categoryPath[i].localeCompare(b.categoryPath[i], 'es');
+          }
+        }
+        return 0;
+      });
     });
+
+    // Convertir a CategoryGroup (un grupo por categoría raíz)
+    const result: CategoryGroup[] = Array.from(rootGroups.entries()).map(([rootTitle, articles]) => {
+      // Obtener descripción de la categoría raíz
+      const firstArticle = articles[0];
+      const rootCategory = enrichedArticles.find(a => 
+        a.categoryPath.length === 1 && a.categoryPath[0] === rootTitle
+      );
+      
+      return {
+        name: rootTitle,
+        description: rootCategory?.categories[0]?.description || '',
+        color: rootColorMap.get(rootTitle)!,
+        articles: articles as Article[], // Mantenemos metadata en los artículos
+        depth: 1
+      };
+    });
+
+    // Ordenar grupos alfabéticamente
+    return result.sort((a, b) => a.name.localeCompare(b.name, 'es'));
   };
 
-  const categoryGroups = organizeByCategories(filteredArticles);
+  const categoryGroups = organizeByRootCategory(filteredArticles);
 
-  // Componente de libro individual
-  const Book = ({ article, color, index }: { article: Article; color: string; index: number }) => {
+  // Componente de libro individual - MEJORADO con color propio
+  const Book = ({ article, baseColor, index }: { article: Article; baseColor: string; index: number }) => {
     const [isHovered, setIsHovered] = useState(false);
+
+    // Calcular color según profundidad de la categoría del artículo
+    const category = article.categories?.[0];
+    const categoryPath = category ? getCategoryPath(category) : [];
+    const depth = categoryPath.length;
+    const bookColor = getColorForDepth(baseColor, depth);
+
+    // Acortar título si es muy largo (para el lomo)
+    const truncateTitle = (title: string, maxLength: number = 35) => {
+      if (title.length <= maxLength) return title;
+      
+      // Buscar el último espacio antes del límite
+      const truncated = title.substring(0, maxLength);
+      const lastSpace = truncated.lastIndexOf(' ');
+      
+      if (lastSpace > 0) {
+        return truncated.substring(0, lastSpace) + '...';
+      }
+      
+      return truncated + '...';
+    };
+
+    const spineTitle = truncateTitle(article.title);
+    
+    // Obtener etiqueta de subcategoría (si no es raíz)
+    const subcategoryLabel = categoryPath.length > 1 
+      ? categoryPath[categoryPath.length - 1] 
+      : '';
 
     return (
       <Link
@@ -219,28 +312,50 @@ export default function BookshelfGrimorio() {
             transform: isHovered ? 'translateY(-12px) scale(1.05)' : 'translateY(0) scale(1)',
           }}
         >
-          {/* Lomo del libro */}
+          {/* Lomo del libro - MÁS ANCHO para textos largos */}
           <div 
-            className="relative h-48 w-10 sm:h-56 sm:w-12 rounded-r-sm shadow-lg transition-all duration-300"
+            className="relative h-48 w-12 sm:h-56 sm:w-14 md:w-16 rounded-r-sm shadow-lg transition-all duration-300"
             style={{
-              background: `linear-gradient(to right, ${color}, ${color}dd, ${color})`,
+              background: `linear-gradient(to right, ${bookColor}, ${bookColor}dd, ${bookColor})`,
               boxShadow: isHovered 
-                ? `0 15px 40px -10px ${color}80, inset -2px 0 4px rgba(0,0,0,0.3)` 
-                : `0 8px 20px -5px ${color}60, inset -2px 0 4px rgba(0,0,0,0.3)`,
+                ? `0 15px 40px -10px ${bookColor}80, inset -2px 0 4px rgba(0,0,0,0.3)` 
+                : `0 8px 20px -5px ${bookColor}60, inset -2px 0 4px rgba(0,0,0,0.3)`,
             }}
           >
-            {/* Título del libro en el lomo */}
-            <div className="absolute inset-0 flex items-center justify-center px-1">
+            {/* Etiqueta de subcategoría en la parte superior */}
+            {subcategoryLabel && (
+              <div 
+                className="absolute top-0 left-0 right-0 px-0.5 py-0.5 text-center"
+                style={{
+                  backgroundColor: 'rgba(0,0,0,0.3)',
+                  borderBottom: '1px solid rgba(255,255,255,0.2)'
+                }}
+              >
+                <span 
+                  className="text-[6px] sm:text-[7px] text-yellow-200/80 font-serif uppercase tracking-wide"
+                  style={{
+                    textShadow: '0 1px 2px rgba(0,0,0,0.8)'
+                  }}
+                >
+                  {subcategoryLabel.length > 12 ? subcategoryLabel.substring(0, 12) : subcategoryLabel}
+                </span>
+              </div>
+            )}
+
+            {/* Título del libro en el lomo - OPTIMIZADO */}
+            <div className="absolute inset-0 flex items-center justify-center px-0.5 py-3">
               <p 
-                className="text-xs sm:text-sm font-serif text-yellow-100 writing-mode-vertical transform rotate-0 text-center line-clamp-4 font-semibold drop-shadow-lg"
+                className="text-[9px] sm:text-[10px] md:text-xs font-serif text-yellow-100 font-semibold drop-shadow-lg overflow-hidden"
                 style={{
                   writingMode: 'vertical-rl',
                   textOrientation: 'mixed',
                   textShadow: '0 2px 4px rgba(0,0,0,0.8)',
-                  letterSpacing: '0.5px'
+                  letterSpacing: '0.3px',
+                  maxHeight: '90%',
+                  lineHeight: '1.2'
                 }}
               >
-                {article.title}
+                {spineTitle}
               </p>
             </div>
 
@@ -257,12 +372,32 @@ export default function BookshelfGrimorio() {
             <div 
               className="absolute top-0 right-0 w-2 h-full bg-gradient-to-l from-black/30 to-transparent"
             ></div>
+            
+            {/* Indicador visual de profundidad (puntos en la parte inferior) */}
+            {depth > 1 && (
+              <div className="absolute bottom-1 left-0 right-0 flex justify-center gap-0.5">
+                {Array.from({ length: Math.min(depth, 4) }).map((_, i) => (
+                  <div 
+                    key={i} 
+                    className="w-0.5 h-0.5 rounded-full bg-yellow-300/60"
+                  ></div>
+                ))}
+              </div>
+            )}
           </div>
 
-          {/* Tooltip con información */}
+          {/* Tooltip con información - MEJORADO con ruta completa */}
           {isHovered && (
             <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-3 z-50 pointer-events-none">
               <div className="bg-gray-900 border border-purple-500/50 rounded-lg p-3 shadow-2xl min-w-[200px] max-w-[280px]">
+                {/* Ruta de categoría */}
+                {categoryPath.length > 0 && (
+                  <div className="mb-2 pb-2 border-b border-purple-500/30">
+                    <p className="text-purple-300 text-[10px] font-serif">
+                      {categoryPath.join(' › ')}
+                    </p>
+                  </div>
+                )}
                 <p className="text-white text-sm font-semibold mb-1 line-clamp-2">{article.title}</p>
                 {article.authors && article.authors.length > 0 && (
                   <p className="text-purple-300 text-xs">
@@ -379,46 +514,63 @@ export default function BookshelfGrimorio() {
         </div>
       </div>
 
-      {/* Estantes de libros */}
+      {/* Estantes de libros - UN ESTANTE POR CATEGORÍA RAÍZ */}
       <div className="max-w-7xl mx-auto space-y-12">
         {categoryGroups.map((categoryGroup, groupIndex) => {
-          const categoryLevels = categoryGroup.name.split(' > ');
-          const displayName = categoryLevels[categoryLevels.length - 1];
-          const parentPath = categoryLevels.slice(0, -1).join(' > ');
-
           return (
             <div key={categoryGroup.name} className="shelf-section">
-              {/* Etiqueta del estante */}
+              {/* Etiqueta del estante - CATEGORÍA RAÍZ */}
               <div className="mb-6">
-                <div className="flex items-center gap-3 mb-2">
-                  <Sparkles className="w-5 h-5 text-purple-400 flex-shrink-0" />
-                  <div>
-                    <h3 className="text-xl sm:text-2xl font-serif font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-300 via-pink-300 to-purple-300">
-                      {displayName}
+                <div className="flex items-start gap-4 mb-3">
+                  {/* Badge de color grande */}
+                  <div 
+                    className="w-4 h-4 rounded-full mt-2 flex-shrink-0 shadow-lg"
+                    style={{ 
+                      backgroundColor: categoryGroup.color,
+                      boxShadow: `0 0 12px ${categoryGroup.color}80`
+                    }}
+                  ></div>
+                  
+                  <div className="flex-1">
+                    {/* Nombre de la categoría RAÍZ */}
+                    <h3 className="text-2xl sm:text-3xl font-serif font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-300 via-pink-300 to-purple-300">
+                      {categoryGroup.name}
                     </h3>
-                    {parentPath && (
-                      <p className="text-xs sm:text-sm text-purple-400 font-serif italic mt-1">
-                        {parentPath}
+                    
+                    {/* Descripción si existe */}
+                    {categoryGroup.description && (
+                      <p className="text-purple-200/80 font-serif italic text-sm sm:text-base mt-2">
+                        {categoryGroup.description}
                       </p>
                     )}
+                    
+                    {/* Contador de libros */}
+                    <div className="flex items-center gap-2 mt-2">
+                      <span className="text-xs text-purple-400/60 font-serif">
+                        {categoryGroup.articles.length} {categoryGroup.articles.length === 1 ? 'libro' : 'libros'}
+                      </span>
+                    </div>
                   </div>
                 </div>
-                {categoryGroup.description && (
-                  <p className="text-purple-200 font-serif italic text-xs sm:text-sm ml-8">
-                    {categoryGroup.description}
-                  </p>
-                )}
+                
+                {/* Línea decorativa */}
+                <div 
+                  className="h-px bg-gradient-to-r from-purple-400 via-pink-400 to-transparent ml-8"
+                  style={{
+                    boxShadow: `0 0 4px ${categoryGroup.color}40`
+                  }}
+                ></div>
               </div>
 
               {/* Estante de madera */}
               <div className="relative">
-                {/* Libros en el estante */}
-                <div className="flex flex-wrap gap-2 sm:gap-3 md:gap-4 mb-4 px-4 sm:px-6 min-h-[200px] sm:min-h-[230px] items-end">
+                {/* Libros en el estante - TODOS JUNTOS con colores diferentes */}
+                <div className="flex flex-wrap gap-1.5 sm:gap-2 md:gap-3 mb-4 px-2 sm:px-4 min-h-[200px] sm:min-h-[230px] items-end">
                   {categoryGroup.articles.map((article, index) => (
                     <Book 
                       key={article._id} 
                       article={article} 
-                      color={categoryGroup.color}
+                      baseColor={categoryGroup.color}
                       index={index}
                     />
                   ))}
