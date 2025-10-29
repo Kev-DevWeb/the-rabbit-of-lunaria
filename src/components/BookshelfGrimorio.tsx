@@ -274,8 +274,8 @@ export default function BookshelfGrimorio() {
     const depth = categoryPath.length;
     const bookColor = getColorForDepth(baseColor, depth);
 
-    // Acortar título si es muy largo (para el lomo)
-    const truncateTitle = (title: string, maxLength: number = 35) => {
+    // Acortar título si es muy largo (para el lomo) - LÍMITE AUMENTADO
+    const truncateTitle = (title: string, maxLength: number = 60) => {
       if (title.length <= maxLength) return title;
       
       // Buscar el último espacio antes del límite
@@ -312,9 +312,9 @@ export default function BookshelfGrimorio() {
             transform: isHovered ? 'translateY(-12px) scale(1.05)' : 'translateY(0) scale(1)',
           }}
         >
-          {/* Lomo del libro - MÁS ANCHO para textos largos */}
+          {/* Lomo del libro - MÁS ANCHO para títulos completos */}
           <div 
-            className="relative h-48 w-12 sm:h-56 sm:w-14 md:w-16 rounded-r-sm shadow-lg transition-all duration-300"
+            className="relative h-48 w-16 sm:h-56 sm:w-20 md:w-24 rounded-r-sm shadow-lg transition-all duration-300"
             style={{
               background: `linear-gradient(to right, ${bookColor}, ${bookColor}dd, ${bookColor})`,
               boxShadow: isHovered 
@@ -325,7 +325,7 @@ export default function BookshelfGrimorio() {
             {/* Etiqueta de subcategoría en la parte superior */}
             {subcategoryLabel && (
               <div 
-                className="absolute top-0 left-0 right-0 px-0.5 py-0.5 text-center"
+                className="absolute top-0 left-0 right-0 px-0.5 py-1 text-center z-10"
                 style={{
                   backgroundColor: 'rgba(0,0,0,0.3)',
                   borderBottom: '1px solid rgba(255,255,255,0.2)'
@@ -342,16 +342,24 @@ export default function BookshelfGrimorio() {
               </div>
             )}
 
-            {/* Título del libro en el lomo - OPTIMIZADO */}
-            <div className="absolute inset-0 flex items-center justify-center px-0.5 py-3">
+            {/* Título del libro en el lomo - TEXTO COMPLETO sin sobreponerse */}
+            <div 
+              className="absolute flex items-center justify-center px-1"
+              style={{
+                top: subcategoryLabel ? '24px' : '12px',
+                bottom: '12px',
+                left: 0,
+                right: 0
+              }}
+            >
               <p 
-                className="text-[9px] sm:text-[10px] md:text-xs font-serif text-yellow-100 font-semibold drop-shadow-lg overflow-hidden"
+                className="text-[10px] sm:text-[11px] md:text-xs font-serif text-yellow-100 font-semibold drop-shadow-lg overflow-hidden"
                 style={{
                   writingMode: 'vertical-rl',
                   textOrientation: 'mixed',
                   textShadow: '0 2px 4px rgba(0,0,0,0.8)',
                   letterSpacing: '0.3px',
-                  maxHeight: '90%',
+                  maxHeight: '100%',
                   lineHeight: '1.2'
                 }}
               >
@@ -386,36 +394,41 @@ export default function BookshelfGrimorio() {
             )}
           </div>
 
-          {/* Tooltip con información - MEJORADO con ruta completa */}
+          {/* Tooltip con información - ADAPTATIVO a tamaño de pantalla */}
           {isHovered && (
-            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-3 z-50 pointer-events-none">
-              <div className="bg-gray-900 border border-purple-500/50 rounded-lg p-3 shadow-2xl min-w-[200px] max-w-[280px]">
-                {/* Ruta de categoría */}
+            <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 z-50 pointer-events-none">
+              <div className="bg-gray-900/95 backdrop-blur-sm border border-purple-500/50 rounded-lg p-2 sm:p-3 shadow-2xl w-[160px] sm:w-[200px] lg:w-[240px]">
+                {/* Ruta de categoría - Compacta */}
                 {categoryPath.length > 0 && (
-                  <div className="mb-2 pb-2 border-b border-purple-500/30">
-                    <p className="text-purple-300 text-[10px] font-serif">
+                  <div className="mb-1.5 pb-1.5 border-b border-purple-500/30">
+                    <p className="text-purple-300 text-[8px] sm:text-[9px] lg:text-[10px] font-serif leading-tight">
                       {categoryPath.join(' › ')}
                     </p>
                   </div>
                 )}
-                <p className="text-white text-sm font-semibold mb-1 line-clamp-2">{article.title}</p>
+                {/* Título - Responsive */}
+                <p className="text-white text-[11px] sm:text-xs lg:text-sm font-semibold mb-1 line-clamp-2 leading-tight">
+                  {article.title}
+                </p>
+                {/* Autor - Compacto */}
                 {article.authors && article.authors.length > 0 && (
-                  <p className="text-purple-300 text-xs">
-                    Por: {article.authors[0].name}
+                  <p className="text-purple-300 text-[9px] sm:text-[10px] lg:text-xs truncate">
+                    {article.authors[0].name}
                   </p>
                 )}
+                {/* Fecha - Solo en pantallas más grandes */}
                 {article.publishedAt && (
-                  <p className="text-gray-400 text-xs mt-1">
+                  <p className="hidden sm:block text-gray-400 text-[9px] lg:text-xs mt-0.5">
                     {new Date(article.publishedAt).toLocaleDateString('es-ES', {
-                      year: 'numeric',
-                      month: 'long',
-                      day: 'numeric'
+                      day: '2-digit',
+                      month: 'short',
+                      year: 'numeric'
                     })}
                   </p>
                 )}
                 {/* Triángulo del tooltip */}
                 <div className="absolute top-full left-1/2 transform -translate-x-1/2 -mt-px">
-                  <div className="border-8 border-transparent border-t-purple-500/50"></div>
+                  <div className="border-4 sm:border-6 lg:border-8 border-transparent border-t-purple-500/50"></div>
                 </div>
               </div>
             </div>

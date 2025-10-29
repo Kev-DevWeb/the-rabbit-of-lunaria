@@ -440,11 +440,28 @@ class YouTubePlayerService {
 
   // Toggle con fade automático
   async togglePlayPauseWithFade(): Promise<void> {
-    if (this.currentState.isPlaying) {
-      console.log('🔇 Iniciando fade out...');
+    if (!this.player) {
+      console.warn('⚠️ Player no disponible para toggle');
+      return;
+    }
+
+    // Usar el estado ACTUAL del player, no del cache
+    const playerState = this.player.getPlayerState();
+    const YT = window.YT;
+    const isCurrentlyPlaying = playerState === YT.PlayerState.PLAYING;
+    
+    console.log('🎛️ Toggle state:', {
+      playerState,
+      isCurrentlyPlaying,
+      cachedIsPlaying: this.currentState.isPlaying,
+      isMuted: this.currentState.isMuted
+    });
+
+    if (isCurrentlyPlaying) {
+      console.log('🔇 Iniciando fade out (pausar)...');
       await this.fadeOut(1500);
     } else {
-      console.log('🎵 Iniciando fade in...');
+      console.log('🎵 Iniciando fade in (reproducir)...');
       await this.fadeIn(2000);
     }
   }
