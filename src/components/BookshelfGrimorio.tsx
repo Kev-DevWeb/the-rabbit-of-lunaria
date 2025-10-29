@@ -312,9 +312,9 @@ export default function BookshelfGrimorio() {
             transform: isHovered ? 'translateY(-12px) scale(1.05)' : 'translateY(0) scale(1)',
           }}
         >
-          {/* Lomo del libro - MÁS ANCHO para títulos completos */}
+          {/* Lomo del libro - Dimensiones optimizadas */}
           <div 
-            className="relative h-48 w-16 sm:h-56 sm:w-20 md:w-24 rounded-r-sm shadow-lg transition-all duration-300"
+            className="relative h-56 w-16 sm:h-64 sm:w-20 md:h-72 md:w-24 rounded-r-sm shadow-lg transition-all duration-300"
             style={{
               background: `linear-gradient(to right, ${bookColor}, ${bookColor}dd, ${bookColor})`,
               boxShadow: isHovered 
@@ -342,11 +342,11 @@ export default function BookshelfGrimorio() {
               </div>
             )}
 
-            {/* Título del libro en el lomo - TEXTO COMPLETO sin sobreponerse */}
+            {/* Título del libro en el lomo - Sin sobreponerse con la etiqueta */}
             <div 
               className="absolute flex items-center justify-center px-1"
               style={{
-                top: subcategoryLabel ? '24px' : '12px',
+                top: subcategoryLabel ? '32px' : '12px',
                 bottom: '12px',
                 left: 0,
                 right: 0
@@ -394,18 +394,10 @@ export default function BookshelfGrimorio() {
             )}
           </div>
 
-          {/* Tooltip con información - ADAPTATIVO a tamaño de pantalla */}
+          {/* Tooltip con información - SIN ruta de categoría */}
           {isHovered && (
             <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 z-50 pointer-events-none">
               <div className="bg-gray-900/95 backdrop-blur-sm border border-purple-500/50 rounded-lg p-2 sm:p-3 shadow-2xl w-[160px] sm:w-[200px] lg:w-[240px]">
-                {/* Ruta de categoría - Compacta */}
-                {categoryPath.length > 0 && (
-                  <div className="mb-1.5 pb-1.5 border-b border-purple-500/30">
-                    <p className="text-purple-300 text-[8px] sm:text-[9px] lg:text-[10px] font-serif leading-tight">
-                      {categoryPath.join(' › ')}
-                    </p>
-                  </div>
-                )}
                 {/* Título - Responsive */}
                 <p className="text-white text-[11px] sm:text-xs lg:text-sm font-semibold mb-1 line-clamp-2 leading-tight">
                   {article.title}
