@@ -2,6 +2,16 @@
    SANITY STUDIO - ESTILOS PERSONALIZADOS
    ======================================== */
 
+/* ===== IMPORTANTE: DESHABILITAR LENIS EN STUDIO ===== */
+
+/* Forzar scroll nativo en todo Sanity Studio */
+#__next,
+[data-sanity],
+[data-ui],
+body:has([data-sanity]) {
+  overscroll-behavior: auto !important;
+}
+
 /* ===== SCROLL Y OVERFLOW ===== */
 
 /* Contenedor principal del editor portable text */
@@ -12,6 +22,7 @@
   max-height: 65vh !important;
   min-height: 400px !important;
   scroll-behavior: smooth !important;
+  overscroll-behavior: contain !important;
 }
 
 /* Eliminar scroll horizontal en elementos inline del editor */
