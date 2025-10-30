@@ -1,6 +1,6 @@
 'use client';
 
-import { PortableTextBlock } from '@portabletext/types';
+import { PortableTextBlock, ArbitraryTypedObject, PortableTextSpan } from '@portabletext/types';
 import { useEffect, useState } from 'react';
 
 interface Heading {
@@ -24,7 +24,12 @@ export default function TableOfContents({ body }: TableOfContentsProps) {
     body.forEach((block, index) => {
       if (block._type === 'block' && block.style && /^h[2-4]$/.test(block.style)) {
         const text = block.children
-          ?.map((child: { text?: string }) => child.text)
+          ?.map((child: ArbitraryTypedObject | PortableTextSpan) => {
+            if ('text' in child) {
+              return child.text;
+            }
+            return '';
+          })
           .join('') || '';
         
         if (text) {
