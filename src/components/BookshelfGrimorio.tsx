@@ -103,7 +103,37 @@ export default function BookshelfGrimorio() {
               parent->{
                 title,
                 slug,
-                orderRank
+                orderRank,
+                parent->{
+                  title,
+                  slug,
+                  orderRank,
+                  parent->{
+                    title,
+                    slug,
+                    orderRank,
+                    parent->{
+                      title,
+                      slug,
+                      orderRank,
+                      parent->{
+                        title,
+                        slug,
+                        orderRank,
+                        parent->{
+                          title,
+                          slug,
+                          orderRank,
+                          parent->{
+                            title,
+                            slug,
+                            orderRank
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
               }
             }
           }
