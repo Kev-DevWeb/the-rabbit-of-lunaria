@@ -24,7 +24,7 @@ export default function TableOfContents({ body }: TableOfContentsProps) {
     body.forEach((block, index) => {
       if (block._type === 'block' && block.style && /^h[2-4]$/.test(block.style)) {
         const text = block.children
-          ?.map((child: any) => child.text)
+          ?.map((child: { text?: string }) => child.text)
           .join('') || '';
         
         if (text) {

@@ -3,13 +3,11 @@ import Link from 'next/link';
 import { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'next/navigation';
 import { client } from '@/sanity/lib/client';
-import imageUrlBuilder from '@sanity/image-url';
 import { SanityImageSource } from '@sanity/image-url/lib/types/types';
 import { gsap } from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { useGSAP } from '@gsap/react';
-import Image from 'next/image';
-import { BookOpen, Search, Sparkles } from 'lucide-react';
+import { BookOpen, Search } from 'lucide-react';
 
 // Define types for our Sanity data
 interface Category {
@@ -39,12 +37,6 @@ interface CategoryGroup {
   color: string;
   articles: Article[];
   depth: number;
-}
-
-const builder = imageUrlBuilder(client);
-
-function urlFor(source: SanityImageSource) {
-  return builder.image(source);
 }
 
 gsap.registerPlugin(ScrollTrigger);
@@ -227,7 +219,7 @@ export default function BookshelfGrimorio() {
     });
 
     // Ordenar artículos dentro de cada grupo por jerarquía
-    rootGroups.forEach((articles, rootTitle) => {
+    rootGroups.forEach((articles) => {
       articles.sort((a, b) => {
         // Ordenar por path completo para mantener jerarquía
         for (let i = 0; i < Math.max(a.categoryPath.length, b.categoryPath.length); i++) {
@@ -244,7 +236,6 @@ export default function BookshelfGrimorio() {
     // Convertir a CategoryGroup (un grupo por categoría raíz)
     const result: CategoryGroup[] = Array.from(rootGroups.entries()).map(([rootTitle, articles]) => {
       // Obtener descripción de la categoría raíz
-      const firstArticle = articles[0];
       const rootCategory = enrichedArticles.find(a => 
         a.categoryPath.length === 1 && a.categoryPath[0] === rootTitle
       );
@@ -521,7 +512,7 @@ export default function BookshelfGrimorio() {
 
       {/* Estantes de libros - UN ESTANTE POR CATEGORÍA RAÍZ */}
       <div className="max-w-7xl mx-auto space-y-12">
-        {categoryGroups.map((categoryGroup, groupIndex) => {
+        {categoryGroups.map((categoryGroup) => {
           return (
             <div key={categoryGroup.name} className="shelf-section">
               {/* Etiqueta del estante - CATEGORÍA RAÍZ */}

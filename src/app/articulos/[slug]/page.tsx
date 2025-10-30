@@ -1,10 +1,8 @@
 import { client } from '@/sanity/lib/client';
 import { notFound } from 'next/navigation';
 import type { Metadata } from 'next';
-import { PortableText } from '@portabletext/react';
 import imageUrlBuilder from '@sanity/image-url';
 import { SanityImageSource } from '@sanity/image-url/lib/types/types';
-import { getYouTubeEmbedId } from '@/lib/utils';
 import { PortableTextBlock } from '@portabletext/types';
 import React from 'react';
 import Image from 'next/image';

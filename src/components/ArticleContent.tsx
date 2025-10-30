@@ -57,19 +57,19 @@ export default function ArticleContent({ body }: ArticleContentProps) {
       },
     },
     block: {
-      h1: ({ children, value }: {children?: React.ReactNode, value?: any}) => {
+      h1: ({ children, value }: {children?: React.ReactNode, value?: PortableTextBlock}) => {
         const id = value?._key ? `heading-${body.indexOf(value)}` : undefined;
         return <h1 id={id} className="text-2xl sm:text-3xl lg:text-4xl font-bold my-5 sm:my-7 text-purple-200 scroll-mt-24">{children}</h1>;
       },
-      h2: ({ children, value }: {children?: React.ReactNode, value?: any}) => {
+      h2: ({ children, value }: {children?: React.ReactNode, value?: PortableTextBlock}) => {
         const id = value?._key ? `heading-${body.indexOf(value)}` : undefined;
         return <h2 id={id} className="text-xl sm:text-2xl lg:text-3xl font-bold my-4 sm:my-6 text-purple-300 scroll-mt-24">{children}</h2>;
       },
-      h3: ({ children, value }: {children?: React.ReactNode, value?: any}) => {
+      h3: ({ children, value }: {children?: React.ReactNode, value?: PortableTextBlock}) => {
         const id = value?._key ? `heading-${body.indexOf(value)}` : undefined;
         return <h3 id={id} className="text-lg sm:text-xl lg:text-2xl font-semibold my-3 sm:my-5 text-purple-400 scroll-mt-24">{children}</h3>;
       },
-      h4: ({ children, value }: {children?: React.ReactNode, value?: any}) => {
+      h4: ({ children, value }: {children?: React.ReactNode, value?: PortableTextBlock}) => {
         const id = value?._key ? `heading-${body.indexOf(value)}` : undefined;
         return <h4 id={id} className="text-base sm:text-lg lg:text-xl font-semibold my-3 sm:my-4 text-purple-400/80 scroll-mt-24">{children}</h4>;
       },
