@@ -1,13 +1,11 @@
-'use client'
-import { usePathname } from 'next/navigation'
 import { Geist, Geist_Mono } from "next/font/google";
 import { Cinzel_Decorative, Playfair_Display, Cormorant_Garamond } from "next/font/google";
 import "./globals.css";
-import { BackgroundMusicProvider } from '@/context/BackgroundMusicProvider';
-import Header from '@/components/Header';
-import AppFooter from '@/components/AppFooter';
-import { GlobalMusicNotifications } from '@/components/GlobalMusicNotifications';
 import Script from 'next/script';
+import LayoutClient from './LayoutClient';
+
+// Re-exportar metadata desde el archivo dedicado
+export { metadata } from './metadata';
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -36,31 +34,28 @@ const cormorantGaramond = Cormorant_Garamond({
   variable: "--font-cormorant-garamond",
 });
 
-// Metadata object cannot be exported from a client component. 
-// We can keep it here, but it might be better to move it to a server component if needed.
-
 const jsonLd = {
   "@context": "https://schema.org",
   "@graph": [
     {
       "@type": "WebSite",
-      "@id": "https://the-rabbit-of-lunaria.vercel.app/#website",
-      "url": "https://the-rabbit-of-lunaria.vercel.app",
+      "@id": "https://www.themadrigueradelunaria.com/#website",
+      "url": "https://www.themadrigueradelunaria.com",
       "name": "La madriguera de Lunaria",
       "description": "Lecturas de tarot y agendamiento de citas.",
       "publisher": {
-        "@id": "https://the-rabbit-of-lunaria.vercel.app/#organization",
+        "@id": "https://www.themadrigueradelunaria.com/#organization",
       },
       "inLanguage": "es-MX",
     },
     {
       "@type": "Organization",
-      "@id": "https://the-rabbit-of-lunaria.vercel.app/#organization",
+      "@id": "https://www.themadrigueradelunaria.com/#organization",
       "name": "La madriguera de Lunaria",
-      "url": "https://the-rabbit-of-lunaria.vercel.app",
+      "url": "https://www.themadrigueradelunaria.com",
       "logo": {
         "@type": "ImageObject",
-        "url": "https://the-rabbit-of-lunaria.vercel.app/logo.png",
+        "url": "https://www.themadrigueradelunaria.com/logo.png",
         "width": 200,
         "height": 200,
       },
@@ -68,24 +63,17 @@ const jsonLd = {
   ],
 };
 
-import { LenisProvider } from '@/context/LenisProvider';
-
-import PageTransition from '@/components/PageTransition';
-
 export default function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
-  const pathname = usePathname()
-  const isStudioPage = pathname.startsWith('/studio')
-
   return (
-    <html lang="en">
+    <html lang="es">
       <head>
         <Script
           src="https://cdn.jsdelivr.net/gh/bigdatacloudapi/js-reverse-geocode-client@latest/bigdatacloud_reverse_geocode.min.js"
-          strategy="beforeInteractive"
+          strategy="afterInteractive"
         />
         <script
           type="application/ld+json"
@@ -93,21 +81,9 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${cinzelDecorative.variable} ${playfairDisplay.variable} ${cormorantGaramond.variable} antialiased bg-gray-900 text-white ${!isStudioPage ? 'overflow-x-hidden' : ''}`}
+        className={`${geistSans.variable} ${geistMono.variable} ${cinzelDecorative.variable} ${playfairDisplay.variable} ${cormorantGaramond.variable} antialiased bg-gray-900 text-white`}
       >
-        <BackgroundMusicProvider>
-          <LenisProvider>
-            <div className={`flex flex-col min-h-screen ${!isStudioPage ? 'overflow-x-hidden' : ''}`}>
-              {!isStudioPage && <Header />}
-              <main className={`flex-grow ${!isStudioPage ? 'overflow-x-hidden' : ''}`}>
-                <PageTransition>{children}</PageTransition>
-              </main>
-              {!isStudioPage && <AppFooter />}
-              {/* Sistema de notificaciones de música */}
-              <GlobalMusicNotifications />
-            </div>
-          </LenisProvider>
-        </BackgroundMusicProvider>
+        <LayoutClient>{children}</LayoutClient>
       </body>
     </html>
   );

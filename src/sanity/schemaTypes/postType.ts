@@ -58,6 +58,7 @@ export const postType = defineType({
     defineField({
       name: 'title',
       type: 'string',
+      validation: Rule => Rule.required().error('El título es obligatorio'),
     }),
     defineField({
       name: 'slug',
@@ -65,6 +66,7 @@ export const postType = defineType({
       options: {
         source: 'title',
       },
+      validation: Rule => Rule.required().error('El slug es obligatorio'),
     }),
     defineField({
       name: 'authors',
@@ -111,10 +113,12 @@ export const postType = defineType({
     defineField({
       name: 'publishedAt',
       type: 'datetime',
+      validation: Rule => Rule.required().error('La fecha de publicación es obligatoria'),
     }),
     defineField({
       name: 'body',
       type: 'blockContent',
+      validation: Rule => Rule.required().error('El contenido del artículo es obligatorio'),
     }),
   ],
  preview: {

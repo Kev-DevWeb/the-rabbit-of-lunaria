@@ -19,7 +19,7 @@ const firebaseConfig = {
 const app = getApps().length ? getApps()[0] : initializeApp(firebaseConfig);
 const db = getFirestore(app);
 
-// Inicializa Analytics solo si es compatible con el navegador
-const analytics = isSupported().then(yes => yes ? getAnalytics(app) : null);
+// Inicializa Analytics solo si es compatible con el navegador y hay configuración
+const analytics = isSupported().then(yes => yes && firebaseConfig.projectId ? getAnalytics(app) : null);
 
 export { db, analytics };

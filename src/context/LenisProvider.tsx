@@ -30,16 +30,19 @@ export const LenisProvider = ({ children }: { children: React.ReactNode }) => {
       }
     });
 
+    let rafId: number;
+
     function raf(time: number) {
       newLenis.raf(time);
-      requestAnimationFrame(raf);
+      rafId = requestAnimationFrame(raf);
     }
 
-    requestAnimationFrame(raf);
+    rafId = requestAnimationFrame(raf);
 
     setLenis(newLenis);
 
     return () => {
+      cancelAnimationFrame(rafId);
       newLenis.destroy();
     };
   }, [isStudioPage]);

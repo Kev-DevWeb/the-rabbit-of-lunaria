@@ -366,7 +366,7 @@ const SobreMiPage = () => {
                 <Star className="w-12 h-12 text-purple-300 mb-4" />
                 <h4 className="text-xl font-semibold text-purple-200 mb-3">Tarot - Arcanos Mayores</h4>
                 <ul className="text-gray-300 space-y-2 text-sm">
-                  <li>• Lecturas con 21 Arcanos Mayores</li>
+                  <li>• Lecturas con 22 Arcanos Mayores</li>
                   <li>• Interpretación Simbólica Profunda</li>
                   <li>• Guía para Decisiones Importantes</li>
                   <li>• Conexión con tu Propósito</li>

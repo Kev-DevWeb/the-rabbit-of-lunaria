@@ -7,6 +7,8 @@ export const readingsData: TarotReading[] = [
       description: 'Varias tiradas para pedir consejo a tus guardianes espirituales. Preguntas ilimitadas durante 30 minutos.',
       price: '$50.00 MXN',
       priceValue: 50.00,
+      priceValueUSD: 3,
+      duration: 30,
     },
     {
       id: 'past-lives',
@@ -14,6 +16,8 @@ export const readingsData: TarotReading[] = [
       description: 'Explora tus vidas pasadas y cómo influyen en tu presente. Preguntas ilimitadas de 30 minutos respecto a las vidas para comprender tu presente.',
       price:'$100.00 MXN',
       priceValue: 100.00,
+      priceValueUSD: 5,
+      duration: 30,
     },
   {
     id: 'past-life-present',
@@ -22,5 +26,6 @@ export const readingsData: TarotReading[] = [
     duration: 60,
     price: '$150.00 MXN',
     priceValue: 150.00,
+    priceValueUSD: 8,
   }
 ];

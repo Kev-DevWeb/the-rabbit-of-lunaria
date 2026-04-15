@@ -33,20 +33,30 @@ const AppFooter = () => {
     >
       {/* Estrellas decorativas de fondo */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-30">
-        {[...Array(20)].map((_, i) => (
-          <div
-            key={i}
-            className="absolute bg-purple-300 rounded-full animate-pulse"
-            style={{
-              width: Math.random() * 3 + 1 + 'px',
-              height: Math.random() * 3 + 1 + 'px',
-              left: Math.random() * 100 + '%',
-              top: Math.random() * 100 + '%',
-              animationDelay: Math.random() * 3 + 's',
-              animationDuration: Math.random() * 2 + 2 + 's',
-            }}
-          />
-        ))}
+        {[...Array(20)].map((_, i) => {
+          // Posiciones determinísticas para evitar hydration mismatch
+          const seed = (i + 1) * 7919; // Primo para distribución
+          const w = ((seed * 13) % 30) / 10 + 1;
+          const h = ((seed * 17) % 30) / 10 + 1;
+          const l = ((seed * 23) % 1000) / 10;
+          const t = ((seed * 29) % 1000) / 10;
+          const delay = ((seed * 31) % 30) / 10;
+          const dur = ((seed * 37) % 20) / 10 + 2;
+          return (
+            <div
+              key={i}
+              className="absolute bg-purple-300 rounded-full animate-pulse"
+              style={{
+                width: w + 'px',
+                height: h + 'px',
+                left: l + '%',
+                top: t + '%',
+                animationDelay: delay + 's',
+                animationDuration: dur + 's',
+              }}
+            />
+          );
+        })}
       </div>
 
       <div className="relative z-10 max-w-6xl mx-auto px-4 py-8">

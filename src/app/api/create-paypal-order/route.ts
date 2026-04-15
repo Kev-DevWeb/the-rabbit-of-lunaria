@@ -42,7 +42,7 @@ export async function POST(request: Request) {
     let currency_code = 'MXN';
 
     if (currency === 'USD') {
-      price = Math.round(price * 0.05443);
+      price = reading.priceValueUSD;
       currency_code = 'USD';
     }
 

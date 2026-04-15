@@ -70,7 +70,7 @@ export async function POST(request: Request) {
             <p><em>Lunaria</em></p>
           </div>
           <div style="text-align: center; margin-top: 40px;">
-            <p style="font-size: 12px; color: #8a6e9e;">&copy; 2025 La Madriguera de Lunaria. Todos los derechos reservados.</p>
+            <p style="font-size: 12px; color: #8a6e9e;">&copy; ${new Date().getFullYear()} La Madriguera de Lunaria. Todos los derechos reservados.</p>
           </div>
         </div>
       `,

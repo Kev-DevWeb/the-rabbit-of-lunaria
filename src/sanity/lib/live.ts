@@ -1,6 +1,19 @@
-// Querying with "sanityFetch" will keep content automatically updated
-// Before using it, import and render "<SanityLive />" in your layout, see
-// https://github.com/sanity-io/next-sanity#live-content-api for more information.
+/**
+ * Sanity Live Content API
+ * 
+ * NOTA: Este archivo está configurado pero NO activado.
+ * Para activar live preview en tiempo real:
+ * 1. Importar `SanityLive` en el layout raíz
+ * 2. Agregar `<SanityLive />` dentro del body
+ * 3. Usar `sanityFetch` en vez de `client.fetch` en los componentes
+ * 
+ * Beneficio: Los contenidos se actualizan automáticamente sin recargar.
+ * Costo: Más conexiones WebSocket activas.
+ * 
+ * Para producción, se recomienda usar ISR (revalidate) en vez de Live API
+ * para mejor rendimiento. Live API es ideal para modo preview/draft.
+ */
+
 import { defineLive } from "next-sanity/live";
 import { client } from './client'
 

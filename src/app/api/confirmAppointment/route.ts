@@ -149,7 +149,7 @@ export async function GET(request: Request) {
             <p><a href="${calendarLink}" target="_blank" class="link">Añadir a Google Calendar</a></p>
           </div>
           <div class="footer">
-            <p class="footer-text">&copy; 2025 La Madriguera de Lunaria. Todos los derechos reservados.</p>
+            <p class="footer-text">&copy; ${new Date().getFullYear()} La Madriguera de Lunaria. Todos los derechos reservados.</p>
           </div>
         </div>
       </body>

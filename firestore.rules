@@ -2,14 +2,15 @@ rules_version = '2';
 
 service cloud.firestore {
   match /databases/{database}/documents {
-    // Permite que cualquier persona lea las citas para ver la disponibilidad
-    // y cree nuevas citas. Esto es para un sistema de reservas público.
+    // Sistema de reservas de citas de tarot
     match /bookings/{bookingId} {
+      // Cualquier persona puede leer (para ver disponibilidad de horarios)
+      // y crear nuevas citas (reservas públicas)
       allow read, create: if true;
 
-      // Para una aplicación en producción, considera reglas más seguras.
-      // Por ejemplo, no permitir que nadie actualice o elimine citas.
-      allow update, delete: if true;
+      // Solo las funciones del servidor (Firebase Admin SDK) pueden
+      // actualizar o eliminar citas. El Admin SDK bypassa estas reglas.
+      allow update, delete: if false;
     }
   }
 }

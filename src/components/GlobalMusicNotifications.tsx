@@ -98,7 +98,6 @@ const MusicNotificationComponent: React.FC<MusicNotificationProps> = ({
 export const GlobalMusicNotifications: React.FC = () => {
   const { notifications, closeNotification } = useBackgroundMusic();
 
-  console.log('🎯 GlobalMusicNotifications rendered with notifications:', notifications?.length || 0);
 
   if (!notifications || notifications.length === 0) {
     return null;

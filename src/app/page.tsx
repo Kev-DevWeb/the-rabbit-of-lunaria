@@ -24,12 +24,6 @@ export default function Home() {
     }
   }, []);
 
-  // El audio solo se dispara por botón del overlay
-  const handleStartExperience = () => {
-    // Esta función se pasa a la cinemática, pero la lógica del audio de fondo
-    // ahora es manejada por el AudioProvider y el MuteButton. No se necesita código aquí.
-  };
-
   const handleCinematicComplete = () => {
     setIsCinematicDone(true);
     setShowCinematic(false);
@@ -46,7 +40,7 @@ export default function Home() {
       {/* Capa de la cinemática inicial - Siempre presente pero oculta/visible */}
       {showCinematic && (
         <div className="fixed top-0 left-0 w-full h-screen z-50 cinematic-intro">
-          <StarrySky onComplete={handleCinematicComplete} onEnter={handleStartExperience} />
+          <StarrySky onComplete={handleCinematicComplete} />
         </div>
       )}
 

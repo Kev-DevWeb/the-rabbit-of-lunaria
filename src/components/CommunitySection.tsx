@@ -148,13 +148,13 @@ const CommunitySection = () => {
         
         <div className="flex items-end justify-center w-full mt-16 gap-8 md:gap-12 relative" style={{ minHeight: '180px' }}>
           <div ref={potion1Ref} className="mb-2 sm:mb-10" style={{ borderRadius: 24 }}>
-            <Image src="/potion1.svg" alt="Poción mágica 1" width={100} height={170} priority style={{ filter: 'drop-shadow(0 0 32px #ad84f7b8) drop-shadow(0 0 12px #a259ffa9)' }} />
+            <Image src="/potion1.svg" alt="Poción mágica 1" width={100} height={170} priority style={{ filter: 'drop-shadow(0 0 32px #ad84f7b8) drop-shadow(0 0 12px #a259ffa9)', width: 'auto', height: 'auto' }} />
           </div>
           <div ref={cauldronRef} className="mb-2 sm:mb-8" style={{ borderRadius: 32 }}>
-            <Image src="/cauldron.svg" alt="Caldero mágico" width={140} height={130} priority style={{ filter: 'drop-shadow(0 0 44px #a259ff77) drop-shadow(0 0 17px #773389a0)' }} />
+            <Image src="/cauldron.svg" alt="Caldero mágico" width={140} height={130} priority style={{ filter: 'drop-shadow(0 0 44px #a259ff77) drop-shadow(0 0 17px #773389a0)', width: 'auto', height: 'auto' }} />
           </div>
           <div ref={potion2Ref} className="mb-2 sm:mb-10" style={{ borderRadius: 24 }}>
-            <Image src="/potion2.svg" alt="Poción mágica 2" width={100} height={170} priority style={{ filter: 'drop-shadow(0 0 32px #ad84f7b3) drop-shadow(0 0 12px #b774ff96)' }} />
+            <Image src="/potion2.svg" alt="Poción mágica 2" width={100} height={170} priority style={{ filter: 'drop-shadow(0 0 32px #ad84f7b3) drop-shadow(0 0 12px #b774ff96)', width: 'auto', height: 'auto' }} />
           </div>
         </div>
       </div>

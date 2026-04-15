@@ -33,6 +33,17 @@ const HangingElements = () => {
     };
   }, [isHovering]);
 
+  useEffect(() => {
+    // Precarga nativa de imágenes para garantizar cache sin depender de componentes React
+    // Esto asegura que la animación fluya sin cortes la primera vez que se hace hover
+    if (typeof window !== 'undefined') {
+      [...Array(10)].forEach((_, i) => {
+        const img = new window.Image();
+        img.src = `/CELL ${i + 1}_Grimorio.png`;
+      });
+    }
+  }, []);
+
   return (
     <div className="absolute inset-0 w-full h-full pointer-events-none z-0">
       {/* Composición en capas superpuestas - centrada - MÁS GRANDE */}
@@ -46,6 +57,7 @@ const HangingElements = () => {
                 src="/CELL_Luna.png" 
                 alt="Luna Llena" 
                 fill 
+                sizes="(max-width: 768px) 100vw, 400px"
                 priority 
                 style={{ objectFit: 'contain' }} 
               />
@@ -64,14 +76,16 @@ const HangingElements = () => {
             />
           </div>
           
-          {/* Capa 3: Grimorio SOBRE el conejo (frente) - con animación hover - Ligeramente más abajo */}
+          {/* Capa 3: Grimorio SOBRE el conejo (frente) - Ligeramente más abajo */}
           <div 
             className="absolute inset-0 flex items-center justify-center z-20 pointer-events-auto cursor-pointer"
             style={{ transform: 'translateY(40px)' }}
             onMouseEnter={() => setIsHovering(true)}
             onMouseLeave={() => setIsHovering(false)}
           >
-            <Image 
+            {/* Usamos etiqueta <img> nativa en vez del <Image> de Next.js para evitar que la optimización (WEBP) 
+                recorte cuadros o se demore en procesar las texturas rápidas durante la animación */}
+            <img 
               src={`/CELL ${currentFrame}_Grimorio.png`}
               alt="Grimorio Mágico" 
               width={220} 

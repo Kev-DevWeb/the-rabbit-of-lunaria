@@ -35,7 +35,7 @@ declare global {
 interface ReadingCardProps {
   reading: TarotReading;
   onSelect: (reading: TarotReading) => void;
-  formatPrice: (price: number) => string;
+  formatPrice: (reading: TarotReading) => string;
 }
 const ReadingCard = ({ reading, onSelect, formatPrice }: ReadingCardProps) => {
   const cardRef = useRef<HTMLDivElement>(null);
@@ -59,7 +59,7 @@ const ReadingCard = ({ reading, onSelect, formatPrice }: ReadingCardProps) => {
         <p className="mt-2 text-gray-300 font-cormorant-garamond text-lg">{reading.description}</p>
       </div>
       <div className="mt-4 flex justify-between items-end">
-        <span className="text-2xl font-bold text-yellow-400">{formatPrice(reading.priceValue)}</span>
+        <span className="text-2xl font-bold text-yellow-400">{formatPrice(reading)}</span>
         <span className="text-yellow-300 opacity-0 group-hover:opacity-100 transition-opacity duration-300">Seleccionar →</span>
       </div>
     </div>
@@ -113,12 +113,11 @@ const BookingSystem = () => {
     }
   }, []);
 
-  const formatPrice = (price: number) => {
+  const formatPrice = (reading: TarotReading) => {
     if (currency === 'USD') {
-      const priceInUSD = Math.round(price * 0.05443);
-      return `${priceInUSD} USD`;
+      return `${reading.priceValueUSD} USD`;
     }
-    return `${price.toFixed(2)} MXN`;
+    return `${reading.priceValue.toFixed(2)} MXN`;
   };
 
   useGSAP(() => {
@@ -234,7 +233,7 @@ const BookingSystem = () => {
 
   const handlePayPalClick = (_data: Record<string, unknown>, actions: { reject: () => void; }) => {
     // Validar el formulario ANTES de abrir el popup de PayPal
-    const emailRegex = /^[^"]+@[^"]+\.[^"]+$/;
+    const emailRegex = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
     if (!emailRegex.test(userEmail) || !userName.trim()) {
       setBookingError('Por favor, introduce un nombre y correo electrónico válidos antes de pagar.');
       return actions.reject();
@@ -296,7 +295,7 @@ const BookingSystem = () => {
             <button onClick={() => { setSelectedReading(null); resetBookingState(); }} className="text-purple-300 hover:text-white transition-colors">&larr; Cambiar de lectura</button>
             <div className="text-right">
               <p className="text-lg text-gray-300">{selectedReading.title}</p>
-              <p className="text-2xl font-bold text-yellow-400">{formatPrice(selectedReading.priceValue)}</p>
+              <p className="text-2xl font-bold text-yellow-400">{formatPrice(selectedReading)}</p>
             </div>
           </div>
           <div className="bg-black/70 backdrop-blur-md p-4 sm:p-8 rounded-lg border border-purple-400/30 flex flex-col md:flex-row gap-8">
@@ -338,7 +337,7 @@ const BookingSystem = () => {
                     <button onClick={() => setPaymentMethod('bankTransfer')} className={`px-6 py-3 rounded-lg transition-colors ${paymentMethod === 'bankTransfer' ? 'bg-yellow-500 text-black' : 'bg-purple-900/50 text-white hover:bg-purple-800/70'}`}>
                         Transferencia
                     </button>
-                    <button onClick={() => setPaymentMethod('paypal')} className={`px-6 py-3 rounded-lg transition-colors ${paymentMethod === 'paypal' ? 'bg-yellow-500 text-black' : 'bg-purple-900/so text-white hover:bg-purple-800/70'}`}>
+                    <button onClick={() => setPaymentMethod('paypal')} className={`px-6 py-3 rounded-lg transition-colors ${paymentMethod === 'paypal' ? 'bg-yellow-500 text-black' : 'bg-purple-900/50 text-white hover:bg-purple-800/70'}`}>
                         PayPal
                     </button>
                   </div>

@@ -191,10 +191,10 @@ const ServicesSection = () => {
                 style={{ objectFit: 'cover' }}
               />
             </div>
-            {/* Mantel morado, centrado sobre la mesa */}
+            {/* Mantel morado, centrado sobre la mesa pero un poco más abajo */}
             <div
               ref={mantelRef}
-              className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2"
+              className="absolute top-[56%] left-1/2 -translate-x-1/2 -translate-y-1/2"
               style={{
                 width: 'min(78%, 500px)',
                 height: 'min(66%, 320px)',
@@ -207,30 +207,30 @@ const ServicesSection = () => {
               }}
             />
             {/* Cartas (por encima de todo) - Layout responsivo */}
-            <div ref={cardsRef} className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" style={{ zIndex: 10, width: 'min(80%, 480px)', height: 'min(80%, 350px)' }}>
+            <div ref={cardsRef} className="absolute top-[54%] left-1/2 -translate-x-1/2 -translate-y-1/2" style={{ zIndex: 10, width: 'min(80%, 480px)', height: 'min(80%, 350px)' }}>
               {/* Desktop layout - 3 cartas horizontales */}
               <div className="hidden sm:block">
                 <div className="absolute card-1 service-card" style={{ left: '15%', top: '35%', maxWidth: '120px' }}>
-                  <Image src="/cartablanca.jpg" alt="Carta de Tarot 1" width={120} height={200} className="rounded-lg shadow-lg" style={{ width: '100%', height: 'auto' }} />
+                  <Image src="/cartablanca.jpg" alt="Carta de Tarot 1" width={120} height={200} className="rounded-lg shadow-lg w-full h-auto" />
                 </div>
                 <div className="absolute card-2 service-card" style={{ left: '40%', top: '35%', maxWidth: '120px' }}>
-                  <Image src="/lunacarta.jpg" alt="Carta de Tarot 2" width={120} height={200} className="rounded-lg shadow-lg" style={{ width: '100%', height: 'auto' }} />
+                  <Image src="/lunacarta.jpg" alt="Carta de Tarot 2" width={120} height={200} className="rounded-lg shadow-lg w-full h-auto" />
                 </div>
                 <div className="absolute card-3 service-card" style={{ left: '65%', top: '35%', maxWidth: '120px' }}>
-                  <Image src="/cartamano.jpg" alt="Carta de Tarot 3" width={120} height={200} className="rounded-lg shadow-lg" style={{ width: '100%', height: 'auto' }} />
+                  <Image src="/cartamano.jpg" alt="Carta de Tarot 3" width={120} height={200} className="rounded-lg shadow-lg w-full h-auto" />
                 </div>
               </div>
               
               {/* Mobile layout - 2 cartas arriba, 1 carta abajo centrada */}
               <div className="block sm:hidden">
                 <div className="absolute card-1 service-card" style={{ left: '20%', top: '20%', width: '25%' }}>
-                  <Image src="/cartablanca.jpg" alt="Carta de Tarot 1" width={120} height={200} className="rounded-lg shadow-lg" style={{ width: '100%', height: 'auto' }} />
+                  <Image src="/cartablanca.jpg" alt="Carta de Tarot 1" width={120} height={200} className="rounded-lg shadow-lg w-full h-auto" />
                 </div>
                 <div className="absolute card-2 service-card" style={{ left: '55%', top: '20%', width: '25%' }}>
-                  <Image src="/lunacarta.jpg" alt="Carta de Tarot 2" width={120} height={200} className="rounded-lg shadow-lg" style={{ width: '100%', height: 'auto' }} />
+                  <Image src="/lunacarta.jpg" alt="Carta de Tarot 2" width={120} height={200} className="rounded-lg shadow-lg w-full h-auto" />
                 </div>
                 <div className="absolute card-3 service-card" style={{ left: '37.5%', top: '55%', width: '25%' }}>
-                  <Image src="/cartamano.jpg" alt="Carta de Tarot 3" width={120} height={200} className="rounded-lg shadow-lg" style={{ width: '100%', height: 'auto' }} />
+                  <Image src="/cartamano.jpg" alt="Carta de Tarot 3" width={120} height={200} className="rounded-lg shadow-lg w-full h-auto" />
                 </div>
               </div>
             </div>

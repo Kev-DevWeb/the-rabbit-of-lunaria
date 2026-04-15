@@ -109,14 +109,7 @@ export const useMusicNotifications = () => {
       timestamp: Date.now()
     };
 
-    console.log('🔔 Creating music notification:', { 
-      id, 
-      title, 
-      channel, 
-      thumbnail,
-      timestamp: new Date().toLocaleTimeString() 
-    });
-    
+
     setNotifications(prev => {
       // Evitar notificaciones duplicadas del mismo track en menos de 2 segundos
       const hasDuplicate = prev.some(n => 
@@ -124,12 +117,10 @@ export const useMusicNotifications = () => {
       );
       
       if (hasDuplicate) {
-        console.log('🚫 Duplicate notification prevented:', title);
         return prev;
       }
 
       const updated = [...prev, newNotification];
-      console.log('📋 Updated notifications list:', updated.map(n => n.title));
       return updated;
     });
   };

@@ -14,6 +14,7 @@ export type TarotReading = {
   title: string;
   description: string;
   price: string;
-  priceValue: number; // Added for numerical price
-  duration?: number; // Optional, as seen in readings-data.ts
+  priceValue: number; // Precio en MXN
+  priceValueUSD: number; // Precio fijo en USD (evita tasa de cambio hardcodeada)
+  duration?: number; // Duración en minutos
 };

@@ -6,7 +6,7 @@ export const metadata: Metadata = {
     default: 'La Madriguera de Lunaria | Tarot y Guía Espiritual',
     template: '%s | La Madriguera de Lunaria'
   },
-  description: 'Descubre claridad y guía espiritual a través del tarot con los 21 Arcanos Mayores. Un espacio mágico para brujit@s, baby witches y buscadores espirituales. Lecturas de tarot, comunicación espiritual y enseñanza para nuevos brujos.',
+  description: 'Descubre claridad y guía espiritual a través del tarot con los 22 Arcanos Mayores. Un espacio mágico para brujit@s, baby witches y buscadores espirituales. Lecturas de tarot, comunicación espiritual y enseñanza para nuevos brujos.',
   keywords: [
     'tarot',
     'lectura de tarot',
@@ -43,7 +43,7 @@ export const metadata: Metadata = {
     url: 'https://www.themadrigueradelunaria.com',
     siteName: 'La Madriguera de Lunaria',
     title: 'La Madriguera de Lunaria | Tarot y Guía Espiritual',
-    description: 'Descubre claridad y guía espiritual a través del tarot con los 21 Arcanos Mayores. Un espacio mágico para brujit@s y buscadores espirituales.',
+    description: 'Descubre claridad y guía espiritual a través del tarot con los 22 Arcanos Mayores. Un espacio mágico para brujit@s y buscadores espirituales.',
     images: [
       {
         url: '/Plantilla diseño.png',
@@ -56,7 +56,7 @@ export const metadata: Metadata = {
   twitter: {
     card: 'summary_large_image',
     title: 'La Madriguera de Lunaria | Tarot y Guía Espiritual',
-    description: 'Descubre claridad y guía espiritual a través del tarot con los 21 Arcanos Mayores.',
+    description: 'Descubre claridad y guía espiritual a través del tarot con los 22 Arcanos Mayores.',
     images: ['/Plantilla diseño.png'],
   },
   robots: {

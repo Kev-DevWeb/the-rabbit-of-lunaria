@@ -114,7 +114,6 @@ class YouTubePlayerService {
         },
         events: {
           onReady: () => {
-            console.log('🎥 YouTube Player ready');
             this.loadPlaylistInfo();
             this.currentState.isLoaded = true;
             this.updateState();
@@ -124,7 +123,6 @@ class YouTubePlayerService {
             this.handleStateChange(event as { data: number; target: YouTubePlayer });
           },
           onError: (event: unknown) => {
-            console.error('❌ YouTube Player error:', event);
             reject(new Error(`YouTube Player error: ${String(event)}`))
           }
         }
@@ -139,7 +137,6 @@ class YouTubePlayerService {
     try {
       if (this.player && this.player.getPlaylist) {
         const playlist = this.player.getPlaylist();
-        console.log('🎵 Playlist loaded:', playlist);
         
         // Primero cargar con placeholders para rapidez
         this.currentState.playlist = playlist?.map((videoId: string, index: number) => ({
@@ -158,13 +155,11 @@ class YouTubePlayerService {
         }
       }
     } catch (error) {
-      console.error('❌ Error loading playlist info:', error);
     }
   }
 
   private async loadRealVideoInfo(videoIds: string[]): Promise<void> {
     try {
-      console.log('🔍 Cargando información real de videos:', videoIds);
       
       // Procesar videos uno por uno para evitar rate limiting
       for (let i = 0; i < videoIds.length; i++) {
@@ -173,7 +168,6 @@ class YouTubePlayerService {
         try {
           // Usar oEmbed API de YouTube (gratuito, sin API key)
           const oembedUrl = `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`;
-          console.log(`🔗 Obteniendo info para video ${i + 1}/${videoIds.length}: ${videoId}`);
           
           const response = await fetch(oembedUrl);
           
@@ -189,32 +183,23 @@ class YouTubePlayerService {
                 thumbnail: data.thumbnail_url || `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`
               };
               
-              console.log(`✅ Info actualizada para video ${i + 1}:`, {
-                title: this.currentState.playlist[i].title,
-                channel: this.currentState.playlist[i].channelTitle
-              });
-              
               // Si es el video actual, actualizar inmediatamente
               if (i === this.currentState.currentIndex) {
                 this.updateCurrentTrack();
               }
             }
           } else {
-            console.warn(`⚠️ oEmbed falló para video ${videoId}, usando fallback`);
           }
           
           // Pequeño delay para evitar rate limiting
           await new Promise(resolve => setTimeout(resolve, 200));
           
         } catch (error) {
-          console.warn(`⚠️ Error obteniendo info para video ${videoId}:`, error);
         }
       }
       
-      console.log('✅ Carga de información de videos completada');
       
     } catch (error) {
-      console.error('❌ Error en carga de información real:', error);
     }
   }
 
@@ -234,20 +219,17 @@ class YouTubePlayerService {
     
     switch (event.data) {
       case YT.PlayerState.PLAYING:
-        console.log('▶️ YouTube: Playing');
         this.currentState.isPlaying = true;
         this.updateCurrentTrack();
         this.updateState();
         break;
         
       case YT.PlayerState.PAUSED:
-        console.log('⏸️ YouTube: Paused');
         this.currentState.isPlaying = false;
         this.updateState();
         break;
         
       case YT.PlayerState.ENDED:
-        console.log('⏭️ YouTube: Track ended');
         // El player automáticamente pasa a la siguiente canción en playlist mode
         setTimeout(() => {
           this.updateCurrentTrack();
@@ -268,7 +250,6 @@ class YouTubePlayerService {
           this.currentState.currentIndex = currentIndex;
           this.currentState.currentTrack = this.currentState.playlist[currentIndex];
           
-          console.log('🎶 Current track updated:', this.currentState.currentTrack);
           
           // Si cambió la canción O si se actualizó la información del track actual
           const titleChanged = previousTrack?.title !== this.currentState.currentTrack.title;
@@ -276,16 +257,13 @@ class YouTubePlayerService {
                              previousTrack.title !== this.currentState.currentTrack.title;
           
           if (titleChanged) {
-            console.log('🔄 Track changed from:', previousTrack?.title, 'to:', this.currentState.currentTrack.title);
             this.updateState();
           } else if (infoUpdated) {
-            console.log('📝 Track info updated:', this.currentState.currentTrack.title);
             this.updateState();
           }
         }
       }
     } catch (error) {
-      console.error('❌ Error updating current track:', error);
     }
   }
 
@@ -385,7 +363,6 @@ class YouTubePlayerService {
           this.currentState.isMuted = false;
           this.currentState.isPlaying = true;
           this.updateState();
-          console.log('🎵 Fade in completed');
           resolve();
         } else {
           // Incrementar volumen gradualmente
@@ -427,7 +404,6 @@ class YouTubePlayerService {
           this.currentState.isMuted = true;
           this.currentState.isPlaying = false;
           this.updateState();
-          console.log('🔇 Fade out completed');
           resolve();
         } else {
           // Decrementar volumen gradualmente
@@ -441,7 +417,6 @@ class YouTubePlayerService {
   // Toggle con fade automático
   async togglePlayPauseWithFade(): Promise<void> {
     if (!this.player) {
-      console.warn('⚠️ Player no disponible para toggle');
       return;
     }
 
@@ -450,18 +425,9 @@ class YouTubePlayerService {
     const YT = window.YT;
     const isCurrentlyPlaying = playerState === YT.PlayerState.PLAYING;
     
-    console.log('🎛️ Toggle state:', {
-      playerState,
-      isCurrentlyPlaying,
-      cachedIsPlaying: this.currentState.isPlaying,
-      isMuted: this.currentState.isMuted
-    });
-
     if (isCurrentlyPlaying) {
-      console.log('🔇 Iniciando fade out (pausar)...');
       await this.fadeOut(1500);
     } else {
-      console.log('🎵 Iniciando fade in (reproducir)...');
       await this.fadeIn(2000);
     }
   }

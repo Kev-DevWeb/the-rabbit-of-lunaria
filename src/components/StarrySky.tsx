@@ -7,8 +7,8 @@ import gsap from 'gsap';
 // Sub-componentes de la cinemática
 const ForestScene = () => (
   <div className="absolute inset-0 w-full h-full">
-    <Image src="/cabañanoche.jpg" alt="Cabaña en el bosque" fill sizes="100vw" style={{ objectFit: 'cover' }} className="z-0" priority />
-    <Image src="/siluetabosque.png" alt="Silueta del bosque" fill sizes="100vw" style={{ objectFit: 'cover' }} className="z-10" priority />
+    <Image src="/cabañanoche.jpg" alt="Cabaña en el bosque" fill sizes="(max-width: 768px) 300px, 350px" style={{ objectFit: 'cover' }} className="z-0" priority />
+    <Image src="/siluetabosque.png" alt="Silueta del bosque" fill sizes="(max-width: 768px) 300px, 350px" style={{ objectFit: 'cover' }} className="z-10" priority />
     <div className="absolute inset-0 z-10" style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 40%)' }} />
     <div className="absolute top-[57%] left-[60%] w-3 h-3 bg-orange-300 rounded-full z-20 lantern" style={{ boxShadow: '0 0 25px 15px rgba(255, 165, 0, 0.7)' }} />
     <div className="absolute w-1 h-1 bg-yellow-200 rounded-full z-20 firefly1" style={{ top: '70%', left: '30%', boxShadow: '0 0 10px 5px rgba(255, 255, 0, 0.7)' }} />
@@ -46,10 +46,11 @@ const StarrySky = ({ onComplete }: StarrySkyProps) => {
           audioRef.current.volume = 0.5; // Volumen moderado
           const playPromise = audioRef.current.play();
           if (playPromise !== undefined) {
-            playPromise.then(() => {
-              console.log("Audio de noche reproduciéndose correctamente");
-            }).catch(error => {
-              console.warn("Audio play failed - esto es normal si no hay interacción del usuario:", error);
+            playPromise.catch(error => {
+              // Ignorar errores esperados de autoplay o falta de caché en dev
+              if (error.name !== 'NotAllowedError' && error.name !== 'AbortError' && error.name !== 'NotSupportedError') {
+                console.warn("Audio play failed:", error);
+              }
             });
           }
         }
@@ -120,10 +121,10 @@ const StarrySky = ({ onComplete }: StarrySkyProps) => {
       audioRef.current.volume = 0.5;
       const playPromise = audioRef.current.play();
       if (playPromise !== undefined) {
-        playPromise.then(() => {
-          console.log("Audio de noche iniciado por interacción del usuario");
-        }).catch(error => {
-          console.error("Error al reproducir audio:", error);
+        playPromise.catch(error => {
+          if (error.name !== 'NotAllowedError' && error.name !== 'AbortError' && error.name !== 'NotSupportedError') {
+            console.error("Error al reproducir audio:", error);
+          }
         });
       }
     }
