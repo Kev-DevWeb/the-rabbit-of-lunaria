@@ -1,36 +1,58 @@
-This is a [Next.js](https://nextjs.org) project bootstrapped with [`create-next-app`](https://nextjs.org/docs/app/api-reference/cli/create-next-app).
+# The Rabbit of Lunaria 🐇🌙
+> Blog y sistema de citas para lecturas de tarot, con experiencia de navegación fluida y pagos integrados
 
-## Getting Started
+[![Next.js](https://img.shields.io/badge/Next.js-black?logo=next.js)](https://nextjs.org/)
+[![Sanity](https://img.shields.io/badge/CMS-Sanity-red?logo=sanity)](https://www.sanity.io/)
+[![PayPal](https://img.shields.io/badge/Pagos-PayPal-blue?logo=paypal)](https://developer.paypal.com/)
+[![Vercel](https://img.shields.io/badge/Deploy-Vercel-black?logo=vercel)](https://vercel.com)
 
-First, run the development server:
+## ✨ Características
+
+- 🔮 **Reserva de lecturas**: Agenda tu sesión de tarot directamente desde la web
+- 💳 **Pagos integrados**: Proceso de pago seguro mediante PayPal
+- 📝 **Blog**: Contenido editorial gestionado con Sanity CMS
+- 🌊 **Navegación fluida**: Scroll animado con Lenis para una experiencia envolvente
+- 📱 **Diseño responsivo**: Optimizado para móvil y escritorio
+
+## 🛠️ Stack
+
+- **Frontend**: Next.js (App Router) + React + Tailwind CSS
+- **CMS**: Sanity (contenido del blog y gestión de citas)
+- **Pagos**: PayPal SDK
+- **Scroll**: Lenis (smooth scrolling)
+- **Hosting**: Vercel
+
+## 🚀 Instalación
 
 ```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
+git clone https://github.com/TU_USUARIO/the-rabbit-of-lunaria.git
+cd the-rabbit-of-lunaria
+npm install
 ```
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+Crea un archivo `.env.local` en la raíz:
 
-You can start editing the page by modifying `app/page.tsx`. The page auto-updates as you edit the file.
+```env
+# Sanity
+NEXT_PUBLIC_SANITY_PROJECT_ID=
+NEXT_PUBLIC_SANITY_DATASET=
+SANITY_API_TOKEN=
 
-This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
+# PayPal
+NEXT_PUBLIC_PAYPAL_CLIENT_ID=
+```
 
-## Learn More
+> - Credenciales de Sanity en [sanity.io/manage](https://www.sanity.io/manage)
+> - Credenciales de PayPal en [developer.paypal.com](https://developer.paypal.com/)
 
-To learn more about Next.js, take a look at the following resources:
+```bash
+npm run dev  # http://localhost:3000
+```
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## 🌐 Demo
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js) - your feedback and contributions are welcome!
+🔗 [the-rabbit-of-lunaria.vercel.app](https://the-rabbit-of-lunaria.vercel.app/)
 
-## Deploy on Vercel
+## 📄 Licencia
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
-
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/app/building-your-application/deploying) for more details.
+Proyecto privado — Todos los derechos reservados
