@@ -23,6 +23,11 @@ export default function ConfirmationPage() {
         setMessage('Tu espacio ha sido reservado. Recibirás un correo electrónico en breve con los detalles para completar el pago mediante transferencia bancaria. Tu cita se confirmará una vez recibido el pago.');
         setIsSuccess(true);
         break;
+      case 'review':
+        setTitle('Pago en revisión');
+        setMessage('Tu horario quedó apartado, pero no pudimos confirmar el pago con PayPal de inmediato. Lo revisaremos a mano y te escribiremos por correo. No intentes pagar de nuevo.');
+        setIsSuccess(true);
+        break;
       case 'cancelled':
         setTitle('Cita cancelada');
         setMessage('La cita ha sido cancelada según tu solicitud.');

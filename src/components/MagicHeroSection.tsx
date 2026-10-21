@@ -2,17 +2,14 @@
 import { useRef } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
-import dynamic from 'next/dynamic';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
 import { SplitText } from 'gsap/SplitText';
 import RabbitGrimoire from './RabbitGrimoire';
+import ForestSilhouette from './ForestSilhouette';
 
 gsap.registerPlugin(ScrollTrigger, SplitText);
-
-// La escena WebGL solo existe en el cliente
-const LunarScene = dynamic(() => import('./three/LunarScene'), { ssr: false });
 
 const MagicHeroSection = () => {
   const containerRef = useRef<HTMLElement>(null);
@@ -30,10 +27,9 @@ const MagicHeroSection = () => {
       gsap.from(split.chars, { autoAlpha: 0, y: 20, filter: 'blur(12px)', duration: 1.2, ease: 'power3.out', stagger: 0.03, delay: 0.6 });
       gsap.from('.hero-copy', { autoAlpha: 0, y: 24, duration: 1.2, ease: 'power3.out', stagger: 0.15, delay: 1.4 });
 
-      // Parallax: la luna y el conejo se quedan atrás juntos, el bosque se adelanta.
+      // Parallax: la luna y el conejo se quedan atrás juntos.
       // Va en un envoltorio propio para no pelear por yPercent con la entrada de .hero-moon.
       gsap.to('.hero-hanging', { yPercent: 25, ease: 'none', scrollTrigger: { trigger: containerRef.current, start: 'top top', end: 'bottom top', scrub: true } });
-      gsap.to('.hero-forest', { yPercent: -18, ease: 'none', scrollTrigger: { trigger: containerRef.current, start: 'top top', end: 'bottom top', scrub: true } });
 
       return () => split.revert();
     });
@@ -45,18 +41,16 @@ const MagicHeroSection = () => {
     <section
       ref={containerRef}
       aria-label="Bienvenida"
-      className="relative flex min-h-[100svh] flex-col items-center overflow-hidden bg-night px-4 pb-28 pt-24 text-center"
+      className="relative flex min-h-[100svh] flex-col items-center overflow-hidden px-4 pb-28 pt-24 text-center"
     >
-      <LunarScene className="absolute inset-0" />
       <div aria-hidden="true" className="lun-halo pointer-events-none absolute left-1/2 top-0 h-[720px] w-[720px] max-w-[160vw] -translate-x-1/2 rounded-full" />
       <div aria-hidden="true" className="lun-fog left-[-10%] top-[48%] h-56 w-[70%]" />
       <div aria-hidden="true" className="lun-fog right-[-12%] top-[58%] h-60 w-[75%] [animation-delay:-8s]" />
 
-      <div aria-hidden="true" className="hero-forest pointer-events-none absolute inset-x-0 bottom-0 h-[38vh] min-h-56">
-        <Image src="/siluetabosque.png" alt="" fill sizes="100vw" className="object-cover object-bottom opacity-90" />
+      {/* Colinas y pasto en SVG; la máscara los desvanece abajo para que el cielo siga sin corte */}
+      <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-0 h-[30vh] min-h-48 [mask-image:linear-gradient(to_bottom,black_65%,transparent)]">
+        <ForestSilhouette />
       </div>
-      {/* Funde el bosque con la siguiente sección para que no quede un corte */}
-      <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-0 z-[5] h-40 bg-gradient-to-b from-transparent to-night" />
 
       <div className="relative z-10 flex flex-col items-center">
         <div className="hero-hanging flex flex-col items-center">

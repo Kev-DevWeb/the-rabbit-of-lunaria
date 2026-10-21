@@ -75,7 +75,7 @@ const CommunitySection = () => {
     <section
       ref={sectionRef}
       aria-labelledby="comunidad-titulo"
-      className="relative flex flex-col items-center overflow-hidden border-t border-lavender/10 bg-night-800 px-4 py-32 text-center md:px-8"
+      className="relative flex flex-col items-center overflow-hidden border-t border-lavender/10 bg-night-800/45 px-4 py-32 text-center md:px-8"
     >
       <div aria-hidden="true" className="lun-fog left-[10%] top-10 h-64 w-[80%] opacity-60" />
 

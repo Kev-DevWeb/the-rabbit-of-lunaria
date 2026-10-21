@@ -1,11 +1,11 @@
 {
   "name": "La Madriguera de Lunaria",
   "short_name": "Lunaria",
-  "description": "Tarot y Guía Espiritual con los 22 Arcanos Mayores",
+  "description": "Lecturas de tarot en línea y guía espiritual",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#000000",
-  "theme_color": "#8b5cf6",
+  "background_color": "#07061a",
+  "theme_color": "#07061a",
   "orientation": "portrait-primary",
   "icons": [
     {
@@ -26,6 +26,6 @@
     }
   ],
   "categories": ["lifestyle", "spirituality", "education"],
-  "lang": "es",
+  "lang": "es-MX",
   "dir": "ltr"
 }

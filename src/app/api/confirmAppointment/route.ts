@@ -1,168 +1,114 @@
 import { NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebaseAdmin';
-import * as nodemailer from 'nodemailer';
-import { readingsData } from '@/lib/readings-data'; // Import readingsData
+import { readingsData } from '@/lib/readings-data';
+import { googleCalendarLink } from '@/lib/booking';
+import { sendMailSafe } from '@/lib/mailer';
+import { adminTransferConfirmedEmail, escapeHtml, userTransferConfirmedEmail } from '@/lib/email-templates';
 
-// Helper function to generate Google Calendar link
-function generateGoogleCalendarLink(
-  title: string,
-  description: string,
-  startDate: string, // YYYY-MM-DD
-  startTime: string, // HH:MM
-  durationMinutes: number,
-  location?: string
-): string {
-  const startDateTime = new Date(`${startDate}T${startTime}:00`);
-  const endDateTime = new Date(startDateTime.getTime() + durationMinutes * 60 * 1000);
+/**
+ * Confirmación de citas por transferencia, desde el enlace del correo de la administradora.
+ * - GET solo muestra los datos y un botón: los escáneres de correo y las vistas previas
+ *   abren enlaces solos, así que abrir el enlace no puede confirmar nada.
+ * - POST (el botón) confirma y envía los correos. Si alguno falla, el mismo botón lo reintenta.
+ */
 
-  const formatDateTime = (date: Date) => {
-    return date.toISOString().replace(/[-:]|\.\d{3}/g, '');
-  };
-
-  const formattedStart = formatDateTime(startDateTime);
-  const formattedEnd = formatDateTime(endDateTime);
-
-  const params = new URLSearchParams({
-    action: 'TEMPLATE',
-    text: title,
-    dates: `${formattedStart}/${formattedEnd}`,
-    details: description,
-    sf: 'true',
-    output: 'xml',
-  });
-
-  if (location) {
-    params.append('location', location);
-  }
-
-  return `https://calendar.google.com/calendar/render?${params.toString()}`;
+async function findByToken(token: string) {
+  const snapshot = await adminDb.collection('bookings').where('confirmToken', '==', token).limit(1).get();
+  return snapshot.empty ? null : snapshot.docs[0];
 }
 
+const page = (title: string, body: string, status = 200) =>
+  new NextResponse(
+    `<!DOCTYPE html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><title>${title}</title>
+    <style>body{margin:0;min-height:100vh;display:flex;align-items:center;justify-content:center;background:#07061a;color:#ece6ff;font-family:Georgia,serif;padding:16px}
+    main{max-width:520px;width:100%;border:1px solid rgba(233,196,106,.4);border-radius:20px;padding:32px;background:#110e2b}
+    h1{margin:0 0 16px;font-size:26px;color:#fdf8ff}dl{display:grid;grid-template-columns:auto 1fr;gap:6px 16px;margin:0 0 24px}dt{color:#a79fc9}dd{margin:0}
+    button{min-height:48px;padding:0 28px;border:0;border-radius:999px;background:#e9c46a;color:#07061a;font-size:16px;font-weight:600;cursor:pointer}
+    p{color:#d7cfef}</style></head><body><main>${body}</main></body></html>`,
+    { status, headers: { 'Content-Type': 'text/html; charset=utf-8', 'Cache-Control': 'no-store' } },
+  );
 
 export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const token = searchParams.get('token');
+  const token = new URL(request.url).searchParams.get('token');
+  const doc = token ? await findByToken(token).catch(() => null) : null;
+  if (!token || !doc) {
+    return page('Enlace no válido', '<h1>Enlace no válido</h1><p>No encontramos una cita con este enlace.</p>', 404);
+  }
 
-  if (!token) {
-    return NextResponse.redirect(new URL('/confirmation/error', request.url));
+  const a = doc.data();
+  const mailsPending = a.status === 'confirmed' && !(a.mails?.customerConfirmed && a.mails?.adminConfirmed);
+  const details = `<dl><dt>Cliente</dt><dd>${escapeHtml(a.name)}</dd><dt>Correo</dt><dd>${escapeHtml(a.email)}</dd>
+    <dt>Lectura</dt><dd>${escapeHtml(a.readingTitle)}</dd><dt>Fecha</dt><dd>${escapeHtml(a.date)} · ${escapeHtml(a.time)}</dd>
+    <dt>Estado</dt><dd>${escapeHtml(a.status)}</dd></dl>`;
+  const form = (label: string) =>
+    `<form method="post"><input type="hidden" name="token" value="${escapeHtml(token)}"><button type="submit">${label}</button></form>`;
+
+  if (a.status === 'confirmed' && !mailsPending) {
+    return page('Cita confirmada', `<h1>Esta cita ya está confirmada</h1>${details}<p>Los correos ya se enviaron.</p>`);
+  }
+  if (mailsPending) {
+    return page('Reenviar correos', `<h1>Cita confirmada, faltan correos</h1>${details}<p>Algún correo de confirmación no se pudo enviar.</p>${form('Reenviar correos')}`);
+  }
+  return page(
+    'Confirmar cita',
+    `<h1>¿Recibiste la transferencia?</h1>${details}<p>Al confirmar, se le avisa al cliente por correo.</p>${form('Confirmar cita')}`,
+  );
+}
+
+export async function POST(request: Request) {
+  const form = await request.formData().catch(() => null);
+  const token = form?.get('token');
+  const doc = typeof token === 'string' && token ? await findByToken(token).catch(() => null) : null;
+  if (!doc) {
+    return NextResponse.redirect(new URL('/confirmation/error', request.url), 303);
   }
 
   try {
-    const bookingsRef = adminDb.collection("bookings");
-    const q = bookingsRef.where("confirmToken", "==", token);
-    const querySnapshot = await q.get();
-
-    if (querySnapshot.empty) {
-      console.error("No appointment found with the provided confirmation token.");
-      return NextResponse.redirect(new URL('/confirmation/error', request.url));
+    const appointment = doc.data();
+    if (appointment.status !== 'confirmed') {
+      await doc.ref.update({ status: 'confirmed', confirmedAt: new Date().toISOString() });
     }
 
-    const appointmentDoc = querySnapshot.docs[0];
-    const appointmentRef = appointmentDoc.ref;
-    const appointmentData = appointmentDoc.data();
-
-    if (appointmentData.status === 'confirmed') {
-      return NextResponse.redirect(new URL('/confirmation/confirmed', request.url));
-    }
-
-    await appointmentRef.update({
-      status: "confirmed",
-    });
-
-    const appBaseUrl = new URL(request.url).origin;
-
-    // Send confirmation email to the user
-    await fetch(`${appBaseUrl}/api/send-confirmation`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          userEmail: appointmentData.email,
-          readingTitle: appointmentData.readingTitle,
-          date: appointmentData.date,
-          time: appointmentData.time,
-        }),
-      });
-
-    // Send confirmation email to admin
-    const selectedReading = readingsData.find(r => r.id === appointmentData.readingId);
-    const readingDuration = selectedReading?.duration || 30; // Default to 30 minutes if not specified
-    const calendarLink = generateGoogleCalendarLink(
-      `Cita de Tarot Confirmada: ${appointmentData.readingTitle} con ${appointmentData.name}`,
-      `Detalles de la cita:\nCliente: ${appointmentData.name}\nEmail: ${appointmentData.email}\nLectura: ${appointmentData.readingTitle}\n\n¡No olvides añadir esta cita a tu calendario!`, 
-      appointmentData.date,
-      appointmentData.time,
-      readingDuration
-    );
-
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: process.env.GMAIL_EMAIL,
-        pass: process.env.GMAIL_APP_PASSWORD,
-      },
-    });
-
-    const adminMailOptionsConfirmed = {
-      from: `"La Madriguera de Lunaria" <${process.env.GMAIL_EMAIL}>`,
-      to: process.env.ADMIN_EMAIL,
-      subject: `¡Cita Confirmada Manualmente: ${appointmentData.readingTitle} con ${appointmentData.name}!`,
-      html: `
-      <!DOCTYPE html>
-      <html>
-      <head>
-        <meta charset="UTF-8">
-        <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative&family=Cormorant+Garamond&display=swap" rel="stylesheet">
-        <style>
-          body { margin: 0; padding: 0; background-color: #1a1a2e; }
-          .wrapper { font-family: 'Cormorant Garamond', serif; background-color: #1a1a2e; color: #e0e0e0; padding: 20px; max-width: 600px; margin: auto; }
-          .header { text-align: center; margin-bottom: 30px; }
-          .title { font-family: 'Cinzel Decorative', cursive; color: #FFFFFF; font-size: 28px; margin: 0; }
-          .subtitle { color: #FFFFFF; font-size: 18px; }
-          .content { font-size: 16px; line-height: 1.8; }
-          .hr { border: none; border-top: 1px solid #5a3a70; margin: 25px 0; }
-          .p-strong { font-size: 18px; margin: 10px 0; }
-          .p-strong strong { color: #FFFFFF; }
-          .link { color: #fde047; text-decoration: none; font-weight: bold; }
-          .footer { text-align: center; margin-top: 40px; }
-          .footer-text { font-size: 12px; color: #9ca3af; }
-        </style>
-      </head>
-      <body>
-        <div class="wrapper">
-          <div class="header">
-            <h1 class="title">~ Cita Confirmada Manualmente ~</h1>
-            <p class="subtitle">La Madriguera de Lunaria</p>
-          </div>
-          <div class="content">
-            <p>Una cita ha sido confirmada manualmente.</p>
-            <hr class="hr">
-            <p class="p-strong"><strong>Detalles de la cita:</strong></p>
-            <p><strong>Nombre del cliente:</strong> ${appointmentData.name}</p>
-            <p><strong>Email del cliente:</strong> ${appointmentData.email}</p>
-            <p><strong>Fecha:</strong> ${appointmentData.date}</p>
-            <p><strong>Hora:</strong> ${appointmentData.time}</p>
-            <p><strong>Lectura:</strong> ${appointmentData.readingTitle}</p>
-            <hr class="hr">
-            <p>Añade esta cita a tu calendario:</p>
-            <p><a href="${calendarLink}" target="_blank" class="link">Añadir a Google Calendar</a></p>
-          </div>
-          <div class="footer">
-            <p class="footer-text">&copy; ${new Date().getFullYear()} La Madriguera de Lunaria. Todos los derechos reservados.</p>
-          </div>
-        </div>
-      </body>
-      </html>
-      `,
+    const reading = readingsData.find(r => r.id === appointment.readingId);
+    const emailData = {
+      name: appointment.name,
+      email: appointment.email,
+      date: appointment.date,
+      time: appointment.time,
+      readingTitle: appointment.readingTitle,
+      paymentMethod: appointment.paymentMethod,
+      cancelToken: appointment.cancelToken,
+      appBaseUrl: process.env.NEXT_PUBLIC_APP_URL || new URL(request.url).origin,
+      calendarLink: googleCalendarLink(
+        `Lectura de tarot: ${appointment.readingTitle}`,
+        `Cliente: ${appointment.name}\nEmail: ${appointment.email}\nLectura: ${appointment.readingTitle}`,
+        appointment.date,
+        appointment.time,
+        reading?.duration || 30,
+      ),
     };
-    await transporter.sendMail(adminMailOptionsConfirmed);
-    console.log("API: Admin confirmation email sent for manual confirmation.");
 
-    return NextResponse.redirect(new URL('/confirmation/confirmed', request.url));
+    // Solo se envía lo que falta; el resultado de cada correo queda guardado para poder reintentar
+    const mails = { customerConfirmed: false, adminConfirmed: false, ...(appointment.mails ?? {}) };
+    if (!mails.customerConfirmed) {
+      mails.customerConfirmed = await sendMailSafe(appointment.email, 'Tu cita en La Madriguera de Lunaria está confirmada', userTransferConfirmedEmail(emailData));
+    }
+    if (!mails.adminConfirmed) {
+      mails.adminConfirmed = await sendMailSafe(
+        process.env.ADMIN_EMAIL,
+        `¡Cita Confirmada Manualmente: ${appointment.readingTitle} con ${appointment.name}!`,
+        adminTransferConfirmedEmail(emailData),
+      );
+    }
+    await doc.ref.update({ mails });
 
+    // Si falta algún correo se vuelve a la página del enlace, que ofrece reenviarlo
+    if (!mails.customerConfirmed || !mails.adminConfirmed) {
+      return NextResponse.redirect(new URL(`/api/confirmAppointment?token=${encodeURIComponent(token as string)}`, request.url), 303);
+    }
+    return NextResponse.redirect(new URL('/confirmation/confirmed', request.url), 303);
   } catch (error) {
-    console.error("Error confirming appointment:", error);
-    return NextResponse.redirect(new URL('/confirmation/error', request.url));
+    console.error('Error confirming appointment:', error);
+    return NextResponse.redirect(new URL('/confirmation/error', request.url), 303);
   }
 }

@@ -1,37 +1,38 @@
 import { Metadata } from 'next'
+import { SITE_AUTHOR, SITE_DESCRIPTION, SITE_NAME, SITE_TAGLINE, SITE_URL, absoluteUrl } from '@/lib/site'
 
+const defaultTitle = `${SITE_NAME} | ${SITE_TAGLINE}`
+
+// La imagen para redes sale de app/opengraph-image.tsx (se genera sola por ruta)
 export const metadata: Metadata = {
-  metadataBase: new URL('https://www.themadrigueradelunaria.com'),
+  metadataBase: new URL(SITE_URL),
   title: {
-    default: 'La Madriguera de Lunaria | Tarot y Guía Espiritual',
-    template: '%s | La Madriguera de Lunaria'
+    default: defaultTitle,
+    template: `%s | ${SITE_NAME}`,
   },
-  description: 'Descubre claridad y guía espiritual a través del tarot con los 22 Arcanos Mayores. Un espacio mágico para brujit@s, baby witches y buscadores espirituales. Lecturas de tarot, comunicación espiritual y enseñanza para nuevos brujos.',
+  description: SITE_DESCRIPTION,
+  applicationName: SITE_NAME,
   keywords: [
     'tarot',
     'lectura de tarot',
+    'lectura de tarot en línea',
+    'tarot online en español',
+    'tirada de 3 cartas',
+    'lectura de vidas pasadas',
     'arcanos mayores',
     'guía espiritual',
+    'guardián espiritual',
+    'tarotista en México',
+    'consulta de tarot',
     'brujería',
     'baby witch',
-    'magia',
-    'tarotista',
-    'comunicación espiritual',
-    'lecturas online',
-    'enseñanza de tarot',
     'grimorio',
-    'lunaria',
-    'tarot en español',
-    'consultas de tarot',
+    'aprender tarot',
     'espiritualidad',
-    'desarrollo espiritual',
-    'guardián espiritual',
-    'tarot profesional',
-    'aprender tarot'
   ],
-  authors: [{ name: 'Arledge Brer', url: 'https://www.themadrigueradelunaria.com/sobre-mi' }],
-  creator: 'Arledge Brer',
-  publisher: 'La Madriguera de Lunaria',
+  authors: [{ name: SITE_AUTHOR, url: absoluteUrl('/sobre-mi') }],
+  creator: SITE_AUTHOR,
+  publisher: SITE_NAME,
   formatDetection: {
     email: false,
     address: false,
@@ -39,25 +40,16 @@ export const metadata: Metadata = {
   },
   openGraph: {
     type: 'website',
-    locale: 'es_ES',
-    url: 'https://www.themadrigueradelunaria.com',
-    siteName: 'La Madriguera de Lunaria',
-    title: 'La Madriguera de Lunaria | Tarot y Guía Espiritual',
-    description: 'Descubre claridad y guía espiritual a través del tarot con los 22 Arcanos Mayores. Un espacio mágico para brujit@s y buscadores espirituales.',
-    images: [
-      {
-        url: '/Plantilla diseño.png',
-        width: 1200,
-        height: 630,
-        alt: 'La Madriguera de Lunaria - Tarot y Guía Espiritual',
-      },
-    ],
+    locale: 'es_MX',
+    url: SITE_URL,
+    siteName: SITE_NAME,
+    title: defaultTitle,
+    description: SITE_DESCRIPTION,
   },
   twitter: {
     card: 'summary_large_image',
-    title: 'La Madriguera de Lunaria | Tarot y Guía Espiritual',
-    description: 'Descubre claridad y guía espiritual a través del tarot con los 22 Arcanos Mayores.',
-    images: ['/Plantilla diseño.png'],
+    title: defaultTitle,
+    description: SITE_DESCRIPTION,
   },
   robots: {
     index: true,
@@ -75,14 +67,17 @@ export const metadata: Metadata = {
     apple: '/apple-icon.png',
   },
   manifest: '/manifest.json',
+  // Cada página declara su propio canonical; este solo aplica al inicio
   alternates: {
-    canonical: 'https://www.themadrigueradelunaria.com',
+    canonical: '/',
+    languages: { 'es-MX': '/' },
   },
+  // Códigos de verificación de Google Search Console y Bing Webmaster Tools (variables en Vercel)
   verification: {
-    // Agregar aquí cuando tengas las verificaciones
-    // google: 'tu-codigo-de-verificacion-google',
-    // yandex: 'tu-codigo-de-verificacion-yandex',
-    // bing: 'tu-codigo-de-verificacion-bing',
+    google: process.env.NEXT_PUBLIC_GOOGLE_SITE_VERIFICATION,
+    other: process.env.NEXT_PUBLIC_BING_SITE_VERIFICATION
+      ? { 'msvalidate.01': process.env.NEXT_PUBLIC_BING_SITE_VERIFICATION }
+      : undefined,
   },
   category: 'espiritualidad',
 }

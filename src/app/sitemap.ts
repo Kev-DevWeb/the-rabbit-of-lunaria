@@ -1,5 +1,6 @@
 import { MetadataRoute } from 'next'
 import { client } from '@/sanity/lib/client'
+import { SITE_URL } from '@/lib/site'
 
 interface Article {
   slug: string
@@ -13,7 +14,7 @@ interface Author {
 }
 
 export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
-  const baseUrl = 'https://www.themadrigueradelunaria.com'
+  const baseUrl = SITE_URL
   
   // Obtener todos los artículos de Sanity
   const articles = await client.fetch<Article[]>(`
