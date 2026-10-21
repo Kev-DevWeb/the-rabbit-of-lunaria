@@ -2,6 +2,7 @@
 
 import { Canvas, useFrame, useThree } from '@react-three/fiber';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import * as THREE from 'three';
 
 // Polvo de estrellas que titila con un shader propio (más barato que tsparticles).
@@ -88,7 +89,8 @@ function StarLayer({ count, depth, size, color, seed }: StarLayerProps) {
     const phases = new Float32Array(count);
     for (let i = 0; i < count; i++) {
       positions[i * 3] = (rnd() - 0.5) * 70;
-      positions[i * 3 + 1] = (rnd() - 0.35) * 40;
+      // Alto de sobra hacia abajo: la escena acompaña todo el scroll del inicio
+      positions[i * 3 + 1] = 22 - rnd() * 60;
       positions[i * 3 + 2] = -depth - rnd() * 4;
       sizes[i] = size * (0.5 + rnd());
       phases[i] = rnd() * Math.PI * 2;
@@ -161,16 +163,16 @@ function FogBank({ position, scale, seed, opacity }: { position: [number, number
   );
 }
 
-// Parallax: la cámara sigue al cursor y baja con el scroll.
+// Parallax: la cámara sigue al cursor y baja despacio con el scroll (las capas cercanas se mueven más)
 function Rig({ pointer }: { pointer: React.RefObject<{ x: number; y: number }> }) {
   const { camera } = useThree();
   useFrame((_, dt) => {
     const p = pointer.current ?? { x: 0, y: 0 };
-    const scroll = window.scrollY / window.innerHeight;
+    const scroll = Math.min(window.scrollY / window.innerHeight, 8);
     const k = Math.min(1, dt * 2.5);
     camera.position.x += (p.x * 1.4 - camera.position.x) * k;
-    camera.position.y += (p.y * 0.8 - scroll * 3 - camera.position.y) * k;
-    camera.lookAt(0, -scroll * 3, -12);
+    camera.position.y += (p.y * 0.8 - scroll * 0.9 - camera.position.y) * k;
+    camera.lookAt(0, -scroll * 0.9, -12);
   });
   return null;
 }
@@ -192,7 +194,7 @@ function hasWebGL() {
   return webglSupport;
 }
 
-export default function LunarScene({ className = '' }: { className?: string }) {
+export default function LunarScene({ className = '', portal = false }: { className?: string; portal?: boolean }) {
   const wrapper = useRef<HTMLDivElement>(null);
   const pointer = useRef({ x: 0, y: 0 });
   const [supported, setSupported] = useState(false);
@@ -224,7 +226,7 @@ export default function LunarScene({ className = '' }: { className?: string }) {
     return () => io.disconnect();
   }, []);
 
-  return (
+  const scene = (
     <div ref={wrapper} aria-hidden="true" className={`pointer-events-none ${className}`}>
       {supported && (
         <Canvas
@@ -233,14 +235,18 @@ export default function LunarScene({ className = '' }: { className?: string }) {
           gl={{ antialias: false, alpha: true, powerPreference: 'low-power' }}
           frameloop={reduced ? 'demand' : inView ? 'always' : 'never'}
         >
-          <StarLayer count={900} depth={30} size={2.2} color="#fff8e1" seed={7} />
-          <StarLayer count={450} depth={18} size={2.8} color="#c9b8ff" seed={13} />
-          <StarLayer count={160} depth={9} size={3.4} color="#f6dc9a" seed={29} />
-          <FogBank position={[-6, -5.5, -6]} scale={[26, 7]} seed={1.3} opacity={0.5} />
-          <FogBank position={[7, -7, -4]} scale={[28, 8]} seed={4.1} opacity={0.4} />
+          <StarLayer count={1300} depth={30} size={2.2} color="#fff8e1" seed={7} />
+          <StarLayer count={650} depth={18} size={2.8} color="#c9b8ff" seed={13} />
+          <StarLayer count={230} depth={9} size={3.4} color="#f6dc9a" seed={29} />
+          <FogBank position={[-6, -5.5, -6]} scale={[26, 7]} seed={1.3} opacity={0.35} />
+          <FogBank position={[7, -7, -4]} scale={[28, 8]} seed={4.1} opacity={0.28} />
           {!reduced && <Rig pointer={pointer} />}
         </Canvas>
       )}
     </div>
   );
+
+  // Como fondo fijo va directo en <body>: un transform o filter en algún ancestro
+  // (p. ej. la transición de página) haría que `position: fixed` deje de ser relativo a la ventana
+  return portal ? createPortal(scene, document.body) : scene;
 }

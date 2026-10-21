@@ -6,6 +6,10 @@ import MagicHeroSection from "../components/MagicHeroSection";
 import ServicesSection from '../components/ServicesSection';
 import CommunitySection from '../components/CommunitySection';
 import FloatingButton from "../components/FloatingButton";
+import dynamic from 'next/dynamic';
+
+// Cielo estrellado WebGL fijo detrás de todo el inicio (solo en el cliente)
+const LunarScene = dynamic(() => import('../components/three/LunarScene'), { ssr: false });
 
 export default function Home() {
   const [isCinematicDone, setIsCinematicDone] = useState(false);
@@ -36,7 +40,8 @@ export default function Home() {
   };
 
   return (
-    <div className='bg-night'>
+    <div className='relative'>
+      <LunarScene portal className="fixed inset-0 -z-10" />
       {/* Capa de la cinemática inicial - Siempre presente pero oculta/visible */}
       {showCinematic && (
         <div className="fixed top-0 left-0 w-full h-screen z-50 cinematic-intro">
