@@ -1,8 +1,9 @@
 import { NextResponse } from 'next/server';
-import { adminDb as db } from '@/lib/firebaseAdmin';
-import * as nodemailer from 'nodemailer';
 import { v4 as uuidv4 } from 'uuid';
 import { readingsData } from '@/lib/readings-data';
+import { availableTimes, googleCalendarLink, isValidDate, isValidTime, reserveSlot, SlotTakenError } from '@/lib/booking';
+import { captureOrder, priceFor } from '@/lib/paypal';
+import { sendMailSafe } from '@/lib/mailer';
 import {
   userConfirmedEmail,
   adminConfirmedEmail,
@@ -10,125 +11,108 @@ import {
   adminPendingEmail,
 } from '@/lib/email-templates';
 
-// Helper para el link de Google Calendar
-function generateGoogleCalendarLink(title: string, description: string, startDate: string, startTime: string, durationMinutes: number): string {
-  const startDateTime = new Date(`${startDate}T${startTime}:00`);
-  const endDateTime = new Date(startDateTime.getTime() + durationMinutes * 60 * 1000);
-  const formatDateTime = (date: Date) => date.toISOString().replace(/[-:]|\.\\d{3}/g, '');
-  const params = new URLSearchParams({
-    action: 'TEMPLATE',
-    text: title,
-    dates: `${formatDateTime(startDateTime)}/${formatDateTime(endDateTime)}`,
-    details: description,
-    sf: 'true',
-    output: 'xml',
-  });
-  return `https://calendar.google.com/calendar/render?${params.toString()}`;
-}
+const EMAIL_RE = /^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\.[a-zA-Z]{2,}$/;
 
 export async function POST(request: Request) {
-  const { date, time, name, email, readingId, readingTitle, paymentMethod, paymentId } = await request.json();
+  const { date, time, name, email, readingId, paymentMethod, orderId, currency } = await request.json();
 
-  if (!date || !time || !name || !email || !readingId || !readingTitle || !paymentMethod) {
-    return NextResponse.json({ error: 'Faltan campos requeridos.' }, { status: 400 });
+  if (!isValidDate(date) || !isValidTime(time) || typeof name !== 'string' || !name.trim() || typeof email !== 'string' || !EMAIL_RE.test(email)) {
+    return NextResponse.json({ error: 'Faltan datos o no son válidos.' }, { status: 400 });
+  }
+  if (paymentMethod !== 'paypal' && paymentMethod !== 'bankTransfer') {
+    return NextResponse.json({ error: 'Método de pago no válido.' }, { status: 400 });
+  }
+  if (paymentMethod === 'paypal' && (typeof orderId !== 'string' || !orderId)) {
+    return NextResponse.json({ error: 'Falta la orden de PayPal.' }, { status: 400 });
   }
 
-  const selectedReading = readingsData.find(r => r.id === readingId);
-  if (!selectedReading) {
+  const reading = readingsData.find(r => r.id === readingId);
+  if (!reading) {
     return NextResponse.json({ error: 'Lectura no válida.' }, { status: 400 });
   }
 
+  // El horario tiene que estar en el calendario (no en el pasado ni fuera de horario)
+  if (!(await availableTimes(date)).includes(time)) {
+    return NextResponse.json({ error: 'Este horario ya no está disponible. Por favor, elige otro.' }, { status: 409 });
+  }
+
+  const cancelToken = uuidv4();
+  const confirmToken = paymentMethod === 'bankTransfer' ? uuidv4() : null;
+  const cleanName = name.trim().slice(0, 120);
+
+  // 1. Apartar el horario (transacción). Con PayPal queda "processing" hasta cobrar.
+  let bookingRef;
   try {
-    const bookingsRef = db.collection('bookings');
-    const existingBookingQuery = await bookingsRef
-      .where('date', '==', date)
-      .where('time', '==', time)
-      .where('status', 'in', ['confirmed', 'pending'])
-      .limit(1)
-      .get();
-
-    if (!existingBookingQuery.empty) {
-      return NextResponse.json({ error: 'Este horario ya no está disponible. Por favor, elige otro.' }, { status: 409 });
+    bookingRef = await reserveSlot(date, time, {
+      name: cleanName,
+      email,
+      readingId: reading.id,
+      readingTitle: reading.title,
+      status: paymentMethod === 'paypal' ? 'processing' : 'pending',
+      paymentMethod,
+      paymentId: null,
+      paypalOrderId: paymentMethod === 'paypal' ? orderId : null,
+      cancelToken,
+      confirmToken,
+      createdAt: new Date().toISOString(),
+    });
+  } catch (error) {
+    if (error instanceof SlotTakenError) {
+      return NextResponse.json({ error: error.message }, { status: 409 });
     }
+    console.error('API Error al apartar el horario:', error);
+    return NextResponse.json({ error: 'No se pudo agendar la cita. Inténtalo de nuevo.' }, { status: 500 });
+  }
 
-    const cancelToken = uuidv4();
-    const bookingStatus = paymentMethod === 'paypal' ? 'confirmed' : 'pending';
+  // 2. Con PayPal, el cobro se hace aquí en el servidor y se verifica el monto.
+  //    Si no se cobra bien, se libera el horario.
+  let paymentId: string | null = null;
+  if (paymentMethod === 'paypal') {
+    try {
+      const capture = await captureOrder(orderId, priceFor(reading, currency === 'USD' ? 'USD' : 'MXN'));
+      if (!capture.ok) {
+        await bookingRef.delete();
+        console.error('Pago de PayPal no válido:', { orderId, reason: capture.reason, captureId: capture.captureId });
+        return NextResponse.json({ error: 'No se pudo completar el pago con PayPal. No se agendó la cita.' }, { status: 402 });
+      }
+      paymentId = capture.captureId ?? null;
+      await bookingRef.update({ status: 'confirmed', paymentId });
+    } catch (error) {
+      await bookingRef.delete().catch(() => undefined);
+      console.error('API Error al cobrar con PayPal:', error);
+      return NextResponse.json({ error: 'No se pudo procesar el pago. Inténtalo de nuevo.' }, { status: 500 });
+    }
+  }
 
-    const newBooking = {
+  // 3. Correos: si fallan, la cita ya está guardada y no se marca error al cliente
+  const appBaseUrl = process.env.NEXT_PUBLIC_APP_URL || new URL(request.url).origin;
+  const emailData = {
+    name: cleanName,
+    email,
+    date,
+    time,
+    readingTitle: reading.title,
+    paymentId: paymentId ?? undefined,
+    paymentMethod,
+    cancelToken,
+    confirmToken: confirmToken ?? undefined,
+    appBaseUrl,
+    calendarLink: googleCalendarLink(
+      `Cita de Tarot: ${reading.title} con ${cleanName}`,
+      `Cliente: ${cleanName}\nEmail: ${email}\nLectura: ${reading.title}\nMétodo de pago: ${paymentMethod}`,
       date,
       time,
-      name,
-      email,
-      readingId,
-      readingTitle,
-      status: bookingStatus,
-      paymentMethod,
-      paymentId: paymentId || null,
-      cancelToken,
-      createdAt: new Date().toISOString(),
-    };
+      reading.duration || 30,
+    ),
+  };
 
-    await bookingsRef.add(newBooking);
-
-    const transporter = nodemailer.createTransport({
-      service: "gmail",
-      auth: {
-        user: process.env.GMAIL_EMAIL,
-        pass: process.env.GMAIL_APP_PASSWORD,
-      },
-    });
-
-    const appBaseUrl = process.env.NEXT_PUBLIC_APP_URL || new URL(request.url).origin;
-    const calendarLink = generateGoogleCalendarLink(
-        `Cita de Tarot: ${readingTitle} con ${name}`,
-        `Detalles:\nCliente: ${name}\nEmail: ${email}\nLectura: ${readingTitle}\nMétodo de Pago: ${paymentMethod}`,
-        date, time, selectedReading.duration || 30
-    );
-
-    const emailData = {
-      name, email, date, time, readingTitle,
-      paymentId, paymentMethod, cancelToken,
-      calendarLink, appBaseUrl,
-    };
-
-    let userMailSubject = '';
-    let userMailHtml = '';
-    let adminMailSubject = '';
-    let adminMailHtml = '';
-
-    if (bookingStatus === 'confirmed') {
-      userMailSubject = "¡Tu cita de Tarot ha sido confirmada!";
-      userMailHtml = userConfirmedEmail(emailData);
-      adminMailSubject = `¡Cita Confirmada por PayPal: ${readingTitle} con ${name}!`;
-      adminMailHtml = adminConfirmedEmail(emailData);
-    } else {
-      userMailSubject = "Confirmación pendiente para tu lectura de Tarot";
-      userMailHtml = userPendingEmail(emailData);
-      adminMailSubject = `Nueva cita pendiente por ${name} (Transferencia)`;
-      adminMailHtml = adminPendingEmail(emailData);
-    }
-
-    await transporter.sendMail({
-        from: `"La Madriguera de Lunaria" <${process.env.GMAIL_EMAIL}>`,
-        to: email,
-        subject: userMailSubject,
-        html: userMailHtml
-    });
-
-    await transporter.sendMail({
-        from: `"La Madriguera de Lunaria" <${process.env.GMAIL_EMAIL}>`,
-        to: process.env.ADMIN_EMAIL,
-        subject: adminMailSubject,
-        html: adminMailHtml
-    });
-
-    return NextResponse.json({ success: true });
-
-  } catch (error) {
-    console.error("API Error en bookAppointment:", error);
-    if (error instanceof Error) {
-      return NextResponse.json({ error: error.message }, { status: 500 });
-    }
-    return NextResponse.json({ error: 'Ocurrió un error inesperado en el servidor.' }, { status: 500 });
+  if (paymentMethod === 'paypal') {
+    await sendMailSafe(email, '¡Tu cita de Tarot ha sido confirmada!', userConfirmedEmail(emailData));
+    await sendMailSafe(process.env.ADMIN_EMAIL, `¡Cita Confirmada por PayPal: ${reading.title} con ${cleanName}!`, adminConfirmedEmail(emailData));
+  } else {
+    await sendMailSafe(email, 'Confirmación pendiente para tu lectura de Tarot', userPendingEmail(emailData));
+    await sendMailSafe(process.env.ADMIN_EMAIL, `Nueva cita pendiente por ${cleanName} (Transferencia)`, adminPendingEmail(emailData));
   }
+
+  return NextResponse.json({ success: true, status: paymentMethod === 'paypal' ? 'confirmed' : 'pending' });
 }

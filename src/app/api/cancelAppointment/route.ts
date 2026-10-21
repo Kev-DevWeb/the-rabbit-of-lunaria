@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { adminDb } from '@/lib/firebaseAdmin';
 import * as nodemailer from 'nodemailer';
+import { escapeHtml } from '@/lib/email-templates';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -25,10 +26,10 @@ export async function GET(request: Request) {
     const appointmentData = appointmentDoc.data();
 
     const userEmail = appointmentData?.email;
-    const readingTitle = appointmentData?.readingTitle;
-    const date = appointmentData?.date;
-    const time = appointmentData?.time;
-    const name = appointmentData?.name;
+    const readingTitle = escapeHtml(appointmentData?.readingTitle);
+    const date = escapeHtml(appointmentData?.date);
+    const time = escapeHtml(appointmentData?.time);
+    const name = escapeHtml(appointmentData?.name);
 
     await adminDb.collection("bookings").doc(appointmentDoc.id).delete(); // Delete the document
 

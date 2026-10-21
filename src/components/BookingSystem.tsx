@@ -9,11 +9,9 @@ import { format } from 'date-fns';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { PayPalScriptProvider, PayPalButtons } from '@paypal/react-paypal-js';
-import type { OnApproveData, OnApproveActions } from '@paypal/paypal-js';
+import type { OnApproveData } from '@paypal/paypal-js';
 
 import { TarotReading } from '@/types/readings';
-import { db } from '@/lib/firebase';
-import { collection, query, where, getDocs } from 'firebase/firestore';
 
 import { readingsData } from '@/lib/readings-data';
 
@@ -165,27 +163,12 @@ const BookingSystem = () => {
     setBookingError(null);
 
     try {
-      const dayOfWeek = date.getDay();
-      const baseAvailableTimes = (dayOfWeek === 0 || dayOfWeek === 6)
-        ? ['11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00']
-        : ['17:00', '18:00', '19:00', '20:00', '21:00', '22:00'];
-
-      const now = new Date();
-      const isToday = date.getDate() === now.getDate() && date.getMonth() === now.getMonth() && date.getFullYear() === now.getFullYear();
-      const timesForToday = isToday
-        ? baseAvailableTimes.filter(time => {
-            const [h, m] = time.split(':').map(Number);
-            return (h * 60 + m) > (now.getHours() * 60 + now.getMinutes());
-          })
-        : baseAvailableTimes;
-
-      const dateString = format(date, 'yyyy-MM-dd');
-      const q = query(collection(db, 'bookings'), where('date', '==', dateString), where('status', 'in', ['pending', 'confirmed']));
-      const querySnapshot = await getDocs(q);
-      const bookedTimes = querySnapshot.docs.map(doc => doc.data().time);
-
-      setAvailableTimes(timesForToday.filter(time => !bookedTimes.includes(time)));
-
+      // El servidor calcula los horarios libres en hora de México y solo regresa horas,
+      // sin datos de otras citas
+      const response = await fetch(`/api/availability?date=${format(date, 'yyyy-MM-dd')}`, { cache: 'no-store' });
+      const result = await response.json();
+      if (!response.ok) throw new Error(result.error);
+      setAvailableTimes(result.times);
     } catch (err) {
       console.error("Error al obtener horarios:", err);
       setTimeFetchError("No se pudieron cargar los horarios. Inténtalo de nuevo.");
@@ -194,7 +177,7 @@ const BookingSystem = () => {
     }
   }, []);
 
-  const bookAppointmentInDB = async (paymentId?: string) => {
+  const bookAppointmentInDB = async (orderId?: string) => {
     if (!selectedReading || !selectedDate || !selectedTime || !userName || !userEmail) {
         setBookingError('Faltan datos para agendar la cita.');
         return false;
@@ -205,7 +188,7 @@ const BookingSystem = () => {
       const response = await fetch('/api/bookAppointment', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ date: format(selectedDate, 'yyyy-MM-dd'), time: selectedTime, name: userName, email: userEmail, readingId: selectedReading.id, readingTitle: selectedReading.title, paymentMethod, paymentId }),
+        body: JSON.stringify({ date: format(selectedDate, 'yyyy-MM-dd'), time: selectedTime, name: userName, email: userEmail, readingId: selectedReading.id, paymentMethod, orderId, currency }),
       });
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || 'Error en la API de booking');
@@ -244,33 +227,27 @@ const BookingSystem = () => {
 
   const createOrder = async () => {
     // La validación ya se hizo en handlePayPalClick. Aquí solo creamos la orden.
-    if (!selectedReading) {
+    if (!selectedReading || !selectedDate || !selectedTime) {
         throw new Error('No reading selected');
     }
-    try {
-        const response = await fetch('/api/create-paypal-order', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ readingId: selectedReading.id, currency: currency }) });
-        const orderData = await response.json();
-        if (!orderData.orderId) throw new Error('No se pudo crear la orden de PayPal');
-        return orderData.orderId;
-    } catch { 
-        setBookingError('No se pudo iniciar el pago con PayPal. Inténtalo de nuevo.');
-        throw new Error('Failed to create PayPal order');
+    const response = await fetch('/api/create-paypal-order', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ readingId: selectedReading.id, currency, date: format(selectedDate, 'yyyy-MM-dd'), time: selectedTime }),
+    });
+    const orderData = await response.json().catch(() => ({}));
+    if (!response.ok || !orderData.orderId) {
+      // 409: el horario se ocupó mientras llenaba el formulario; no se abre PayPal
+      setBookingError(orderData.error || 'No se pudo iniciar el pago con PayPal. Inténtalo de nuevo.');
+      throw new Error('Failed to create PayPal order');
     }
+    return orderData.orderId;
   };
 
-  const onApprove = async (data: OnApproveData, actions: OnApproveActions) => {
-    try {
-        if (actions.order) {
-            const details = await actions.order.capture();
-            const bookingSuccessful = await bookAppointmentInDB(details.id);
-
-            if (!bookingSuccessful) {
-                setBookingError(`¡Pago completado (ID: ${details.id})! Pero hubo un error al guardar tu cita. Por favor, contáctame para confirmarla manually.`);
-            }
-        }
-    } catch { 
-        setBookingError('Ocurrió un error al procesar tu pago. Por favor, inténtalo de nuevo.');
-    }
+  // El cobro ya no se hace en el navegador: el servidor aparta el horario, cobra la orden
+  // y verifica el monto. Si el horario se ocupó, no se cobra nada.
+  const onApprove = async (data: OnApproveData) => {
+    await bookAppointmentInDB(data.orderID);
   };
 
   const onCancel = () => {
