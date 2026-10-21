@@ -43,136 +43,126 @@ interface BackgroundMusicProviderProps {
   children: ReactNode;
 }
 
+const PLAYLIST_ID = 'PL4SJvJ-lWGWX2CFXEi7l92UJk-q91szHJ';
+// Si la persona apagó la música, no se la volvemos a poner al recargar
+const PREFERENCE_KEY = 'lunaria-music';
+
+const readPreferenceOff = () => {
+  try {
+    return localStorage.getItem(PREFERENCE_KEY) === 'off';
+  } catch {
+    return false;
+  }
+};
+
+const savePreference = (on: boolean) => {
+  try {
+    localStorage.setItem(PREFERENCE_KEY, on ? 'on' : 'off');
+  } catch {
+    // Sin almacenamiento (modo privado): solo no se recuerda
+  }
+};
+
 export const BackgroundMusicProvider: React.FC<BackgroundMusicProviderProps> = ({ children }) => {
-  const youtubePlayerRef = useRef<YouTubePlayerService | null>(null);
-  const playerContainerRef = useRef<HTMLDivElement | null>(null);
+  const playerRef = useRef<YouTubePlayerService | null>(null);
+  const isReadyRef = useRef(false);
   const lastTrackTitleRef = useRef<string | null>(null);
-  const isMutedRef = useRef(true); // Ref para acceso sincrónico en callbacks
-  const [isMuted, setIsMuted] = useState(true);
+  // La intención de la persona (¿quiere música?) es la fuente de verdad de los botones,
+  // separada de lo que esté haciendo el video. Así el icono responde al instante.
+  const [wantsMusic, setWantsMusic] = useState(false);
+  const wantsMusicRef = useRef(false);
+  const fadeIdRef = useRef(0);
   const [youtubeState, setYoutubeState] = useState<YouTubePlayerState | null>(null);
   const [isProcessing, setIsProcessing] = useState(false);
-  
+
   const { notifications, showNotification, closeNotification } = useMusicNotifications();
   const showNotificationRef = useRef(showNotification);
   showNotificationRef.current = showNotification;
-  
-  const PLAYLIST_ID = 'PL4SJvJ-lWGWX2CFXEi7l92UJk-q91szHJ';
 
-  // Sync ref con state
-  useEffect(() => {
-    isMutedRef.current = isMuted;
-  }, [isMuted]);
+  // Aplica la intención al player. Un clic nuevo cancela el desvanecido anterior en vez de esperarlo.
+  const applyIntent = useCallback(async (want: boolean, fadeMs: number) => {
+    const player = playerRef.current;
+    if (!player || !isReadyRef.current) return; // se aplica al estar listo
+    const fadeId = ++fadeIdRef.current;
+    setIsProcessing(true);
+    try {
+      if (want) await player.fadeIn(fadeMs);
+      else await player.fadeOut(1500);
+    } finally {
+      if (fadeId === fadeIdRef.current) setIsProcessing(false);
+    }
+  }, []);
+
+  const setIntent = useCallback((want: boolean, fadeMs = 2000) => {
+    wantsMusicRef.current = want;
+    setWantsMusic(want);
+    void applyIntent(want, fadeMs);
+  }, [applyIntent]);
 
   // Inicializar YouTube Player — UNA SOLA VEZ
   useEffect(() => {
-    if (youtubePlayerRef.current) return;
+    if (playerRef.current) return;
 
-    // Crear container hidden para el player
-    if (!playerContainerRef.current) {
-      const container = document.createElement('div');
+    // Contenedor oculto para el iframe
+    let container = document.getElementById('youtube-player-bg');
+    if (!container) {
+      container = document.createElement('div');
       container.id = 'youtube-player-bg';
-      container.style.position = 'fixed';
-      container.style.top = '-1000px';
-      container.style.left = '-1000px';
-      container.style.width = '1px';
-      container.style.height = '1px';
-      container.style.opacity = '0';
-      container.style.pointerEvents = 'none';
+      Object.assign(container.style, {
+        position: 'fixed', top: '-1000px', left: '-1000px', width: '1px', height: '1px', opacity: '0', pointerEvents: 'none',
+      });
       document.body.appendChild(container);
-      playerContainerRef.current = container;
     }
 
-    youtubePlayerRef.current = new YouTubePlayerService(PLAYLIST_ID);
-    
-    youtubePlayerRef.current.initialize('youtube-player-bg')
+    const player = new YouTubePlayerService(PLAYLIST_ID);
+    playerRef.current = player;
+
+    player.onStateChange((state) => {
+      setYoutubeState(state);
+
+      // Notificación cuando cambia la canción y la música se oye
+      const title = state.currentTrack?.title;
+      if (title && title !== lastTrackTitleRef.current && wantsMusicRef.current && state.isPlaying && !state.isMuted) {
+        lastTrackTitleRef.current = title;
+        showNotificationRef.current(title, state.currentTrack!.channelTitle, state.currentTrack!.thumbnail);
+      }
+    });
+
+    player.initialize('youtube-player-bg')
       .then(() => {
-        // Configurar callback de cambios de estado
-        youtubePlayerRef.current?.onStateChange((state) => {
-          setYoutubeState(state);
-          
-          // Sincronizar el estado de React con el del player real
-          // Esto es clave: el player es la fuente de verdad
-          const playerIsPlaying = state.isPlaying && !state.isMuted;
-          setIsMuted(!playerIsPlaying);
-          isMutedRef.current = !playerIsPlaying;
-          
-          // Mostrar notificación cuando cambia la canción
-          const lastTrackTitle = lastTrackTitleRef.current;
-          
-          if (state.currentTrack && 
-              state.currentTrack.title !== lastTrackTitle && 
-              state.isPlaying && 
-              !state.isMuted) {
-            
-            lastTrackTitleRef.current = state.currentTrack.title;
-            
-            showNotificationRef.current(
-              state.currentTrack.title,
-              state.currentTrack.channelTitle,
-              state.currentTrack.thumbnail
-            );
-          }
-        });
-        
-        // Aplicar estado de mute inicial
-        youtubePlayerRef.current?.setMuted(true);
+        isReadyRef.current = true;
+        // Si la persona pidió música antes de que el player estuviera listo, se respeta ahora
+        if (wantsMusicRef.current) void applyIntent(true, 2000);
+        else player.setMuted(true);
       })
       .catch(() => {
-        // Error silencioso - el reproductor se intentará inicializar de nuevo al recargar
+        // Error silencioso: el reproductor se reintenta al recargar
       });
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Sin dependencias — inicializar solo una vez
+  }, [applyIntent]);
 
-  const toggleMute = useCallback(async () => {
-    if (!youtubePlayerRef.current || isProcessing) return;
-    
-    try {
-      setIsProcessing(true);
-      
-      // Dejar que el player determine qué hacer basado en su estado REAL
-      await youtubePlayerRef.current.togglePlayPauseWithFade();
-      
-      // Después del fade, sincronizar estado de React con el player real
-      const state = youtubePlayerRef.current.getCurrentState();
-      const newMuted = !state.isPlaying;
-      setIsMuted(newMuted);
-      isMutedRef.current = newMuted;
-      
-      setIsProcessing(false);
-    } catch {
-      setIsProcessing(false);
-      // No revertir — dejar que el onStateChange callback sincronice
-    }
-  }, [isProcessing]);
+  const toggleMute = useCallback(() => {
+    const want = !wantsMusicRef.current;
+    savePreference(want);
+    setIntent(want);
+  }, [setIntent]);
 
   const nextTrack = useCallback(() => {
-    youtubePlayerRef.current?.nextTrack();
+    playerRef.current?.nextTrack();
   }, []);
 
   const previousTrack = useCallback(() => {
-    youtubePlayerRef.current?.previousTrack();
+    playerRef.current?.previousTrack();
   }, []);
 
-  const startMusicAfterAnimation = useCallback(async () => {
-    if (!youtubePlayerRef.current || !isMutedRef.current) return;
-    
-    try {
-      setIsProcessing(true);
-      
-      await youtubePlayerRef.current.fadeIn(3000);
-      
-      // Sincronizar estado con player real
-      setIsMuted(false);
-      isMutedRef.current = false;
-      setIsProcessing(false);
-    } catch {
-      setIsProcessing(false);
-    }
-  }, []);
+  // Tras la intro de la puerta. No se fuerza si la persona ya la había apagado antes.
+  const startMusicAfterAnimation = useCallback(() => {
+    if (wantsMusicRef.current || readPreferenceOff()) return;
+    setIntent(true, 3000);
+  }, [setIntent]);
 
   return (
     <BackgroundMusicContext.Provider value={{
-      isMuted,
+      isMuted: !wantsMusic,
       toggleMute,
       currentTrack: youtubeState?.currentTrack?.title || null,
       isPlaying: youtubeState?.isPlaying || false,

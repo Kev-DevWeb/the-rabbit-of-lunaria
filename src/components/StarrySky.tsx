@@ -11,9 +11,9 @@ const ForestScene = () => (
     <Image src="/siluetabosque.png" alt="Silueta del bosque" fill sizes="(max-width: 768px) 300px, 350px" style={{ objectFit: 'cover' }} className="z-10" priority />
     <div className="absolute inset-0 z-10" style={{ background: 'linear-gradient(to bottom, rgba(0,0,0,0.8) 0%, rgba(0,0,0,0) 40%)' }} />
     <div className="absolute top-[57%] left-[60%] w-3 h-3 bg-orange-300 rounded-full z-20 lantern" style={{ boxShadow: '0 0 25px 15px rgba(255, 165, 0, 0.7)' }} />
-    <div className="absolute w-1 h-1 bg-yellow-200 rounded-full z-20 firefly1" style={{ top: '70%', left: '30%', boxShadow: '0 0 10px 5px rgba(255, 255, 0, 0.7)' }} />
-    <div className="absolute w-1 h-1 bg-yellow-200 rounded-full z-20 firefly2" style={{ top: '80%', left: '60%', boxShadow: '0 0 10px 5px rgba(255, 255, 0, 0.7)' }} />
-    <div className="absolute w-1 h-1 bg-yellow-200 rounded-full z-20 firefly3" style={{ top: '75%', left: '45%', boxShadow: '0 0 10px 5px rgba(255, 255, 0, 0.7)' }} />
+    <div className="absolute w-1 h-1 bg-gold-200 rounded-full z-20 firefly1" style={{ top: '70%', left: '30%', boxShadow: '0 0 10px 5px rgba(255, 255, 0, 0.7)' }} />
+    <div className="absolute w-1 h-1 bg-gold-200 rounded-full z-20 firefly2" style={{ top: '80%', left: '60%', boxShadow: '0 0 10px 5px rgba(255, 255, 0, 0.7)' }} />
+    <div className="absolute w-1 h-1 bg-gold-200 rounded-full z-20 firefly3" style={{ top: '75%', left: '45%', boxShadow: '0 0 10px 5px rgba(255, 255, 0, 0.7)' }} />
   </div>
 );
 
@@ -138,7 +138,7 @@ const StarrySky = ({ onComplete }: StarrySkyProps) => {
   return (
     <section
       ref={containerRef}
-      className="relative w-full h-screen overflow-hidden bg-black flex items-center justify-center"
+      className="relative w-full h-screen overflow-hidden bg-night flex items-center justify-center"
       style={{ minHeight: '600px', perspective: '1000px' }}
     >
       <audio ref={audioRef} src="/night.mp3" preload="auto" />
@@ -148,16 +148,16 @@ const StarrySky = ({ onComplete }: StarrySkyProps) => {
             <ForestScene />
           </div>
           <div
-            className="absolute top-0 left-0 w-1/2 h-full border-r-2 border-black door-left z-20"
+            className="absolute top-0 left-0 w-1/2 h-full border-r-2 border-night door-left z-20"
             style={{ transformOrigin: 'left center', backfaceVisibility: 'hidden', background: 'linear-gradient(to right, #3a2d21, #5c4736)' }}
           >
-            <div className="absolute inset-2 border-2 border-black/30 rounded-lg"></div>
+            <div className="absolute inset-2 border-2 border-night/30 rounded-lg"></div>
           </div>
           <div
-            className="absolute top-0 right-0 w-1/2 h-full border-l-2 border-black door-right z-20"
+            className="absolute top-0 right-0 w-1/2 h-full border-l-2 border-night door-right z-20"
             style={{ transformOrigin: 'right center', backfaceVisibility: 'hidden', background: 'linear-gradient(to left, #3a2d21, #5c4736)' }}
           >
-            <div className="absolute inset-2 border-2 border-black/30 rounded-lg"></div>
+            <div className="absolute inset-2 border-2 border-night/30 rounded-lg"></div>
           </div>
         </div>
       </div>
@@ -165,7 +165,7 @@ const StarrySky = ({ onComplete }: StarrySkyProps) => {
       {!isOpening && (
         <button
           onClick={handleEnter}
-          className="absolute z-30 bottom-[20%] left-1/2 -translate-x-1/2 entry-button text-white font-cinzel-decorative text-xl tracking-widest px-6 py-3 rounded-lg border-2 border-purple-300/50 bg-black/50 backdrop-blur-sm hover:bg-purple-900/50 hover:border-purple-300 transition-all duration-300"
+          className="absolute z-30 bottom-[20%] left-1/2 -translate-x-1/2 entry-button text-moon-50 font-cinzel-decorative text-xl tracking-widest px-6 py-3 rounded-lg border-2 border-lavender/50 bg-night/50 backdrop-blur-sm hover:bg-dusk-500/50 hover:border-lavender transition-all duration-300"
           style={{ textShadow: '0 0 10px #a259ff' }}
         >
           Entrar a Lunaria

@@ -14,7 +14,7 @@ const FloatingButton = () => {
     const onMouseEnter = () => {
       gsap.to(button, {
         scale: 1.1,
-        boxShadow: '0 8px 40px 0 #6366f1',
+        boxShadow: '0 0 36px 0 rgba(233, 196, 106, 0.6)',
         duration: 0.3,
         ease: 'power2.out'
       });
@@ -23,7 +23,7 @@ const FloatingButton = () => {
     const onMouseLeave = () => {
       gsap.to(button, {
         scale: 1,
-        boxShadow: '0 4px 24px 0 #6366f1',
+        boxShadow: '0 0 0 0 rgba(233, 196, 106, 0)',
         duration: 0.3,
         ease: 'power2.in'
       });
@@ -42,7 +42,7 @@ const FloatingButton = () => {
     <Link
       ref={buttonRef}
       href="/citas"
-      className="fixed bottom-8 right-8 z-[100] bg-indigo-600 transition-colors text-white font-bold px-6 py-3 rounded-full shadow-2xl text-lg animate-bounce"
+      className="lun-glow-pulse fixed bottom-6 right-6 z-[100] flex min-h-12 items-center rounded-full border border-gold/60 bg-night/85 whitespace-nowrap px-5 font-label text-sm text-gold sm:px-6 sm:text-base backdrop-blur-md transition-colors hover:bg-gold hover:text-night"
       style={{ 
         letterSpacing: 1,
         maxWidth: '200px',

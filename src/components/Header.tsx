@@ -1,6 +1,7 @@
 'use client';
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
+import { usePathname } from "next/navigation";
 import { useGSAP } from "@gsap/react";
 import gsap from "gsap";
 import { ScrollTrigger } from "gsap/ScrollTrigger";
@@ -10,245 +11,177 @@ import { SkipForward, SkipBack, Music, Play, Pause } from "lucide-react";
 
 gsap.registerPlugin(ScrollTrigger);
 
+const NAV = [
+  { href: "/", label: "Inicio" },
+  { href: "/sobre-mi", label: "Sobre mí" },
+  { href: "/articulos", label: "El grimorio de Lunaria" },
+];
+
+const MoonMark = ({ size = 28 }: { size?: number }) => (
+  <svg aria-hidden="true" width={size} height={size} viewBox="0 0 24 24" fill="none" stroke="#e9c46a" strokeWidth="1.5">
+    <path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5Z" />
+  </svg>
+);
+
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
   const headerRef = useRef<HTMLElement>(null);
+  const isOpenRef = useRef(false);
+  const pathname = usePathname();
   const lenis = useLenis();
-  const { 
-    isMuted, 
-    toggleMute, 
-    currentTrack, 
-    nextTrack, 
+  const {
+    isMuted,
+    toggleMute,
+    currentTrack,
+    nextTrack,
     previousTrack,
     isProcessing
   } = useBackgroundMusic();
 
+  const isActive = (href: string) => (href === "/" ? pathname === "/" : pathname.startsWith(href));
+
   useGSAP(() => {
-    const cleanupFunctions: (() => void)[] = [];
-
-    // Animated links
-    const links = gsap.utils.toArray<Element>('.animated-link');
-    links.forEach((link: Element) => {
-      const onMouseEnter = () => {
-        gsap.to(link, { y: -2, color: "#d1d5db", duration: 0.2 });
-      };
-      const onMouseLeave = () => {
-        gsap.to(link, { y: 0, color: "#ffffff", duration: 0.2 });
-      };
-      link.addEventListener('mouseenter', onMouseEnter);
-      link.addEventListener('mouseleave', onMouseLeave);
-
-      // Store cleanup function
-      cleanupFunctions.push(() => {
-        link.removeEventListener('mouseenter', onMouseEnter);
-        link.removeEventListener('mouseleave', onMouseLeave);
-      });
-    });
-
-    // Animate header background on scroll
+    // Al bajar de los primeros 100px el header se vuelve vidrio esmerilado
     gsap.to(headerRef.current, {
-      padding: "1rem 2rem",
-      backgroundColor: "rgba(0, 0, 0, 0.8)",
-      backdropFilter: "blur(10px)",
-      scrollTrigger: {
-        trigger: "body",
-        start: "top top",
-        end: "+=100",
-        scrub: 1,
-      },
+      backgroundColor: "rgba(7, 6, 26, 0.72)",
+      backdropFilter: "blur(14px)",
+      borderBottomColor: "rgba(201, 184, 255, 0.14)",
+      paddingTop: "0.75rem",
+      paddingBottom: "0.75rem",
+      scrollTrigger: { trigger: "body", start: "top top", end: "+=100", scrub: 1 },
     });
 
-    // Smooth header movement with Lenis integration
-    let currentY = 0;
-    let isAnimating = false;
-
-    const handleLenisScroll = ({ scroll }: { scroll: number }) => {
-      if (isAnimating) return;
-      
-      const scrollDirection = scroll > currentY ? 1 : -1;
-      const scrollSpeed = Math.abs(scroll - currentY);
-      
-      // Create subtle floating effect based on scroll
-      const targetY = Math.sin(scroll * 0.002) * 3; // Gentle sine wave movement
-      const targetRotation = scrollDirection * Math.min(scrollSpeed * 0.01, 1); // Rotation based on speed
-      
-      isAnimating = true;
-      gsap.to(headerRef.current, {
-        y: targetY,
-        rotationZ: targetRotation,
-        duration: 0.6,
-        ease: "power2.out",
-        onComplete: () => {
-          isAnimating = false;
-        }
-      });
-      
-      currentY = scroll;
+    // Se esconde al bajar y vuelve al subir, salvo que el menú móvil esté abierto
+    // o el foco del teclado esté dentro del header
+    const header = headerRef.current;
+    if (!lenis || !header) return;
+    const show = () => gsap.to(header, { yPercent: 0, duration: 0.4, ease: "power2.out", overwrite: "auto" });
+    let lastScroll = 0;
+    const onScroll = ({ scroll }: { scroll: number }) => {
+      const pinned = isOpenRef.current || header.contains(document.activeElement);
+      const hide = !pinned && scroll > 160 && scroll > lastScroll;
+      gsap.to(header, { yPercent: hide ? -110 : 0, duration: 0.4, ease: "power2.out", overwrite: "auto" });
+      lastScroll = scroll;
     };
-
-    // Listen to Lenis scroll events for perfect integration
-    if (lenis) {
-      lenis.on('scroll', handleLenisScroll);
-      cleanupFunctions.push(() => {
-        lenis.off('scroll', handleLenisScroll);
-      });
-    }
-
-    // CTA Button animation
-    const ctaButton = document.querySelector('.cta-button') as HTMLElement | null;
-    if (ctaButton) {
-      const onMouseEnter = () => {
-        gsap.to(ctaButton, { rotation: 5, duration: 0.1, ease: 'power2.inOut', repeat: 1, yoyo: true });
-      };
-      const onMouseLeave = () => {
-        gsap.to(ctaButton, { rotation: 0, duration: 0.1, ease: 'power2.inOut' });
-      };
-      ctaButton.addEventListener('mouseenter', onMouseEnter);
-      ctaButton.addEventListener('mouseleave', onMouseLeave);
-
-      cleanupFunctions.push(() => {
-        ctaButton?.removeEventListener('mouseenter', onMouseEnter);
-        ctaButton?.removeEventListener('mouseleave', onMouseLeave);
-      });
-    }
-
-    // Return single cleanup function that calls all stored cleanup functions
+    lenis.on("scroll", onScroll);
+    header.addEventListener("focusin", show);
     return () => {
-      cleanupFunctions.forEach(cleanup => cleanup());
+      lenis.off("scroll", onScroll);
+      header.removeEventListener("focusin", show);
     };
-  }, { scope: headerRef });
+  }, { scope: headerRef, dependencies: [lenis] });
 
+  // Al abrir el menú móvil el header vuelve a la vista
+  useEffect(() => {
+    isOpenRef.current = isOpen;
+    if (isOpen && headerRef.current) {
+      gsap.to(headerRef.current, { yPercent: 0, duration: 0.4, ease: "power2.out", overwrite: "auto" });
+    }
+  }, [isOpen]);
+
+  const musicButtons = (size: number) => (
+    <>
+      <button
+        onClick={previousTrack}
+        className="flex h-11 w-11 items-center justify-center rounded-full text-moon-500 transition-colors hover:bg-dusk-500/60 hover:text-moon-50 disabled:opacity-40"
+        aria-label="Canción anterior"
+        disabled={isMuted}
+      >
+        <SkipBack size={size} />
+      </button>
+      <button
+        onClick={toggleMute}
+        className={`flex h-11 w-11 items-center justify-center rounded-full border border-lavender/30 text-lavender transition-colors hover:bg-dusk-500/60 hover:text-moon-50 ${isProcessing ? 'animate-pulse' : ''}`}
+        aria-label={!isMuted ? "Pausar música" : "Reproducir música"}
+      >
+        {!isMuted ? <Pause size={size + 2} /> : <Play size={size + 2} />}
+      </button>
+      <button
+        onClick={nextTrack}
+        className="flex h-11 w-11 items-center justify-center rounded-full text-moon-500 transition-colors hover:bg-dusk-500/60 hover:text-moon-50 disabled:opacity-40"
+        aria-label="Siguiente canción"
+        disabled={isMuted}
+      >
+        <SkipForward size={size} />
+      </button>
+    </>
+  );
 
   return (
-    <header ref={headerRef} className="fixed top-0 left-0 w-full p-4 sm:p-8 text-white z-50 transition-all duration-300 will-change-transform">
-      <nav className="container mx-auto flex justify-between items-center">
-        <Link href="/" className="text-xl sm:text-2xl font-bold hover:text-gray-300 navbar-title animated-link">
+    <header
+      ref={headerRef}
+      className="fixed left-0 top-0 z-50 w-full border-b border-transparent px-[clamp(1rem,4vw,3.5rem)] py-5 text-moon-100 will-change-transform"
+    >
+      <nav aria-label="Principal" className="mx-auto flex max-w-7xl items-center justify-between gap-4">
+        <Link href="/" className="navbar-title flex items-center gap-3 whitespace-nowrap text-base font-bold tracking-wide text-moon-50 sm:text-lg xl:text-xl">
+          <MoonMark />
           La madriguera de Lunaria
         </Link>
 
-        {/* Desktop Menu */}
-        <div className="hidden md:flex items-center space-x-6">
-          <ul className="flex space-x-6">
-            <li><Link href="/" className="animated-link">Inicio</Link></li>
-            <li><Link href="/sobre-mi" className="animated-link">Sobre mí</Link></li>
-            <li><Link href="/articulos" className="animated-link whitespace-nowrap">El grimorio de Lunaria</Link></li>
-            <li><Link href="/citas" className="font-semibold px-4 py-2 rounded-full bg-purple-600/50 text-white ring-1 ring-purple-400 hover:bg-purple-600/80 transition-all shadow-[0_0_15px_rgba(168,85,247,0.6)] hover:shadow-[0_0_25px_rgba(168,85,247,0.8)] cta-button whitespace-nowrap">Agendar</Link></li>
+        {/* Menú de escritorio */}
+        <div className="hidden items-center gap-5 lg:flex xl:gap-7">
+          <ul className="m-0 flex list-none items-center gap-5 p-0 font-label text-sm tracking-[0.06em] xl:gap-7 xl:text-[0.95rem]">
+            {NAV.map((item) => (
+              <li key={item.href}>
+                <Link href={item.href} aria-current={isActive(item.href) ? "page" : undefined} className="lun-link whitespace-nowrap">
+                  {item.label}
+                </Link>
+              </li>
+            ))}
           </ul>
-          
-          {/* Controles de música YouTube - siempre visibles */}
-          {(
-            <div className="flex items-center space-x-2 bg-purple-600/10 rounded-full p-1">
-              {/* Canción actual */}
-              {currentTrack && !isMuted && (
-                <div className="hidden lg:flex items-center space-x-2 px-3 max-w-48">
-                  <Music size={14} className="text-purple-400 animate-pulse" />
-                  <span className="text-xs text-white/80 truncate">{currentTrack}</span>
-                </div>
-              )}
-              
-              {/* Controles */}
-              <button 
-                onClick={previousTrack}
-                className="p-2 rounded-full hover:bg-purple-600/40 transition-all duration-300 text-white/60 hover:text-white disabled:opacity-50"
-                aria-label="Canción anterior"
-                disabled={isMuted || isProcessing}
-              >
-                <SkipBack size={16} />
-              </button>
-              
-              <button 
-                onClick={toggleMute}
-                className={`p-2 rounded-full bg-purple-600/20 hover:bg-purple-600/40 transition-all duration-300 text-white/80 hover:text-white ${isProcessing ? 'animate-pulse' : ''}`}
-                aria-label={!isMuted ? "Pausar música" : "Reproducir música"}
-                disabled={isProcessing}
-              >
-                {!isMuted ? <Pause size={18} /> : <Play size={18} />}
-              </button>
-              
-              <button 
-                onClick={nextTrack}
-                className="p-2 rounded-full hover:bg-purple-600/40 transition-all duration-300 text-white/60 hover:text-white disabled:opacity-50"
-                aria-label="Siguiente canción"
-                disabled={isMuted || isProcessing}
-              >
-                <SkipForward size={16} />
-              </button>
-            </div>
-          )}
+
+          <div className="flex items-center gap-1">
+            {currentTrack && !isMuted && (
+              <div className="hidden max-w-48 items-center gap-2 px-2 lg:flex">
+                <Music size={14} className="text-gold" />
+                <span className="truncate text-xs text-moon-400">{currentTrack}</span>
+              </div>
+            )}
+            {musicButtons(16)}
+          </div>
+
+          <Link href="/citas" className="lun-btn-gold min-h-11 px-5 text-[0.95rem]">Agendar</Link>
         </div>
 
-        {/* Mobile Menu Button */}
-        <div className="md:hidden">
-          <button onClick={() => setIsOpen(!isOpen)} className="text-white focus:outline-none" aria-label="Abrir menú">
-            {isOpen ? (
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
-              </svg>
-            ) : (
-              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16m-7 6h7" />
-              </svg>
-            )}
-          </button>
-        </div>
+        {/* Botón de menú móvil */}
+        <button
+          onClick={() => setIsOpen(!isOpen)}
+          className="flex h-11 w-11 items-center justify-center rounded-full border border-gold/50 text-gold lg:hidden"
+          aria-label={isOpen ? "Cerrar menú" : "Abrir menú"}
+          aria-expanded={isOpen}
+        >
+          <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6">
+            {isOpen ? <path d="M6 18L18 6M6 6l12 12" /> : <path d="M4 7h16M4 12h16M4 17h10" />}
+          </svg>
+        </button>
       </nav>
 
-      {/* Mobile Menu */}
+      {/* Menú móvil */}
       {isOpen && (
-        <div className="md:hidden mt-4">
-          <ul className="flex flex-col items-center space-y-4 bg-black bg-opacity-80 backdrop-blur-sm p-4 rounded-lg">
-            <li><Link href="/" className="block py-2 hover:text-gray-300 animated-link" onClick={() => setIsOpen(false)}>Inicio</Link></li>
-            <li><Link href="/sobre-mi" className="block py-2 hover:text-gray-300 animated-link" onClick={() => setIsOpen(false)}>Sobre mí</Link></li>
-            <li><Link href="/articulos" className="block py-2 hover:text-gray-300 animated-link" onClick={() => setIsOpen(false)}>El grimorio de Lunaria</Link></li>
-            <li><Link href="/citas" className="block py-2 px-5 rounded-full bg-purple-600/50 text-white ring-1 ring-purple-400 hover:bg-purple-600/80 transition-all shadow-[0_0_15px_rgba(168,85,247,0.6)]" onClick={() => setIsOpen(false)}>Agendar Cita</Link></li>
-            
-            {/* Controles de música - siempre visibles */}
-            {(
-              <>
-                {/* Canción actual */}
-                {currentTrack && !isMuted && (
-                  <li className="text-center">
-                    <div className="flex items-center justify-center space-x-2 py-2 text-purple-300">
-                      <Music size={16} className="animate-pulse" />
-                      <span className="text-xs truncate max-w-48">{currentTrack}</span>
-                    </div>
-                  </li>
-                )}
-                
-                {/* Controles */}
-                <li>
-                  <div className="flex items-center justify-center space-x-3 py-2">
-                    <button 
-                      onClick={previousTrack}
-                      className="p-2 hover:bg-white/10 rounded-full transition-colors disabled:opacity-50"
-                      aria-label="Canción anterior"
-                      disabled={isMuted || isProcessing}
-                    >
-                      <SkipBack size={18} className="text-white/60" />
-                    </button>
-                    
-                    <button 
-                      onClick={toggleMute}
-                      className={`flex items-center space-x-2 py-2 px-4 rounded-full bg-purple-600/20 hover:bg-purple-600/40 transition-all duration-300 text-white/80 hover:text-white ${isProcessing ? 'animate-pulse' : ''}`}
-                      aria-label={!isMuted ? "Pausar música" : "Reproducir música"}
-                      disabled={isProcessing}
-                    >
-                      {!isMuted ? <Pause size={20} /> : <Play size={20} />}
-                      <span className="text-sm">{!isMuted ? "Pausar" : "Reproducir"}</span>
-                    </button>
-                    
-                    <button 
-                      onClick={nextTrack}
-                      className="p-2 hover:bg-white/10 rounded-full transition-colors disabled:opacity-50"
-                      aria-label="Siguiente canción"
-                      disabled={isMuted || isProcessing}
-                    >
-                      <SkipForward size={18} className="text-white/60" />
-                    </button>
-                  </div>
-                </li>
-              </>
+        <div className="mt-4 lg:hidden">
+          <ul className="flex list-none flex-col items-center gap-2 rounded-2xl border border-lavender/15 bg-night/90 p-5 font-label tracking-[0.08em] backdrop-blur-md">
+            {NAV.map((item) => (
+              <li key={item.href}>
+                <Link
+                  href={item.href}
+                  aria-current={isActive(item.href) ? "page" : undefined}
+                  className="lun-link block py-2"
+                  onClick={() => setIsOpen(false)}
+                >
+                  {item.label}
+                </Link>
+              </li>
+            ))}
+            <li className="mt-2">
+              <Link href="/citas" className="lun-btn-gold" onClick={() => setIsOpen(false)}>Agendar cita</Link>
+            </li>
+            {currentTrack && !isMuted && (
+              <li className="flex items-center gap-2 pt-2 text-xs text-moon-400">
+                <Music size={14} className="text-gold" />
+                <span className="max-w-48 truncate">{currentTrack}</span>
+              </li>
             )}
+            <li className="flex items-center gap-2 pt-1">{musicButtons(18)}</li>
           </ul>
         </div>
       )}

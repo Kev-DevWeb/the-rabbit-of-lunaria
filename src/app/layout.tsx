@@ -1,5 +1,4 @@
-import { Geist, Geist_Mono } from "next/font/google";
-import { Cinzel_Decorative, Playfair_Display, Cormorant_Garamond } from "next/font/google";
+import { Cinzel, Cinzel_Decorative, Cormorant_Garamond } from "next/font/google";
 import "./globals.css";
 import Script from 'next/script';
 import LayoutClient from './LayoutClient';
@@ -7,25 +6,17 @@ import LayoutClient from './LayoutClient';
 // Re-exportar metadata desde el archivo dedicado
 export { metadata } from './metadata';
 
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
 const cinzelDecorative = Cinzel_Decorative({
   weight: ["400", "700", "900"],
   subsets: ["latin"],
   variable: "--font-cinzel-decorative",
 });
 
-const playfairDisplay = Playfair_Display({
+// Cinzel sin ornamentos para etiquetas, navegación y botones
+const cinzel = Cinzel({
+  weight: ["400", "600"],
   subsets: ["latin"],
-  variable: "--font-playfair-display",
+  variable: "--font-cinzel",
 });
 
 const cormorantGaramond = Cormorant_Garamond({
@@ -72,7 +63,7 @@ export default function RootLayout({
     <html lang="es">
       <head>
         <Script
-          src="https://cdn.jsdelivr.net/gh/bigdatacloudapi/js-reverse-geocode-client@latest/bigdatacloud_reverse_geocode.min.js"
+          src="https://cdn.jsdelivr.net/gh/bigdatacloudapi/js-reverse-geocode-client@9ab66c35f7914b9d9a54b3e57fd465916d45ec65/bigdatacloud_reverse_geocode.min.js"
           strategy="afterInteractive"
         />
         <script
@@ -81,7 +72,7 @@ export default function RootLayout({
         />
       </head>
       <body
-        className={`${geistSans.variable} ${geistMono.variable} ${cinzelDecorative.variable} ${playfairDisplay.variable} ${cormorantGaramond.variable} antialiased bg-gray-900 text-white`}
+        className={`${cinzelDecorative.variable} ${cinzel.variable} ${cormorantGaramond.variable} antialiased bg-night text-moon-50`}
       >
         <LayoutClient>{children}</LayoutClient>
       </body>

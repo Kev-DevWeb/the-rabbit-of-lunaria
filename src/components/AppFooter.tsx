@@ -1,199 +1,124 @@
 'use client';
 import { useRef } from 'react';
+import Link from 'next/link';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
 import { ScrollTrigger } from 'gsap/ScrollTrigger';
-import { Music, Heart, Moon, Sparkles, Instagram, Palette, Code } from 'lucide-react';
+import { Music, Heart, Instagram, Palette, Code } from 'lucide-react';
 
 gsap.registerPlugin(ScrollTrigger);
+
+const CREDITS = [
+  {
+    icon: Music,
+    title: 'Música Ambiente',
+    body: (
+      <>
+        Agradecimiento especial a{' '}
+        <a href="https://www.youtube.com/@erinmusicbox" target="_blank" rel="noopener noreferrer" className="lun-link text-gold">
+          erinmusicbox
+        </a>{' '}
+        por su hermosa música que acompaña este espacio mágico
+      </>
+    ),
+  },
+  {
+    icon: Palette,
+    title: 'Ilustración Grimorio',
+    body: (
+      <>
+        Ilustraciones y animación del grimorio por{' '}
+        <a href="https://www.instagram.com/woolysolid0619_oficial/" target="_blank" rel="noopener noreferrer" className="lun-link inline-flex items-center gap-1 text-gold">
+          <Instagram className="h-3.5 w-3.5" aria-hidden="true" />
+          WoolySolid 0619
+        </a>
+      </>
+    ),
+  },
+  {
+    icon: Heart,
+    title: 'Creado con Amor',
+    body: <>Este espacio fue creado con amor y dedicación para acompañarte en tu camino espiritual</>,
+  },
+];
 
 const AppFooter = () => {
   const footerRef = useRef<HTMLElement>(null);
 
   useGSAP(() => {
-    if (!footerRef.current) return;
-    
-    gsap.from(footerRef.current, {
-      autoAlpha: 0,
-      y: 50,
-      duration: 0.8,
-      ease: 'power3.out',
-      scrollTrigger: {
-        trigger: footerRef.current,
-        start: 'top 95%',
-        toggleActions: 'play none none none',
-      },
+    const mm = gsap.matchMedia();
+    mm.add('(prefers-reduced-motion: no-preference)', () => {
+      gsap.from('.footer-item', {
+        autoAlpha: 0,
+        y: 30,
+        duration: 0.8,
+        ease: 'power3.out',
+        stagger: 0.1,
+        scrollTrigger: { trigger: footerRef.current, start: 'top 95%', toggleActions: 'play none none none' },
+      });
     });
+    return () => mm.revert();
   }, { scope: footerRef });
 
   return (
-    <footer 
-      ref={footerRef} 
-      className="relative w-full overflow-hidden bg-gradient-to-b from-gray-900 via-purple-950 to-black border-t border-purple-500/30"
-    >
-      {/* Estrellas decorativas de fondo */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none opacity-30">
-        {[...Array(20)].map((_, i) => {
-          // Posiciones determinísticas para evitar hydration mismatch
-          const seed = (i + 1) * 7919; // Primo para distribución
-          const w = ((seed * 13) % 30) / 10 + 1;
-          const h = ((seed * 17) % 30) / 10 + 1;
-          const l = ((seed * 23) % 1000) / 10;
-          const t = ((seed * 29) % 1000) / 10;
-          const delay = ((seed * 31) % 30) / 10;
-          const dur = ((seed * 37) % 20) / 10 + 2;
-          return (
-            <div
-              key={i}
-              className="absolute bg-purple-300 rounded-full animate-pulse"
-              style={{
-                width: w + 'px',
-                height: h + 'px',
-                left: l + '%',
-                top: t + '%',
-                animationDelay: delay + 's',
-                animationDuration: dur + 's',
-              }}
-            />
-          );
-        })}
-      </div>
-
-      <div className="relative z-10 max-w-6xl mx-auto px-4 py-8">
-        {/* Sección superior con logo/nombre */}
-        <div className="flex flex-col items-center mb-6">
-          <div className="flex items-center gap-2 mb-3">
-            <Moon className="w-6 h-6 text-purple-400" />
-            <h3 className="text-xl font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 bg-clip-text text-transparent">
-              La Madriguera de Lunaria
-            </h3>
-            <Sparkles className="w-6 h-6 text-purple-400" />
+    <footer ref={footerRef} className="relative w-full overflow-hidden border-t border-lavender/12 bg-night">
+      <div className="relative z-10 mx-auto max-w-6xl px-4 py-14">
+        <div className="footer-item flex flex-col items-center gap-3 text-center">
+          <div className="flex items-center gap-3 font-display text-xl text-moon-50">
+            <svg aria-hidden="true" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="#e9c46a" strokeWidth="1.5">
+              <path d="M20 14.5A8.5 8.5 0 0 1 9.5 4a8.5 8.5 0 1 0 10.5 10.5Z" />
+            </svg>
+            La Madriguera de Lunaria
           </div>
-          <p className="text-gray-400 text-sm text-center max-w-md">
-            Un espacio mágico de guía espiritual y sabiduría ancestral
-          </p>
+          <p className="m-0 max-w-md text-base text-moon-500">Un espacio mágico de guía espiritual y sabiduría ancestral</p>
+          <nav aria-label="Pie de página" className="mt-2 flex flex-wrap justify-center gap-6 font-label text-sm tracking-[0.08em]">
+            <Link href="/sobre-mi" className="lun-link">Sobre mí</Link>
+            <Link href="/articulos" className="lun-link">Grimorio</Link>
+            <Link href="/citas" className="lun-link">Agendar</Link>
+            <a href="mailto:elconejodelunaria@gmail.com" className="lun-link">Contacto</a>
+          </nav>
         </div>
 
-        {/* Línea divisoria decorativa */}
-        <div className="w-full h-px bg-gradient-to-r from-transparent via-purple-500/50 to-transparent mb-6"></div>
+        <div aria-hidden="true" className="my-10 text-center tracking-[0.6em] text-gold">✦ ☾ ✦</div>
 
-        {/* Sección de créditos */}
-        <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-4 mb-6">
-          {/* Crédito musical */}
-          <div className="bg-purple-900/20 backdrop-blur-sm rounded-lg p-4 border border-purple-500/20 hover:border-purple-500/40 transition-all duration-300">
-            <div className="flex items-start gap-3">
-              <Music className="w-5 h-5 text-pink-400 mt-1 flex-shrink-0" />
+        <ul className="m-0 grid list-none gap-4 p-0 md:grid-cols-3">
+          {CREDITS.map(({ icon: Icon, title, body }) => (
+            <li key={title} className="footer-item lun-card flex items-start gap-3 p-5">
+              <Icon className="mt-1 h-5 w-5 flex-shrink-0 text-gold" aria-hidden="true" />
               <div>
-                <h4 className="text-purple-300 font-semibold mb-1 text-sm">Música Ambiente</h4>
-                <p className="text-gray-400 text-xs leading-relaxed">
-                  Agradecimiento especial a <a 
-                    href="https://www.youtube.com/@erinmusicbox" 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="text-purple-400 hover:text-purple-300 underline decoration-purple-500/50 hover:decoration-purple-300 transition-colors font-medium"
-                  >
-                    erinmusicbox
-                  </a> por su hermosa música que acompaña este espacio mágico
-                </p>
+                <h4 className="m-0 mb-1 font-label text-sm font-semibold tracking-[0.05em] text-moon-50">{title}</h4>
+                <p className="m-0 text-sm leading-relaxed text-moon-400">{body}</p>
               </div>
-            </div>
+            </li>
+          ))}
+        </ul>
+
+        <p className="footer-item mx-auto mt-6 max-w-2xl text-center text-sm text-moon-500">
+          <span className="text-moon-300">Recursos visuales:</span> las demás ilustraciones fueron extraídas de{' '}
+          <a href="https://www.freepik.com/" target="_blank" rel="noopener noreferrer" className="lun-link text-lavender">Freepik</a>
+          {' '}y{' '}
+          <a href="https://www.pexels.com/" target="_blank" rel="noopener noreferrer" className="lun-link text-lavender">Pexels</a>
+        </p>
+
+        <div className="footer-item mt-10 flex flex-col items-center gap-5 border-t border-lavender/10 pt-8 text-center sm:flex-row sm:justify-between sm:text-left">
+          <div>
+            <p className="m-0 text-sm text-moon-400">&copy; {new Date().getFullYear()} La Madriguera de Lunaria</p>
+            <p className="m-0 text-xs text-moon-500">Todos los derechos reservados • Hecho con magia y propósito</p>
           </div>
-
-          {/* Crédito ilustraciones Grimorio */}
-          <div className="bg-indigo-900/20 backdrop-blur-sm rounded-lg p-4 border border-indigo-500/20 hover:border-indigo-500/40 transition-all duration-300">
-            <div className="flex items-start gap-3">
-              <Palette className="w-5 h-5 text-indigo-400 mt-1 flex-shrink-0" />
-              <div>
-                <h4 className="text-indigo-300 font-semibold mb-1 text-sm">Ilustración Grimorio</h4>
-                <p className="text-gray-400 text-xs leading-relaxed">
-                  Ilustraciones y animación del grimorio por <a 
-                    href="https://www.instagram.com/woolysolid0619_oficial/" 
-                    target="_blank" 
-                    rel="noopener noreferrer"
-                    className="text-indigo-400 hover:text-indigo-300 transition-colors font-medium inline-flex items-center gap-1"
-                  >
-                    <Instagram className="w-3 h-3" />
-                    WoolySolid 0619
-                  </a>
-                </p>
-              </div>
-            </div>
-          </div>
-
-          {/* Mensaje de amor y luz */}
-          <div className="bg-pink-900/20 backdrop-blur-sm rounded-lg p-4 border border-pink-500/20 hover:border-pink-500/40 transition-all duration-300">
-            <div className="flex items-start gap-3">
-              <Heart className="w-5 h-5 text-pink-400 mt-1 flex-shrink-0" />
-              <div>
-                <h4 className="text-pink-300 font-semibold mb-1 text-sm">Creado con Amor</h4>
-                <p className="text-gray-400 text-xs leading-relaxed">
-                  Este espacio fue creado con amor y dedicación para acompañarte en tu camino espiritual
-                </p>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        {/* Créditos de recursos visuales */}
-        <div className="bg-gray-900/40 backdrop-blur-sm rounded-lg p-4 border border-gray-500/20 mb-6">
-          <p className="text-gray-400 text-xs text-center leading-relaxed">
-            <span className="text-gray-300 font-medium">Recursos visuales:</span> Las demás ilustraciones fueron extraídas de{' '}
-            <a 
-              href="https://www.freepik.com/" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="text-blue-400 hover:text-blue-300 underline decoration-blue-500/50 hover:decoration-blue-300 transition-colors"
-            >
-              Freepik
-            </a>
-            {' '}y{' '}
-            <a 
-              href="https://www.pexels.com/" 
-              target="_blank" 
-              rel="noopener noreferrer"
-              className="text-green-400 hover:text-green-300 underline decoration-green-500/50 hover:decoration-green-300 transition-colors"
-            >
-              Pexels
-            </a>
-          </p>
-        </div>
-
-        {/* Copyright y derechos */}
-        <div className="text-center mb-4">
-          <p className="text-gray-400 text-sm mb-2">
-            &copy; {new Date().getFullYear()} La Madriguera de Lunaria
-          </p>
-          <p className="text-gray-500 text-xs">
-            Todos los derechos reservados • Hecho con magia y propósito ✨
-          </p>
-        </div>
-
-        {/* Línea divisoria */}
-        <div className="w-full h-px bg-gradient-to-r from-transparent via-purple-500/30 to-transparent mb-4"></div>
-
-        {/* Crédito de desarrollo */}
-        <div className="flex justify-center">
-          <a 
-            href="https://www.devvisualstudio.com/" 
-            target="_blank" 
+          <a
+            href="https://www.devvisualstudio.com/"
+            target="_blank"
             rel="noopener noreferrer"
-            className="group bg-gradient-to-r from-purple-900/30 to-indigo-900/30 backdrop-blur-sm rounded-lg px-6 py-3 border border-purple-500/30 hover:border-purple-500/60 transition-all duration-300 hover:scale-105"
+            className="group flex items-center gap-3 rounded-xl border border-lavender/20 px-5 py-3 transition-colors hover:border-gold/50"
           >
-            <div className="flex items-center gap-3">
-              <Code className="w-5 h-5 text-purple-400 group-hover:text-purple-300 transition-colors" />
-              <div className="text-left">
-                <p className="text-xs text-gray-400">Desarrollado por</p>
-                <p className="text-sm font-bold bg-gradient-to-r from-purple-400 via-pink-400 to-purple-400 bg-clip-text text-transparent group-hover:from-purple-300 group-hover:via-pink-300 group-hover:to-purple-300 transition-all">
-                  DevVisual Studio
-                </p>
-              </div>
-            </div>
+            <Code className="h-5 w-5 text-gold" aria-hidden="true" />
+            <span className="text-left">
+              <span className="block text-xs text-moon-500">Desarrollado por</span>
+              <span className="block font-label text-sm font-semibold text-moon-50 group-hover:text-gold">DevVisual Studio</span>
+            </span>
           </a>
         </div>
       </div>
-
-      {/* Brillo decorativo inferior */}
-      <div className="absolute bottom-0 left-1/2 -translate-x-1/2 w-3/4 h-px bg-gradient-to-r from-transparent via-purple-500/50 to-transparent"></div>
     </footer>
   );
 };

@@ -47,7 +47,7 @@ const MusicNotificationComponent: React.FC<MusicNotificationProps> = ({
     <div
       className={`
         max-w-sm w-full
-        bg-black/90 text-white rounded-lg border border-purple-500/30
+        bg-night/90 text-moon-50 rounded-lg border border-lavender/30
         backdrop-blur-sm shadow-xl
         transform transition-all duration-300 ease-out
         ${isVisible && !isExiting 
@@ -58,32 +58,32 @@ const MusicNotificationComponent: React.FC<MusicNotificationProps> = ({
     >
       <div className="flex items-center p-4">
         <div className="flex-shrink-0 mr-3">
-          <div className="w-8 h-8 bg-purple-600 rounded-full flex items-center justify-center">
+          <div className="w-8 h-8 bg-violet-glow rounded-full flex items-center justify-center">
             <Music className="w-4 h-4" />
           </div>
         </div>
         
         <div className="flex-1 min-w-0">
-          <p className="text-sm font-medium text-white truncate">
+          <p className="text-sm font-medium text-moon-50 truncate">
             {notification.title}
           </p>
-          <p className="text-xs text-gray-300 truncate">
+          <p className="text-xs text-moon-300 truncate">
             {notification.channel}
           </p>
         </div>
         
         <button
           onClick={handleClose}
-          className="ml-3 flex-shrink-0 text-gray-400 hover:text-white transition-colors"
+          className="ml-3 flex-shrink-0 text-moon-500 hover:text-moon-50 transition-colors"
         >
           <X className="w-4 h-4" />
         </button>
       </div>
       
       {/* Barra de progreso */}
-      <div className="h-1 bg-gray-800">
+      <div className="h-1 bg-dusk">
         <div 
-          className="h-full bg-gradient-to-r from-purple-500 to-pink-500 transition-all ease-linear"
+          className="h-full bg-gradient-to-r from-violet-glow to-gold transition-all ease-linear"
           style={{
             width: isVisible && !isExiting ? '0%' : '100%',
             transitionDuration: `${duration}ms`

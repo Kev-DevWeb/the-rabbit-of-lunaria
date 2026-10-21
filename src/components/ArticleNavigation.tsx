@@ -32,7 +32,7 @@ export default function ArticleNavigation({ articles }: ArticleNavigationProps) 
       <div className="block md:hidden space-y-3">
         <Link 
           href="/articulos" 
-          className="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white text-sm rounded-md shadow-lg transition-colors duration-300 text-center block"
+          className="w-full px-4 py-2 bg-violet-glow hover:bg-dusk-500 text-moon-50 text-sm rounded-md shadow-lg transition-colors duration-300 text-center block"
         >
           📖 Regresar al Índice
         </Link>
@@ -40,24 +40,24 @@ export default function ArticleNavigation({ articles }: ArticleNavigationProps) 
           {prevArticle ? (
             <Link 
               href={`/articulos/${prevArticle.slug.current}`} 
-              className="flex-1 px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm rounded-md shadow-lg transition-colors duration-300 text-center"
+              className="flex-1 px-3 py-2 bg-violet-glow hover:bg-dusk-500 text-moon-50 text-sm rounded-md shadow-lg transition-colors duration-300 text-center"
             >
               ← Anterior
             </Link>
           ) : (
-            <span className="flex-1 px-3 py-2 bg-gray-700 text-gray-400 text-sm rounded-md cursor-not-allowed text-center">
+            <span className="flex-1 px-3 py-2 bg-dusk-700 text-moon-500 text-sm rounded-md cursor-not-allowed text-center">
               ← Anterior
             </span>
           )}
           {nextArticle ? (
             <Link 
               href={`/articulos/${nextArticle.slug.current}`} 
-              className="flex-1 px-3 py-2 bg-purple-600 hover:bg-purple-700 text-white text-sm rounded-md shadow-lg transition-colors duration-300 text-center"
+              className="flex-1 px-3 py-2 bg-violet-glow hover:bg-dusk-500 text-moon-50 text-sm rounded-md shadow-lg transition-colors duration-300 text-center"
             >
               Siguiente →
             </Link>
           ) : (
-            <span className="flex-1 px-3 py-2 bg-gray-700 text-gray-400 text-sm rounded-md cursor-not-allowed text-center">
+            <span className="flex-1 px-3 py-2 bg-dusk-700 text-moon-500 text-sm rounded-md cursor-not-allowed text-center">
               Siguiente →
             </span>
           )}
@@ -69,19 +69,19 @@ export default function ArticleNavigation({ articles }: ArticleNavigationProps) 
         {prevArticle ? (
           <Link 
             href={`/articulos/${prevArticle.slug.current}`} 
-            className="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg shadow-lg transition-colors duration-300"
+            className="px-6 py-3 bg-violet-glow hover:bg-dusk-500 text-moon-50 rounded-lg shadow-lg transition-colors duration-300"
           >
             ← Página Anterior
           </Link>
         ) : (
-          <span className="px-6 py-3 bg-gray-700 text-gray-400 rounded-lg cursor-not-allowed">
+          <span className="px-6 py-3 bg-dusk-700 text-moon-500 rounded-lg cursor-not-allowed">
             ← Página Anterior
           </span>
         )}
 
         <Link 
           href="/articulos" 
-          className="px-6 py-3 bg-blue-600 hover:bg-blue-700 text-white rounded-lg shadow-lg transition-colors duration-300"
+          className="px-6 py-3 bg-violet-glow hover:bg-dusk-500 text-moon-50 rounded-lg shadow-lg transition-colors duration-300"
         >
           📖 Regresar al Índice
         </Link>
@@ -89,12 +89,12 @@ export default function ArticleNavigation({ articles }: ArticleNavigationProps) 
         {nextArticle ? (
           <Link 
             href={`/articulos/${nextArticle.slug.current}`} 
-            className="px-6 py-3 bg-purple-600 hover:bg-purple-700 text-white rounded-lg shadow-lg transition-colors duration-300"
+            className="px-6 py-3 bg-violet-glow hover:bg-dusk-500 text-moon-50 rounded-lg shadow-lg transition-colors duration-300"
           >
             Página Siguiente →
           </Link>
         ) : (
-          <span className="px-6 py-3 bg-gray-700 text-gray-400 rounded-lg cursor-not-allowed">
+          <span className="px-6 py-3 bg-dusk-700 text-moon-500 rounded-lg cursor-not-allowed">
             Página Siguiente →
           </span>
         )}
