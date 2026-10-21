@@ -3,6 +3,10 @@
 import { createContext, useContext, useEffect, useState } from 'react';
 import { usePathname } from 'next/navigation';
 import Lenis from 'lenis';
+import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+
+gsap.registerPlugin(ScrollTrigger);
 
 const LenisContext = createContext<Lenis | null>(null);
 
@@ -30,19 +34,16 @@ export const LenisProvider = ({ children }: { children: React.ReactNode }) => {
       }
     });
 
-    let rafId: number;
-
-    function raf(time: number) {
-      newLenis.raf(time);
-      rafId = requestAnimationFrame(raf);
-    }
-
-    rafId = requestAnimationFrame(raf);
+    // Lenis corre en el ticker de GSAP para que ScrollTrigger y el scroll suave vayan sincronizados
+    newLenis.on('scroll', ScrollTrigger.update);
+    const tick = (time: number) => newLenis.raf(time * 1000);
+    gsap.ticker.add(tick);
+    gsap.ticker.lagSmoothing(0);
 
     setLenis(newLenis);
 
     return () => {
-      cancelAnimationFrame(rafId);
+      gsap.ticker.remove(tick);
       newLenis.destroy();
     };
   }, [isStudioPage]);

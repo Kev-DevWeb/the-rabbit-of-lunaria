@@ -15,15 +15,16 @@ const CITAS_CONSTELLATION = [
 
 const CitasPage = () => {
   return (
-    <div className="bg-black text-white">
+    <div className="bg-night text-moon-50">
       <StarBackground constellation={CITAS_CONSTELLATION} width={420} height={260} />
       <main className="min-h-screen flex flex-col items-center justify-center pt-32 pb-16">
         <div className="container mx-auto p-4 sm:p-8 z-10 relative">
           <div className="text-center mb-12">
-            <h1 className="text-4xl md:text-5xl font-bold font-cinzel-decorative mb-4">
+            <span className="lun-eyebrow block">Consulta</span>
+            <h1 className="mt-4 mb-4 font-display text-[clamp(2.4rem,5vw,3.75rem)] font-bold leading-[1.1] text-moon-50">
               Agenda tu Lectura
             </h1>
-            <p className="mt-4 text-lg max-w-3xl mx-auto text-gray-300 font-cormorant-garamond">
+            <p className="mt-4 text-lg max-w-3xl mx-auto text-moon-300 font-cormorant-garamond">
               El tarot es una herramienta de autoconocimiento y una conversación con tu intuición. No predice un futuro inamovible, sino que ilumina los caminos disponibles para ti, ofreciéndote claridad, consejo y perspectiva. A través de las cartas, podemos explorar tus dudas, entender tus desafíos y encontrar la guía que necesitas para tomar decisiones más conscientes y alineadas con tu verdadero ser.
             </p>
           </div>

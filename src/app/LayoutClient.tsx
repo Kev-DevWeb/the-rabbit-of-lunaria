@@ -7,6 +7,7 @@ import AppFooter from '@/components/AppFooter'
 import { GlobalMusicNotifications } from '@/components/GlobalMusicNotifications'
 import { LenisProvider } from '@/context/LenisProvider'
 import PageTransition from '@/components/PageTransition'
+import CursorSparkles from '@/components/CursorSparkles'
 
 export default function LayoutClient({
   children,
@@ -25,6 +26,7 @@ export default function LayoutClient({
             <PageTransition>{children}</PageTransition>
           </main>
           {!isStudioPage && <AppFooter />}
+          {!isStudioPage && <CursorSparkles />}
           {/* Sistema de notificaciones de música */}
           <GlobalMusicNotifications />
         </div>

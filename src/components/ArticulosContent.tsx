@@ -254,18 +254,18 @@ export default function ArticulosContent() {
         {/* Título de la categoría - Alineado a la izquierda como índice de libro */}
         <div className="mb-4">
           <div className="flex items-center gap-2 mb-2">
-            <Sparkles className={`${sparkleSize} text-purple-400 flex-shrink-0`} />
-            <h3 className={`${titleSize} font-serif font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-300 via-pink-300 to-purple-300 leading-tight`}>
+            <Sparkles className={`${sparkleSize} text-lavender flex-shrink-0`} />
+            <h3 className={`${titleSize} font-serif font-bold text-transparent bg-clip-text bg-gradient-to-r from-lavender via-gold-200 to-lavender leading-tight`}>
               {categoryName}
             </h3>
           </div>
           {categoryNode.description && (
-            <p className="text-purple-200 font-serif italic text-xs sm:text-sm mb-2 ml-6">
+            <p className="text-moon-200 font-serif italic text-xs sm:text-sm mb-2 ml-6">
               {categoryNode.description}
             </p>
           )}
           {/* Línea decorativa más sutil y corta - responsive */}
-          <div className="h-px bg-gradient-to-r from-purple-400 to-transparent w-16 sm:w-24 lg:w-32 ml-6"></div>
+          <div className="h-px bg-gradient-to-r from-lavender to-transparent w-16 sm:w-24 lg:w-32 ml-6"></div>
         </div>
 
         {/* Artículos de esta categoría */}
@@ -275,7 +275,7 @@ export default function ArticulosContent() {
               <Link 
                 key={article._id}
                 href={`/articulos/${article.slug.current}`}
-                className="group block py-2 px-3 rounded-md hover:bg-purple-800/20 transition-all duration-300 article-entry"
+                className="group block py-2 px-3 rounded-md hover:bg-dusk-500/20 transition-all duration-300 article-entry"
               >
                 {/* Layout Mobile - Stack vertical */}
                 <div className="sm:hidden">
@@ -288,16 +288,16 @@ export default function ArticulosContent() {
                           alt={article.mainImage.alt || article.title}
                           width={48}
                           height={48}
-                          className="w-12 h-12 object-cover rounded border border-purple-500/30 group-hover:border-purple-400/50 transition-colors"
+                          className="w-12 h-12 object-cover rounded border border-lavender/30 group-hover:border-lavender/50 transition-colors"
                         />
                       </div>
                     )}
                     
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center mb-1">
-                        <div className="w-1 h-1 bg-yellow-400 rounded-full group-hover:bg-yellow-300 transition-colors mr-2 flex-shrink-0"></div>
+                        <div className="w-1 h-1 bg-gold rounded-full group-hover:bg-gold-200 transition-colors mr-2 flex-shrink-0"></div>
                       </div>
-                      <h3 className="text-gray-200 group-hover:text-yellow-100 transition-colors font-medium text-sm leading-tight">
+                      <h3 className="text-moon-200 group-hover:text-gold-200 transition-colors font-medium text-sm leading-tight">
                         {article.title}
                       </h3>
                     </div>
@@ -314,24 +314,24 @@ export default function ArticulosContent() {
                         alt={article.mainImage.alt || article.title}
                         width={40}
                         height={40}
-                        className="w-10 h-10 object-cover rounded border border-purple-500/30 group-hover:border-purple-400/50 transition-colors"
+                        className="w-10 h-10 object-cover rounded border border-lavender/30 group-hover:border-lavender/50 transition-colors"
                       />
                     </div>
                   )}
                   
                   <div className="flex items-center flex-grow min-w-0">
                     {/* Punto de índice más pequeño */}
-                    <div className="w-1 h-1 bg-yellow-400 rounded-full group-hover:bg-yellow-300 transition-colors mr-2 flex-shrink-0"></div>
-                    <span className="text-gray-200 group-hover:text-yellow-100 transition-colors font-medium text-base lg:text-base flex-grow truncate">
+                    <div className="w-1 h-1 bg-gold rounded-full group-hover:bg-gold-200 transition-colors mr-2 flex-shrink-0"></div>
+                    <span className="text-moon-200 group-hover:text-gold-200 transition-colors font-medium text-base lg:text-base flex-grow truncate">
                       {article.title}
                     </span>
                   </div>
                   
                   {/* Línea punteada estilo índice de libro */}
-                  <div className="flex-grow mx-3 border-b border-dotted border-purple-400/30 group-hover:border-purple-300/50 transition-colors min-w-8"></div>
+                  <div className="flex-grow mx-3 border-b border-dotted border-lavender/30 group-hover:border-lavender/50 transition-colors min-w-8"></div>
                   
                   {/* Fecha como "número de página" */}
-                  <span className="text-purple-300 group-hover:text-purple-200 font-mono text-xs transition-colors min-w-16 text-right flex-shrink-0">
+                  <span className="text-lavender group-hover:text-moon-200 font-mono text-xs transition-colors min-w-16 text-right flex-shrink-0">
                     {article.publishedAt 
                       ? new Date(article.publishedAt).toLocaleDateString('es-ES', { 
                           day: '2-digit', 
@@ -395,7 +395,7 @@ export default function ArticulosContent() {
     return (
       <div className="text-center py-12">
         <div className="inline-flex items-center gap-3">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-400"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-lavender"></div>
           <span className="text-xl font-serif">Abriendo el grimorio...</span>
         </div>
       </div>
@@ -407,13 +407,13 @@ export default function ArticulosContent() {
       {/* Header del Grimorio - Estilo libro tradicional */}
       <div className="mb-12">
         <div className="flex items-start gap-4 mb-6">
-          <BookOpen className="w-8 h-8 text-yellow-400 mt-2 flex-shrink-0" />
+          <BookOpen className="w-8 h-8 text-gold mt-2 flex-shrink-0" />
           <div>
-            <h2 className="text-4xl font-serif font-bold text-yellow-300 mb-2">Índice</h2>
-            <p className="text-lg text-purple-200 font-serif italic">
+            <h2 className="text-4xl font-serif font-bold text-gold mb-2">Índice</h2>
+            <p className="text-lg text-moon-200 font-serif italic">
               &ldquo;Los secretos del cosmos organizados para tu sabiduría&rdquo;
             </p>
-            <div className="h-px bg-gradient-to-r from-yellow-400 to-transparent w-64 mt-3"></div>
+            <div className="h-px bg-gradient-to-r from-gold to-transparent w-64 mt-3"></div>
           </div>
         </div>
       </div>
@@ -422,20 +422,20 @@ export default function ArticulosContent() {
       <div className="mb-12 max-w-4xl mx-auto">
         <div className="max-w-2xl mx-auto">
           <div className="relative">
-            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-purple-400" />
+            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-lavender" />
             <input
               type="text"
               placeholder="Buscar en el grimorio..."
-              className="w-full pl-10 sm:pl-12 pr-4 py-3 sm:py-4 rounded-lg bg-black/40 backdrop-blur-sm border border-purple-500/30 text-gray-200 placeholder-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition-all duration-300 text-sm sm:text-base"
+              className="w-full pl-10 sm:pl-12 pr-4 py-3 sm:py-4 rounded-lg bg-night/40 backdrop-blur-sm border border-lavender/30 text-moon-200 placeholder-purple-300 focus:outline-none focus:ring-2 focus:ring-lavender focus:border-transparent transition-all duration-300 text-sm sm:text-base"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
           
-          <div className="mt-6 p-4 bg-purple-900/20 rounded-lg border border-purple-500/20">
-            <p className="text-center text-purple-200 text-sm leading-relaxed">
+          <div className="mt-6 p-4 bg-dusk-500/20 rounded-lg border border-lavender/20">
+            <p className="text-center text-moon-200 text-sm leading-relaxed">
               ¿No encuentras la sabiduría que buscas? o ¿Quieres aportar con tu conocimiento? Escríbenos a{' '}
-              <a href="mailto:elconejodelunaria@gmail.com" className="text-yellow-400 hover:text-yellow-300 underline transition-colors">
+              <a href="mailto:elconejodelunaria@gmail.com" className="text-gold hover:text-gold underline transition-colors">
                 elconejodelunaria@gmail.com
               </a>{' '}
               para agregar una nueva página al grimorio.
@@ -446,7 +446,7 @@ export default function ArticulosContent() {
 
       {/* Índice completo del Grimorio - Formato de libro */}
       <div className="max-w-4xl mx-auto">
-        <div className="bg-black/40 backdrop-blur-sm rounded-lg border border-purple-500/30 shadow-2xl p-8">
+        <div className="bg-night/40 backdrop-blur-sm rounded-lg border border-lavender/30 shadow-2xl p-8">
           
           {/* Renderizar estructura de categorías anidadas */}
           {Object.entries(organizedContent).map(([categoryName, categoryNode]) =>
@@ -455,7 +455,7 @@ export default function ArticulosContent() {
 
           {Object.keys(organizedContent).length === 0 && (
             <div className="py-12">
-              <p className="text-purple-300 font-serif italic">
+              <p className="text-lavender font-serif italic">
                 {searchQuery 
                   ? `No se encontraron resultados para "${searchQuery}"`
                   : "El grimorio está esperando sus primeras páginas..."}
@@ -464,8 +464,8 @@ export default function ArticulosContent() {
           )}
 
           {/* Footer del índice */}
-          <div className="mt-12 pt-8 border-t border-purple-500/30">
-            <p className="text-purple-300 font-serif italic text-sm">
+          <div className="mt-12 pt-8 border-t border-lavender/30">
+            <p className="text-lavender font-serif italic text-sm">
               &ldquo;Cada página contiene secretos esperando ser descubiertos...&rdquo;
             </p>
           </div>

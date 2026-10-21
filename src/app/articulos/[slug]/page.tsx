@@ -8,6 +8,7 @@ import React from 'react';
 import Image from 'next/image';
 import TableOfContents from '@/components/TableOfContents';
 import ArticleContent from '@/components/ArticleContent';
+import MoonReadingProgress from '@/components/MoonReadingProgress';
 
 // Define the types for our article data
 interface Article {
@@ -138,19 +139,22 @@ export default async function ArticuloPage({ params }: { params: Promise<{ slug:
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-2 sm:px-4 py-6 sm:py-8 text-gray-200">
+    <div className="max-w-7xl mx-auto px-0 sm:px-4 pt-4 pb-16 sm:pb-24 text-moon-200">
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      
+      <MoonReadingProgress />
+
+      <span className="lun-eyebrow block text-center">El grimorio de Lunaria</span>
+
       {/* Título del artículo */}
-      <h1 className="text-2xl sm:text-3xl lg:text-4xl font-bold mb-2 text-center font-cinzel-decorative text-white">
+      <h1 className="mx-auto mt-4 mb-3 max-w-4xl text-center font-display text-[clamp(2rem,4.6vw,3.75rem)] font-bold leading-[1.12] text-moon-50">
         {article.title}
       </h1>
-      
+
       {/* Autor */}
-      <p className="text-center text-gray-400 mb-6 sm:mb-8 text-sm sm:text-base">
+      <p className="text-center text-moon-500 mb-10 sm:mb-12 text-base">
         Aportado por: {article.authors && article.authors.length > 0 
           ? article.authors.map(author => author.name).join(', ') 
           : 'La Madriguera'}
@@ -166,7 +170,7 @@ export default async function ArticuloPage({ params }: { params: Promise<{ slug:
               alt={article.mainImage.alt || article.title}
               width={400}
               height={300}
-              className="w-full h-auto rounded-lg shadow-lg shadow-purple-900/50"
+              className="w-full h-auto rounded-lg shadow-lg shadow-dusk-500/50"
             />
           </div>
         )}

@@ -36,7 +36,7 @@ export default function Home() {
   };
 
   return (
-    <div className='bg-black'>
+    <div className='bg-night'>
       {/* Capa de la cinemática inicial - Siempre presente pero oculta/visible */}
       {showCinematic && (
         <div className="fixed top-0 left-0 w-full h-screen z-50 cinematic-intro">

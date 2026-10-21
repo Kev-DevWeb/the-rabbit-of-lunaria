@@ -47,11 +47,11 @@ export default async function AuthorPage({ params }: { params: Promise<{ slug: s
   const author = await getAuthorPosts(slug);
 
   if (!author) {
-    return <div className="text-center text-white py-10">Aportador no encontrado.</div>;
+    return <div className="text-center text-moon-50 py-10">Aportador no encontrado.</div>;
   }
 
   return (
-    <div className="container mx-auto px-4 py-8 text-white">
+    <div className="container mx-auto px-4 py-8 text-moon-50">
       <h1 className="text-4xl font-bold mb-8 text-center font-cinzel-decorative">Aportes de {author.name}</h1>
       <div className="max-w-4xl mx-auto">
         {author.posts.length > 0 ? (
@@ -68,7 +68,7 @@ export default async function AuthorPage({ params }: { params: Promise<{ slug: s
                   />
                 )}
                 <Link href={`/articulos/${article.slug.current}`}>
-                  <p className="text-2xl hover:text-purple-400">{article.title}</p>
+                  <p className="text-2xl hover:text-lavender">{article.title}</p>
                 </Link>
               </li>
             ))}

@@ -47,8 +47,8 @@ export default async function ArticulosLayout({
   return (
     <div className="relative min-h-screen pt-24">
       <StarBackground />
-      <div className="absolute inset-0 bg-black/50 backdrop-blur-sm" />
-      <div className="relative container mx-auto px-4 py-8 text-white">
+      <div className="absolute inset-0 bg-night/50 backdrop-blur-sm" />
+      <div className="relative container mx-auto px-4 py-8 text-moon-50">
         {children}
         <ArticleNavigation articles={articles} />
       </div>

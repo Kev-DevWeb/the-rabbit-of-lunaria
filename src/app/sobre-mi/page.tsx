@@ -145,7 +145,7 @@ const SobreMiPage = () => {
     // Crear partículas mágicas
     for (let i = 0; i < 6; i++) {
       const particle = document.createElement('div');
-      particle.className = 'absolute w-2 h-2 bg-purple-400 rounded-full opacity-80';
+      particle.className = 'absolute w-2 h-2 bg-lavender rounded-full opacity-80';
       particle.style.left = '50%';
       particle.style.top = '50%';
       rabbitRef.current?.appendChild(particle);
@@ -207,7 +207,7 @@ const SobreMiPage = () => {
     // Crear muchas partículas mágicas en explosión
     for (let i = 0; i < 20; i++) {
       const particle = document.createElement('div');
-      const colors = ['bg-purple-400', 'bg-pink-400', 'bg-yellow-400', 'bg-blue-400', 'bg-green-400'];
+      const colors = ['bg-lavender', 'bg-pink-400', 'bg-gold', 'bg-blue-400', 'bg-green-400'];
       const randomColor = colors[Math.floor(Math.random() * colors.length)];
       particle.className = `absolute w-3 h-3 ${randomColor} rounded-full opacity-90 shadow-lg`;
       particle.style.left = '50%';
@@ -235,7 +235,7 @@ const SobreMiPage = () => {
   };
 
   return (
-    <div className="bg-black relative overflow-hidden">
+    <div className="bg-night relative overflow-hidden">
       {/* Elementos flotantes mágicos */}
       <div className="fixed inset-0 pointer-events-none z-0">
         {[...Array(8)].map((_, i) => (
@@ -250,10 +250,10 @@ const SobreMiPage = () => {
               top: `${15 + (i % 3) * 25}%`,
             }}
           >
-            {i % 4 === 0 && <Sparkles className="w-4 h-4 text-purple-400" />}
-            {i % 4 === 1 && <Star className="w-3 h-3 text-yellow-300" />}
-            {i % 4 === 2 && <Moon className="w-5 h-5 text-blue-300" />}
-            {i % 4 === 3 && <Gem className="w-4 h-4 text-pink-300" />}
+            {i % 4 === 0 && <Sparkles className="w-4 h-4 text-lavender" />}
+            {i % 4 === 1 && <Star className="w-3 h-3 text-gold" />}
+            {i % 4 === 2 && <Moon className="w-5 h-5 text-mist" />}
+            {i % 4 === 3 && <Gem className="w-4 h-4 text-lavender" />}
           </div>
         ))}
       </div>
@@ -262,20 +262,20 @@ const SobreMiPage = () => {
         <StarBackground constellation={SOBRE_MI_CONSTELLATION} width={420} height={280} />
       </div>
       
-      <main className="min-h-screen flex flex-col items-center justify-center text-white pt-20 pb-10 px-4">
+      <main className="min-h-screen flex flex-col items-center justify-center text-moon-50 pt-20 pb-10 px-4">
         <div className="container max-w-4xl mx-auto z-10 relative">
           
           {/* Header Section */}
           <div className="text-center mb-12">
             <h1 
               ref={titleRef}
-              className="text-5xl sm:text-6xl lg:text-7xl font-bold mb-4 font-cinzel-decorative bg-gradient-to-r from-purple-400 via-pink-300 to-blue-300 bg-clip-text text-transparent"
+              className="text-5xl sm:text-6xl lg:text-7xl font-bold mb-4 font-cinzel-decorative bg-gradient-to-r from-lavender via-gold-200 to-blue-300 bg-clip-text text-transparent"
             >
               Arledge Brer
             </h1>
             <p 
               ref={typewriterRef}
-              className="text-xl sm:text-2xl text-purple-300 font-light tracking-wide mb-8"
+              className="text-xl sm:text-2xl text-lavender font-light tracking-wide mb-8"
             >
               {/* El texto se escribirá con GSAP TextPlugin */}
             </p>
@@ -286,30 +286,30 @@ const SobreMiPage = () => {
             
             {/* Text Content */}
             <div ref={textRef} className="space-y-6 min-h-[600px]">
-              <div className="bg-gradient-to-br from-purple-900/30 to-pink-900/20 backdrop-blur-lg rounded-2xl p-8 border border-purple-500/20 shadow-2xl">
-                <h2 className="text-2xl sm:text-3xl font-bold mb-6 text-purple-300 flex items-center gap-3">
-                  <Heart className="w-8 h-8 text-pink-400" />
+              <div className="bg-gradient-to-br from-dusk-500/30 to-pink-900/20 backdrop-blur-lg rounded-2xl p-8 border border-lavender/20 shadow-2xl">
+                <h2 className="text-2xl sm:text-3xl font-bold mb-6 text-lavender flex items-center gap-3">
+                  <Heart className="w-8 h-8 text-lavender" />
                   Bienvenido a Mi Rincón Lunar
                 </h2>
-                <p className="text-gray-200 leading-relaxed mb-4 text-base sm:text-lg">
+                <p className="text-moon-200 leading-relaxed mb-4 text-base sm:text-lg">
                   ¡Hola, hermoso ser! Soy Arledge Brer, y me emociona tenerte aquí en este espacio sagrado. 
                   Soy un tarotista que trabaja específicamente con los 22 Arcanos Mayores, encontrando en estas cartas 
                   una herramienta poderosa de sabiduría ancestral para conectar corazones y acompañar almas.
                 </p>
-                <p className="text-gray-200 leading-relaxed mb-4 text-base sm:text-lg">
+                <p className="text-moon-200 leading-relaxed mb-4 text-base sm:text-lg">
                   Mi enfoque principal es acompañarte en tu camino espiritual a través del tarot y enseñar a nuevos brujitos 
-                  los misterios de esta hermosa práctica. Creé <span className="text-purple-300 font-semibold">La Madriguera de Lunaria</span> como 
+                  los misterios de esta hermosa práctica. Creé <span className="text-lavender font-semibold">La Madriguera de Lunaria</span> como 
                   el refugio que a mí me hubiera gustado encontrar cuando inicié este camino: un lugar sin juicios, 
                   lleno de comprensión y donde cada pregunta espiritual es bienvenida.
                 </p>
               </div>
 
               <div className="bg-gradient-to-br from-blue-900/30 to-purple-900/20 backdrop-blur-lg rounded-2xl p-8 border border-blue-500/20 shadow-2xl">
-                <h3 className="text-xl sm:text-2xl font-semibold mb-4 text-blue-300 flex items-center gap-3">
-                  <Sparkles className="w-6 h-6 text-yellow-400" />
+                <h3 className="text-xl sm:text-2xl font-semibold mb-4 text-mist flex items-center gap-3">
+                  <Sparkles className="w-6 h-6 text-gold" />
                   Mi Misión
                 </h3>
-                <p className="text-gray-200 leading-relaxed text-base sm:text-lg">
+                <p className="text-moon-200 leading-relaxed text-base sm:text-lg">
                   Mi propósito es acompañarte en tu viaje espiritual a través de la sabiduría de los Arcanos Mayores, 
                   facilitando la comunicación con tus guías espirituales y ofreciéndote herramientas de protección energética. 
                   Aquí encontrarás claridad, orientación y un espacio seguro para explorar tu camino espiritual.
@@ -326,7 +326,7 @@ const SobreMiPage = () => {
                 onMouseLeave={handleRabbitLeave}
                 onClick={handleRabbitClick}
               >
-                <div className="absolute inset-0 bg-gradient-to-r from-purple-500/30 to-pink-500/30 rounded-full blur-xl scale-150 group-hover:scale-175 transition-transform duration-300"></div>
+                <div className="absolute inset-0 bg-gradient-to-r from-violet-glow/30 to-gold/30 rounded-full blur-xl scale-150 group-hover:scale-175 transition-transform duration-300"></div>
                 <Image
                   src="/conejos.svg"
                   alt="Conejos Mágicos"
@@ -335,18 +335,18 @@ const SobreMiPage = () => {
                   className="relative z-10 w-60 h-60 filter invert drop-shadow-2xl transition-all duration-300 group-hover:drop-shadow-[0_0_20px_rgba(168,85,247,0.8)]"
                 />
                 {isHoveringRabbit && !clickMessage && (
-                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-purple-800/90 text-white px-3 py-1 rounded-full text-sm whitespace-nowrap animate-bounce">
+                  <div className="absolute -top-4 left-1/2 transform -translate-x-1/2 bg-dusk-500/90 text-moon-50 px-3 py-1 rounded-full text-sm whitespace-nowrap animate-bounce">
                     ¡Haz clic para una sorpresa! ✨
                   </div>
                 )}
                 {clickMessage && (
-                  <div className="absolute -top-16 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-purple-600 to-pink-600 text-white px-6 py-3 rounded-full text-base font-bold whitespace-nowrap shadow-2xl animate-pulse z-50">
+                  <div className="absolute -top-16 left-1/2 transform -translate-x-1/2 bg-gradient-to-r from-violet-glow to-gold text-moon-50 px-6 py-3 rounded-full text-base font-bold whitespace-nowrap shadow-2xl animate-pulse z-50">
                     {clickMessage}
                   </div>
                 )}
               </div>
 
-              <p className="text-center text-purple-200 italic text-lg mb-8">
+              <p className="text-center text-moon-200 italic text-lg mb-8">
                 &ldquo;La magia sucede cuando el corazón se abre al misterio&rdquo;
               </p>
             </div>
@@ -354,18 +354,18 @@ const SobreMiPage = () => {
 
           {/* Servicios Espirituales */}
           <div ref={cardsContainerRef} className="mt-16">
-            <h3 className="text-3xl font-bold text-center mb-10 text-purple-300 flex items-center justify-center gap-3">
-              <Moon className="w-8 h-8 text-yellow-400" />
+            <h3 className="text-3xl font-bold text-center mb-10 text-lavender flex items-center justify-center gap-3">
+              <Moon className="w-8 h-8 text-gold" />
               Mis Servicios Espirituales
             </h3>
             
             <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
               
               {/* Tarot - Arcanos Mayores */}
-              <div className="bg-gradient-to-br from-purple-800/40 to-indigo-800/30 backdrop-blur-lg rounded-xl p-6 border border-purple-400/30 hover:border-purple-400/60 transition-all duration-300 hover:scale-105">
-                <Star className="w-12 h-12 text-purple-300 mb-4" />
-                <h4 className="text-xl font-semibold text-purple-200 mb-3">Tarot - Arcanos Mayores</h4>
-                <ul className="text-gray-300 space-y-2 text-sm">
+              <div className="bg-gradient-to-br from-purple-800/40 to-indigo-800/30 backdrop-blur-lg rounded-xl p-6 border border-lavender/30 hover:border-lavender/60 transition-all duration-300 hover:scale-105">
+                <Star className="w-12 h-12 text-lavender mb-4" />
+                <h4 className="text-xl font-semibold text-moon-200 mb-3">Tarot - Arcanos Mayores</h4>
+                <ul className="text-moon-300 space-y-2 text-sm">
                   <li>• Lecturas con 22 Arcanos Mayores</li>
                   <li>• Interpretación Simbólica Profunda</li>
                   <li>• Guía para Decisiones Importantes</li>
@@ -375,9 +375,9 @@ const SobreMiPage = () => {
 
               {/* Comunicación con Entidades */}
               <div className="bg-gradient-to-br from-blue-800/40 to-cyan-800/30 backdrop-blur-lg rounded-xl p-6 border border-blue-400/30 hover:border-blue-400/60 transition-all duration-300 hover:scale-105">
-                <Sparkles className="w-12 h-12 text-blue-300 mb-4" />
+                <Sparkles className="w-12 h-12 text-mist mb-4" />
                 <h4 className="text-xl font-semibold text-blue-200 mb-3">Comunicación Espiritual</h4>
-                <ul className="text-gray-300 space-y-2 text-sm">
+                <ul className="text-moon-300 space-y-2 text-sm">
                   <li>• Canalización de Mensajes</li>
                   <li>• Contacto con Guías Espirituales</li>
                   <li>• Interpretación de Señales</li>
@@ -389,7 +389,7 @@ const SobreMiPage = () => {
               <div className="bg-gradient-to-br from-green-800/40 to-emerald-800/30 backdrop-blur-lg rounded-xl p-6 border border-green-400/30 hover:border-green-400/60 transition-all duration-300 hover:scale-105">
                 <BookOpen className="w-12 h-12 text-green-300 mb-4" />
                 <h4 className="text-xl font-semibold text-green-200 mb-3">Enseñanza de Tarot</h4>
-                <ul className="text-gray-300 space-y-2 text-sm">
+                <ul className="text-moon-300 space-y-2 text-sm">
                   <li>• Clases para Nuevos Brujitos</li>
                   <li>• Arcanos Mayores en Profundidad</li>
                   <li>• Desarrollo de Intuición</li>
@@ -399,9 +399,9 @@ const SobreMiPage = () => {
 
               {/* Guía Espiritual */}
               <div className="bg-gradient-to-br from-pink-800/40 to-rose-800/30 backdrop-blur-lg rounded-xl p-6 border border-pink-400/30 hover:border-pink-400/60 transition-all duration-300 hover:scale-105">
-                <Heart className="w-12 h-12 text-pink-300 mb-4" />
+                <Heart className="w-12 h-12 text-lavender mb-4" />
                 <h4 className="text-xl font-semibold text-pink-200 mb-3">Guía & Acompañamiento</h4>
-                <ul className="text-gray-300 space-y-2 text-sm">
+                <ul className="text-moon-300 space-y-2 text-sm">
                   <li>• Orientación en Momentos Difíciles</li>
                   <li>• Desarrollo de Intuición</li>
                   <li>• Apoyo en Despertar Espiritual</li>
@@ -410,10 +410,10 @@ const SobreMiPage = () => {
               </div>
 
               {/* Metodología */}
-              <div className="bg-gradient-to-br from-yellow-800/40 to-orange-800/30 backdrop-blur-lg rounded-xl p-6 border border-yellow-400/30 hover:border-yellow-400/60 transition-all duration-300 hover:scale-105">
-                <Moon className="w-12 h-12 text-yellow-300 mb-4" />
-                <h4 className="text-xl font-semibold text-yellow-200 mb-3">Mi Enfoque</h4>
-                <ul className="text-gray-300 space-y-2 text-sm">
+              <div className="bg-gradient-to-br from-yellow-800/40 to-orange-800/30 backdrop-blur-lg rounded-xl p-6 border border-gold/30 hover:border-gold/60 transition-all duration-300 hover:scale-105">
+                <Moon className="w-12 h-12 text-gold mb-4" />
+                <h4 className="text-xl font-semibold text-gold-200 mb-3">Mi Enfoque</h4>
+                <ul className="text-moon-300 space-y-2 text-sm">
                   <li>• Lecturas Intuitivas Personalizadas</li>
                   <li>• Ambiente Relajado y Acogedor</li>
                   <li>• Respeto por tu Proceso</li>
@@ -425,7 +425,7 @@ const SobreMiPage = () => {
               <div className="bg-gradient-to-br from-violet-800/40 to-purple-800/30 backdrop-blur-lg rounded-xl p-6 border border-violet-400/30 hover:border-violet-400/60 transition-all duration-300 hover:scale-105">
                 <BookOpen className="w-12 h-12 text-violet-300 mb-4" />
                 <h4 className="text-xl font-semibold text-violet-200 mb-3">Mi Aprendizaje</h4>
-                <ul className="text-gray-300 space-y-2 text-sm">
+                <ul className="text-moon-300 space-y-2 text-sm">
                   <li>• Estudio Continuo del Tarot</li>
                   <li>• Práctica Diaria de Meditación</li>
                   <li>• Conexión con la Naturaleza</li>
@@ -437,18 +437,18 @@ const SobreMiPage = () => {
 
           {/* Call to Action */}
           <div className="text-center mt-16">
-            <div className="bg-gradient-to-r from-purple-900/50 to-pink-900/50 backdrop-blur-lg rounded-2xl p-8 border border-purple-400/30">
-              <h3 className="text-2xl sm:text-3xl font-bold mb-4 text-purple-200">
+            <div className="bg-gradient-to-r from-dusk-500/50 to-pink-900/50 backdrop-blur-lg rounded-2xl p-8 border border-lavender/30">
+              <h3 className="text-2xl sm:text-3xl font-bold mb-4 text-moon-200">
                 ¿Listo para tu Viaje de Autodescubrimiento?
               </h3>
-              <p className="text-gray-300 mb-8 text-base sm:text-lg max-w-2xl mx-auto">
+              <p className="text-moon-300 mb-8 text-base sm:text-lg max-w-2xl mx-auto">
                 Te invito a explorar mis artículos en el grimorio o, si tu corazón lo siente, 
                 a que conectemos en una sesión de tarot personalizada donde juntos iluminaremos tu sendero.
               </p>
               <div className="flex flex-col sm:flex-row gap-4 justify-center items-center">
                 <Link 
                   href="/articulos" 
-                  className="group px-8 py-4 bg-gradient-to-r from-purple-600 to-pink-600 hover:from-purple-700 hover:to-pink-700 text-white font-semibold rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 flex items-center gap-3"
+                  className="group px-8 py-4 bg-gradient-to-r from-violet-glow to-gold hover:from-purple-700 hover:to-pink-700 text-moon-50 font-semibold rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 flex items-center gap-3"
                 >
                   <BookOpen className="w-5 h-5" />
                   Explorar el Grimorio
@@ -456,7 +456,7 @@ const SobreMiPage = () => {
                 </Link>
                 <Link 
                   href="/citas" 
-                  className="group px-8 py-4 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-black font-semibold rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 flex items-center gap-3"
+                  className="group px-8 py-4 bg-gradient-to-r from-yellow-500 to-orange-500 hover:from-yellow-600 hover:to-orange-600 text-night font-semibold rounded-xl transition-all duration-300 shadow-lg hover:shadow-xl hover:scale-105 flex items-center gap-3"
                 >
                   <Heart className="w-5 h-5" />
                   Agendar Lectura

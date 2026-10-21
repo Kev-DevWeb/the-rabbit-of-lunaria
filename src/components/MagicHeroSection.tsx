@@ -1,156 +1,91 @@
 "use client";
-import { useEffect, useState, useRef } from 'react';
+import { useRef } from 'react';
 import Image from 'next/image';
-import Particles, { initParticlesEngine } from "@tsparticles/react";
-import { loadSlim } from "@tsparticles/slim";
+import Link from 'next/link';
+import dynamic from 'next/dynamic';
 import { useGSAP } from '@gsap/react';
 import gsap from 'gsap';
+import { ScrollTrigger } from 'gsap/ScrollTrigger';
+import { SplitText } from 'gsap/SplitText';
+import RabbitGrimoire from './RabbitGrimoire';
 
-const HangingElements = () => {
-  const [currentFrame, setCurrentFrame] = useState(1);
-  const [isHovering, setIsHovering] = useState(false);
-  const animationRef = useRef<NodeJS.Timeout | null>(null);
+gsap.registerPlugin(ScrollTrigger, SplitText);
 
-  useEffect(() => {
-    if (isHovering) {
-      // Iniciar animación en loop
-      animationRef.current = setInterval(() => {
-        setCurrentFrame((prev) => (prev >= 10 ? 1 : prev + 1));
-      }, 100); // Cambiar frame cada 100ms (10 frames por segundo)
-    } else {
-      // Detener animación y volver al frame 1
-      if (animationRef.current) {
-        clearInterval(animationRef.current);
-        animationRef.current = null;
-      }
-      setCurrentFrame(1);
-    }
-
-    return () => {
-      if (animationRef.current) {
-        clearInterval(animationRef.current);
-      }
-    };
-  }, [isHovering]);
-
-  useEffect(() => {
-    // Precarga nativa de imágenes para garantizar cache sin depender de componentes React
-    // Esto asegura que la animación fluya sin cortes la primera vez que se hace hover
-    if (typeof window !== 'undefined') {
-      [...Array(10)].forEach((_, i) => {
-        const img = new window.Image();
-        img.src = `/CELL ${i + 1}_Grimorio.png`;
-      });
-    }
-  }, []);
-
-  return (
-    <div className="absolute inset-0 w-full h-full pointer-events-none z-0">
-      {/* Composición en capas superpuestas - centrada - MÁS GRANDE */}
-      <div className="absolute top-[15%] left-1/2 -translate-x-1/2 -translate-y-1/2 hanging-moon z-30">
-        <div className="relative w-96 h-96 flex items-center justify-center" style={{ filter: 'drop-shadow(0 0 30px rgba(255, 255, 255, 0.6))' }}>
-          
-          {/* Capa 1: Luna de fondo - CELL_Luna.png - MÁS ARRIBA */}
-          <div className="absolute inset-0 flex items-center justify-center" style={{ transform: 'translateY(-30px)' }}>
-            <div className="relative w-80 h-80">
-              <Image 
-                src="/CELL_Luna.png" 
-                alt="Luna Llena" 
-                fill 
-                sizes="(max-width: 768px) 100vw, 400px"
-                priority 
-                style={{ objectFit: 'contain' }} 
-              />
-            </div>
-          </div>
-          
-          {/* Capa 2: Conejo grande SOBRE la luna - CELL_Conejo.png - MÁS ABAJO */}
-          <div className="absolute inset-0 flex items-center justify-center z-10" style={{ transform: 'translateY(15px)' }}>
-            <Image 
-              src="/CELL_Conejo.png" 
-              alt="Conejo de Lunaria" 
-              width={300} 
-              height={300} 
-              priority
-              style={{ objectFit: 'contain' }}
-            />
-          </div>
-          
-          {/* Capa 3: Grimorio SOBRE el conejo (frente) - Ligeramente más abajo */}
-          <div 
-            className="absolute inset-0 flex items-center justify-center z-20 pointer-events-auto cursor-pointer"
-            style={{ transform: 'translateY(40px)' }}
-            onMouseEnter={() => setIsHovering(true)}
-            onMouseLeave={() => setIsHovering(false)}
-          >
-            {/* Usamos etiqueta <img> nativa en vez del <Image> de Next.js para evitar que la optimización (WEBP) 
-                recorte cuadros o se demore en procesar las texturas rápidas durante la animación */}
-            <img 
-              src={`/CELL ${currentFrame}_Grimorio.png`}
-              alt="Grimorio Mágico" 
-              width={220} 
-              height={220}
-              className="transition-transform duration-200 hover:scale-105"
-              style={{ objectFit: 'contain' }}
-            />
-          </div>
-        </div>
-      </div>
-      
-      {/* Estrellas decorativas - MÁS GRANDES - Ocultas en móvil para evitar superposición */}
-      <div className="hidden sm:block absolute top-[40%] left-[20%] -translate-y-1/2 hanging-star1 z-10">
-        <Image src="/estrella.svg" alt="Estrella" width={80} height={80} />
-      </div>
-      <div className="hidden sm:block absolute top-[35%] right-[20%] -translate-y-1/2 hanging-star2 z-10">
-        <Image src="/estrella.svg" alt="Estrella" width={60} height={60} />
-      </div>
-    </div>
-  );
-};
+// La escena WebGL solo existe en el cliente
+const LunarScene = dynamic(() => import('./three/LunarScene'), { ssr: false });
 
 const MagicHeroSection = () => {
-  const [init, setInit] = useState(false);
-  const particleOptions = {
-    background: { color: { value: "#000" } },
-    fpsLimit: 60,
-    particles: { number: { value: 150 }, color: { value: "#fff" }, opacity: { value: { min: 0.1, max: 0.7 } }, size: { value: { min: 1, max: 2.5 } }, move: { enable: true, speed: 0.2, direction: "none" as const, straight: false } },
-  };
-  const containerRef = useRef(null);
-  useEffect(() => {
-    initParticlesEngine(async (engine) => {
-      await loadSlim(engine);
-    }).then(() => {
-      setInit(true);
-    });
-  }, []);
+  const containerRef = useRef<HTMLElement>(null);
 
   useGSAP(() => {
-    gsap.set([".hanging-moon", ".hanging-star1", ".hanging-star2"], { autoAlpha: 0, yPercent: -100 });
-    gsap.set(".main-text", { autoAlpha: 0 });
-    
-    gsap.to(".main-text", { autoAlpha: 1, y: 0, duration: 1.5 });
-    gsap.to([".hanging-moon", ".hanging-star1", ".hanging-star2"], { autoAlpha: 1, yPercent: 0, duration: 2, ease: 'elastic.out(1, 0.5)', stagger: 0.3 });
+    const mm = gsap.matchMedia();
+
+    mm.add('(prefers-reduced-motion: no-preference)', () => {
+      // Luna y conejo descienden colgando, como en el sitio original
+      gsap.from('.hero-moon, .hero-rabbit', { autoAlpha: 0, yPercent: -40, duration: 2, ease: 'elastic.out(1, 0.5)', stagger: 0.3 });
+      gsap.to('.hero-moon', { y: -14, duration: 4.5, ease: 'sine.inOut', repeat: -1, yoyo: true, delay: 2 });
+
+      // El titular aparece letra a letra saliendo de la niebla
+      const split = SplitText.create('.hero-title', { type: 'chars, words' });
+      gsap.from(split.chars, { autoAlpha: 0, y: 20, filter: 'blur(12px)', duration: 1.2, ease: 'power3.out', stagger: 0.03, delay: 0.6 });
+      gsap.from('.hero-copy', { autoAlpha: 0, y: 24, duration: 1.2, ease: 'power3.out', stagger: 0.15, delay: 1.4 });
+
+      // Parallax: la luna se queda atrás, el bosque se adelanta
+      gsap.to('.hero-moon', { yPercent: 35, ease: 'none', scrollTrigger: { trigger: containerRef.current, start: 'top top', end: 'bottom top', scrub: true } });
+      gsap.to('.hero-forest', { yPercent: -18, ease: 'none', scrollTrigger: { trigger: containerRef.current, start: 'top top', end: 'bottom top', scrub: true } });
+
+      return () => split.revert();
+    });
+
+    return () => mm.revert();
   }, { scope: containerRef });
 
   return (
-    <section ref={containerRef} className="relative w-full h-screen min-h-[600px] overflow-hidden bg-black">
-      {/* Solo ocupa el hero, no encima de todo */}
-      <div className="absolute inset-0 left-0 top-0 w-full h-full z-0">
-        {init && <Particles id="tsparticles-hero" options={particleOptions} />}
+    <section
+      ref={containerRef}
+      aria-label="Bienvenida"
+      className="relative flex min-h-[100svh] flex-col items-center overflow-hidden bg-night px-4 pb-28 pt-24 text-center"
+    >
+      <LunarScene className="absolute inset-0" />
+      <div aria-hidden="true" className="lun-halo pointer-events-none absolute left-1/2 top-0 h-[720px] w-[720px] max-w-[160vw] -translate-x-1/2 rounded-full" />
+      <div aria-hidden="true" className="lun-fog left-[-10%] top-[48%] h-56 w-[70%]" />
+      <div aria-hidden="true" className="lun-fog right-[-12%] top-[58%] h-60 w-[75%] [animation-delay:-8s]" />
+
+      <div aria-hidden="true" className="hero-forest pointer-events-none absolute inset-x-0 bottom-0 h-[38vh] min-h-56">
+        <Image src="/siluetabosque.png" alt="" fill sizes="100vw" className="object-cover object-bottom opacity-90" />
       </div>
-      <div className="absolute inset-0 z-30 flex items-center justify-center pointer-events-none">
-        <div className="relative w-full h-full text-center text-white overflow-hidden">
-          {/* Texto movido más abajo para no tapar las imágenes */}
-          <div className="absolute top-[70%] left-1/2 -translate-x-1/2 w-full max-w-7xl z-10 main-text px-4 sm:px-6 md:px-8">
-            <h2 className="text-3xl sm:text-4xl md:text-5xl lg:text-6xl font-bold mb-6 break-words leading-tight" style={{ textShadow: '2px 2px 4px black, 0 0 1.5em black, 0 0 0.3em black' }}>
-              Encuentra claridad y consejo a través de tu guardián espiritual
-            </h2>
-            <p className="text-xl sm:text-2xl md:text-3xl lg:text-4xl break-words leading-relaxed max-w-5xl mx-auto" style={{ textShadow: '2px 2px 4px black, 0 0 1.5em black, 0 0 0.3em black' }}>
-              El tarot es una guía amorosa que te ayuda a comprenderte y escuchar a tu guardián.
-            </p>
-          </div>
-          <HangingElements />
+      {/* Funde el bosque con la siguiente sección para que no quede un corte */}
+      <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-0 z-[5] h-40 bg-gradient-to-b from-transparent to-night" />
+
+      <div className="relative z-10 flex flex-col items-center">
+        <div className="hero-moon relative aspect-square w-[min(340px,70vw)] drop-shadow-[0_0_40px_rgba(233,196,106,0.45)]">
+          <Image src="/CELL_Luna.png" alt="" fill priority sizes="340px" className="object-contain" />
         </div>
+        {/* El conejo cuelga justo debajo de la luna */}
+        <div className="hero-rabbit -mt-[min(210px,43vw)]">
+          <RabbitGrimoire />
+        </div>
+
+        <div className="mt-4 flex max-w-4xl flex-col items-center gap-5">
+          <span className="lun-eyebrow hero-copy">Tarot · Luna · Grimorio</span>
+          <h1 className="hero-title m-0 font-display text-[clamp(1.9rem,5.5vw,4.25rem)] font-bold leading-[1.1] text-moon-50 [text-shadow:0_0_40px_rgba(123,92,255,0.55)]">
+            Encuentra claridad y consejo a través de tu guardián espiritual
+          </h1>
+          <p className="hero-copy m-0 max-w-2xl text-moon-300">
+            El tarot es una guía amorosa que te ayuda a comprenderte y escuchar a tu guardián.
+          </p>
+          <div className="hero-copy mt-2 flex flex-wrap justify-center gap-4">
+            <Link href="/citas" className="lun-btn-gold">Agendar una lectura</Link>
+            <Link href="/articulos" className="lun-btn-ghost">Abrir el grimorio</Link>
+          </div>
+        </div>
+      </div>
+
+      <div aria-hidden="true" className="absolute bottom-8 left-1/2 z-10 flex -translate-x-1/2 flex-col items-center gap-1.5 font-label text-xs tracking-[0.3em] text-moon-500">
+        DESCIENDE
+        <svg width="16" height="24" viewBox="0 0 16 24" fill="none" stroke="currentColor" strokeWidth="1.4">
+          <path d="M8 2v18M2 14l6 6 6-6" />
+        </svg>
       </div>
     </section>
   );

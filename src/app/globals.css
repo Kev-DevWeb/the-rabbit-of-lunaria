@@ -1,31 +1,41 @@
 @import "tailwindcss";
 @plugin "@tailwindcss/typography";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+/* ===== Tema "noche de Lunaria": índigo, lavanda y oro lunar ===== */
+@theme {
+  --color-night: #07061a;
+  --color-night-800: #0c0a24;
+  --color-dusk: #110e2b;
+  --color-dusk-700: #171236;
+  --color-dusk-500: #2a1f66;
+  --color-moon-50: #fdf8ff;
+  --color-moon-100: #ece6ff;
+  --color-moon-200: #e2dbf5;
+  --color-moon-300: #d7cfef;
+  --color-moon-400: #c8c0e4;
+  --color-moon-500: #a79fc9;
+  --color-lavender: #c9b8ff;
+  --color-violet-glow: #7b5cff;
+  --color-gold: #e9c46a;
+  --color-gold-200: #f6dc9a;
+  --color-mist: #8fa8d8;
 }
 
 @theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
+  --font-display: var(--font-cinzel-decorative);
+  --font-label: var(--font-cinzel);
+  --font-serif: var(--font-cormorant-garamond);
+  /* Alias de las clases que ya usaban los componentes */
+  --font-cinzel-decorative: var(--font-cinzel-decorative);
+  --font-cormorant-garamond: var(--font-cormorant-garamond);
 }
 
 body {
-  background: var(--background);
-  color: var(--foreground);
+  background: var(--color-night);
+  color: var(--color-moon-100);
   font-family: var(--font-cormorant-garamond);
-  font-size: 18px; /* Aumentar tamaño base de 16px a 18px */
-  line-height: 1.7; /* Mejorar legibilidad */
+  font-size: 19px;
+  line-height: 1.7;
 }
 
 /* No aplicar overflow-x-hidden en Sanity Studio */
@@ -35,31 +45,19 @@ body:not(:has([data-sanity])) {
 
 @media (max-width: 768px) {
   body {
-    font-size: 17px; /* Ligeramente más pequeño en móvil pero aún más grande que antes */
+    font-size: 18px;
   }
 }
 
-/* Aumentar tamaño de todos los párrafos globalmente */
+/* Párrafos: escala más contenida que antes (18 → 20px) */
 p {
-  font-size: 1.125rem; /* 18px base */
+  font-size: 1.125rem;
   line-height: 1.75;
-}
-
-@media (min-width: 640px) {
-  p {
-    font-size: 1.25rem; /* 20px en sm */
-  }
 }
 
 @media (min-width: 768px) {
   p {
-    font-size: 1.375rem; /* 22px en md */
-  }
-}
-
-@media (min-width: 1024px) {
-  p {
-    font-size: 1.5rem; /* 24px en lg */
+    font-size: 1.25rem;
   }
 }
 
@@ -71,49 +69,221 @@ h1, h2 {
   font-family: var(--font-cinzel-decorative);
 }
 
-/* Custom styles for React Day Picker */
+/* ===== Piezas compartidas del tema ===== */
+.lun-eyebrow {
+  font-family: var(--font-cinzel);
+  font-size: 0.8rem;
+  letter-spacing: 0.4em;
+  text-transform: uppercase;
+  color: var(--color-gold);
+}
+
+.lun-link {
+  color: var(--color-moon-100);
+  text-decoration: none;
+  border-bottom: 1px solid transparent;
+  transition: color 0.25s, border-color 0.25s;
+}
+.lun-link:hover,
+.lun-link[aria-current="page"] {
+  color: var(--color-gold);
+  border-color: var(--color-gold);
+}
+
+.lun-btn-gold,
+.lun-btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 0.6rem;
+  min-height: 3.25rem;
+  padding: 0 1.9rem;
+  border-radius: 999px;
+  font-family: var(--font-cinzel);
+  font-size: 1rem;
+  letter-spacing: 0.06em;
+  transition: box-shadow 0.25s, background-color 0.25s, color 0.25s;
+}
+.lun-btn-gold {
+  background: var(--color-gold);
+  color: var(--color-night);
+  font-weight: 600;
+}
+.lun-btn-ghost {
+  border: 1px solid rgb(201 184 255 / 0.55);
+  background: rgb(17 14 43 / 0.6);
+  color: var(--color-moon-100);
+}
+.lun-btn-gold:hover,
+.lun-btn-ghost:hover {
+  box-shadow: 0 0 28px rgb(233 196 106 / 0.45);
+}
+
+.lun-card {
+  border: 1px solid rgb(201 184 255 / 0.18);
+  background: rgb(17 14 43 / 0.7);
+  border-radius: 1.25rem;
+}
+
+.lun-halo {
+  background: radial-gradient(circle, rgb(233 196 106 / 0.35) 0%, rgb(201 184 255 / 0.12) 38%, rgb(7 6 26 / 0) 70%);
+}
+
+.lun-fog {
+  position: absolute;
+  border-radius: 50%;
+  background: radial-gradient(ellipse, rgb(143 168 216 / 0.22) 0%, rgb(143 168 216 / 0) 70%);
+  filter: blur(8px);
+  animation: lunFog 22s ease-in-out infinite alternate;
+  pointer-events: none;
+}
+@keyframes lunFog {
+  from { transform: translateX(-6%); }
+  to { transform: translateX(6%); }
+}
+
+.lun-ring {
+  animation: lunSpin 24s linear infinite;
+  transform-origin: 50% 50%;
+  transition: opacity 0.4s;
+}
+.lun-ring[data-open="true"] {
+  animation-duration: 6s;
+}
+@keyframes lunSpin {
+  to { transform: rotate(360deg); }
+}
+
+.lun-spark {
+  position: absolute;
+  width: 6px;
+  height: 6px;
+  border-radius: 50%;
+  background: var(--color-gold-200);
+  box-shadow: 0 0 10px var(--color-gold);
+  animation: lunRise 1.8s ease-out infinite;
+  pointer-events: none;
+}
+@keyframes lunRise {
+  0% { transform: translateY(0) scale(0.6); opacity: 0; }
+  15% { opacity: 1; }
+  100% { transform: translateY(-170px) scale(1.1); opacity: 0; }
+}
+
+.lun-glow-pulse {
+  animation: lunGlow 3s ease-in-out infinite;
+}
+@keyframes lunGlow {
+  0%, 100% { box-shadow: 0 0 0 rgb(233 196 106 / 0); }
+  50% { box-shadow: 0 0 14px rgb(233 196 106 / 0.35); }
+}
+
+/* Capitular dorada en el primer párrafo de cada artículo */
+.lun-article > p:first-of-type::first-letter {
+  float: left;
+  font-family: var(--font-cinzel-decorative);
+  font-size: 4.5em;
+  line-height: 0.9;
+  padding: 0.08em 0.12em 0 0;
+  color: var(--color-gold);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lun-fog,
+  .lun-ring,
+  .lun-spark,
+  .lun-glow-pulse {
+    animation: none;
+  }
+}
+
+/* React Day Picker v9 (clases .rdp-root / .rdp-day_button) */
+.rdp-root {
+  --rdp-accent-color: #e9c46a;
+  --rdp-accent-background-color: #2a1f66;
+  --rdp-today-color: #e9c46a;
+  --rdp-day-height: 46px;
+  --rdp-day-width: 46px;
+  --rdp-day_button-height: 42px;
+  --rdp-day_button-width: 42px;
+  --rdp-day_button-border-radius: 14px;
+  --rdp-selected-border: 2px solid #e9c46a;
+  --rdp-disabled-opacity: 0.35;
+  font-family: var(--font-cinzel);
+  color: var(--color-moon-100);
+}
+.rdp-root .rdp-chevron {
+  fill: var(--color-gold);
+}
+.rdp-root .rdp-caption_label {
+  color: var(--color-moon-50);
+  font-weight: 600;
+}
+.rdp-root .rdp-weekday {
+  color: var(--color-moon-500);
+  font-size: 0.8rem;
+  letter-spacing: 0.12em;
+}
+.rdp-root .rdp-day:not(.rdp-disabled) .rdp-day_button {
+  border: 1px solid rgb(233 196 106 / 0.45);
+  background: #171236;
+  transition: box-shadow 0.25s, background-color 0.25s;
+}
+.rdp-root .rdp-day:not(.rdp-disabled) .rdp-day_button:hover {
+  box-shadow: 0 0 18px rgb(233 196 106 / 0.45);
+}
+.rdp-root .rdp-day.rdp-selected:not(.rdp-disabled) .rdp-day_button {
+  background: var(--color-gold);
+  color: var(--color-night);
+}
+
+/* Custom styles for React Day Picker (v8, por compatibilidad) */
 .rdp {
-  --rdp-cell-size: 40px;
-  --rdp-accent-color: #8b5cf6; /* purple-500 */
-  --rdp-background-color: #a78bfa; /* purple-400 */
-  --rdp-accent-color-dark: #7c3aed; /* purple-600 */
-  --rdp-background-color-dark: #a78bfa; /* purple-400 */
+  --rdp-cell-size: 44px;
+  --rdp-accent-color: #e9c46a;
+  --rdp-background-color: #171236;
+  --rdp-accent-color-dark: #e9c46a;
+  --rdp-background-color-dark: #171236;
   --rdp-outline: 2px solid var(--rdp-accent-color);
   --rdp-outline-selected: 3px solid var(--rdp-accent-color);
-  --rdp-border-radius: 6px;
+  --rdp-border-radius: 14px;
   margin: 1em auto;
-  color: #d1d5db; /* gray-300 */
+  color: var(--color-moon-100);
+  font-family: var(--font-cinzel);
 }
 
 .rdp-day_selected, .rdp-day_selected:focus-visible, .rdp-day_selected:hover {
   background-color: var(--rdp-accent-color);
-  color: white;
+  color: var(--color-night);
 }
 
 .rdp-caption_label {
-  color: #d8b4fe; /* purple-300 */
-  font-family: var(--font-cinzel-decorative);
+  color: var(--color-moon-50);
+  font-family: var(--font-cinzel);
+  font-weight: 600;
 }
 
 .rdp-head_cell {
-  color: #a78bfa; /* purple-400 */
-  font-size: 0.875rem;
+  color: var(--color-moon-500);
+  font-size: 0.8rem;
+  letter-spacing: 0.15em;
 }
 
 .rdp-day_today {
   font-weight: bold;
-  color: #facc15; /* yellow-400 */
+  color: var(--color-gold);
 }
 
 .rdp-button:hover:not([disabled]):not(.rdp-day_selected) {
-  background-color: #3c096c33;
+  background-color: #2a1f66;
+  box-shadow: 0 0 18px rgb(233 196 106 / 0.45);
 }
 
 .rdp-nav_button {
-  color: #c4b5fd; /* purple-300 */
+  color: var(--color-lavender);
 }
 .rdp-nav_button:hover {
-  background-color: #3c096c55;
+  background-color: #2a1f6699;
 }
 
 .text-shadow {
@@ -155,17 +325,10 @@ h1, h2 {
   }
 }
 
-/* Estilos personalizados para negritas */
-strong, b, .font-bold {
-  color: #c4b5fd; /* purple-300 - morado lila claro */
+/* Negritas en lavanda clara */
+strong, b {
+  color: var(--color-lavender);
   font-weight: 700;
-}
-
-/* Para modo oscuro, un tono ligeramente más claro */
-@media (prefers-color-scheme: dark) {
-  strong, b, .font-bold {
-    color: #ddd6fe; /* purple-200 - morado lila más claro para contraste */
-  }
 }
 
 /* Proteger el reproductor musical de animaciones externas */

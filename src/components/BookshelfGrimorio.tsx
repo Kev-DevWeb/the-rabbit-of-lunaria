@@ -328,9 +328,11 @@ export default function BookshelfGrimorio() {
         }}
       >
         <div 
-          className="relative group cursor-pointer transition-all duration-300"
+          className="relative group cursor-pointer transition-[transform,filter] duration-500 ease-[cubic-bezier(.2,.7,.2,1)]"
           style={{
-            transform: isHovered ? 'translateY(-12px) scale(1.05)' : 'translateY(0) scale(1)',
+            // El libro sale del estante e ilumina el lomo con oro lunar
+            transform: isHovered ? 'translateY(-14px) rotate(-2deg) scale(1.05)' : 'translateY(0) rotate(0) scale(1)',
+            filter: isHovered ? 'drop-shadow(0 0 18px rgba(233,196,106,0.5))' : 'none',
           }}
         >
           {/* Lomo del libro - Dimensiones optimizadas */}
@@ -353,7 +355,7 @@ export default function BookshelfGrimorio() {
                 }}
               >
                 <span 
-                  className="text-[6px] sm:text-[7px] text-yellow-200/80 font-serif uppercase tracking-wide"
+                  className="text-[6px] sm:text-[7px] text-gold-200/80 font-serif uppercase tracking-wide"
                   style={{
                     textShadow: '0 1px 2px rgba(0,0,0,0.8)'
                   }}
@@ -374,7 +376,7 @@ export default function BookshelfGrimorio() {
               }}
             >
               <p 
-                className="text-[10px] sm:text-[11px] md:text-xs font-serif text-yellow-100 font-semibold drop-shadow-lg overflow-hidden"
+                className="text-[10px] sm:text-[11px] md:text-xs font-serif text-gold-200 font-semibold drop-shadow-lg overflow-hidden"
                 style={{
                   writingMode: 'vertical-rl',
                   textOrientation: 'mixed',
@@ -389,8 +391,8 @@ export default function BookshelfGrimorio() {
             </div>
 
             {/* Detalles decorativos del libro */}
-            <div className="absolute top-2 left-0 right-0 h-px bg-yellow-600/40"></div>
-            <div className="absolute bottom-2 left-0 right-0 h-px bg-yellow-600/40"></div>
+            <div className="absolute top-2 left-0 right-0 h-px bg-gold/40"></div>
+            <div className="absolute bottom-2 left-0 right-0 h-px bg-gold/40"></div>
             
             {/* Brillo en el lomo */}
             <div 
@@ -399,7 +401,7 @@ export default function BookshelfGrimorio() {
 
             {/* Sombra interna derecha */}
             <div 
-              className="absolute top-0 right-0 w-2 h-full bg-gradient-to-l from-black/30 to-transparent"
+              className="absolute top-0 right-0 w-2 h-full bg-gradient-to-l from-night/30 to-transparent"
             ></div>
             
             {/* Indicador visual de profundidad (puntos en la parte inferior) */}
@@ -408,7 +410,7 @@ export default function BookshelfGrimorio() {
                 {Array.from({ length: Math.min(depth, 4) }).map((_, i) => (
                   <div 
                     key={i} 
-                    className="w-0.5 h-0.5 rounded-full bg-yellow-300/60"
+                    className="w-0.5 h-0.5 rounded-full bg-gold-200/60"
                   ></div>
                 ))}
               </div>
@@ -418,20 +420,20 @@ export default function BookshelfGrimorio() {
           {/* Tooltip con información - SIN ruta de categoría */}
           {isHovered && (
             <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 z-50 pointer-events-none">
-              <div className="bg-gray-900/95 backdrop-blur-sm border border-purple-500/50 rounded-lg p-2 sm:p-3 shadow-2xl w-[160px] sm:w-[200px] lg:w-[240px]">
+              <div className="bg-night/95 backdrop-blur-sm border border-lavender/50 rounded-lg p-2 sm:p-3 shadow-2xl w-[160px] sm:w-[200px] lg:w-[240px]">
                 {/* Título - Responsive */}
-                <p className="text-white text-[11px] sm:text-xs lg:text-sm font-semibold mb-1 line-clamp-2 leading-tight">
+                <p className="text-moon-50 text-[11px] sm:text-xs lg:text-sm font-semibold mb-1 line-clamp-2 leading-tight">
                   {article.title}
                 </p>
                 {/* Autor - Compacto */}
                 {article.authors && article.authors.length > 0 && (
-                  <p className="text-purple-300 text-[9px] sm:text-[10px] lg:text-xs truncate">
+                  <p className="text-lavender text-[9px] sm:text-[10px] lg:text-xs truncate">
                     {article.authors[0].name}
                   </p>
                 )}
                 {/* Fecha - Solo en pantallas más grandes */}
                 {article.publishedAt && (
-                  <p className="hidden sm:block text-gray-400 text-[9px] lg:text-xs mt-0.5">
+                  <p className="hidden sm:block text-moon-500 text-[9px] lg:text-xs mt-0.5">
                     {new Date(article.publishedAt).toLocaleDateString('es-ES', {
                       day: '2-digit',
                       month: 'short',
@@ -492,7 +494,7 @@ export default function BookshelfGrimorio() {
     return (
       <div className="text-center py-12">
         <div className="inline-flex items-center gap-3">
-          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-purple-400"></div>
+          <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-lavender"></div>
           <span className="text-xl font-serif">Organizando el estante...</span>
         </div>
       </div>
@@ -504,13 +506,13 @@ export default function BookshelfGrimorio() {
       {/* Header del Grimorio */}
       <div className="mb-12">
         <div className="flex items-start gap-4 mb-6">
-          <BookOpen className="w-8 h-8 text-yellow-400 mt-2 flex-shrink-0" />
+          <BookOpen className="w-8 h-8 text-gold mt-2 flex-shrink-0" />
           <div>
-            <h2 className="text-3xl sm:text-4xl font-serif font-bold text-yellow-300 mb-2">El Estante de Lunaria</h2>
-            <p className="text-base sm:text-lg text-purple-200 font-serif italic">
+            <h2 className="text-3xl sm:text-4xl font-serif font-bold text-gold mb-2">El Estante de Lunaria</h2>
+            <p className="text-base sm:text-lg text-moon-200 font-serif italic">
               &ldquo;Cada libro guarda secretos antiguos esperando ser descubiertos&rdquo;
             </p>
-            <div className="h-px bg-gradient-to-r from-yellow-400 to-transparent w-48 sm:w-64 mt-3"></div>
+            <div className="h-px bg-gradient-to-r from-gold to-transparent w-48 sm:w-64 mt-3"></div>
           </div>
         </div>
       </div>
@@ -519,20 +521,20 @@ export default function BookshelfGrimorio() {
       <div className="mb-12 max-w-4xl mx-auto">
         <div className="max-w-2xl mx-auto">
           <div className="relative">
-            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-purple-400" />
+            <Search className="absolute left-4 top-1/2 transform -translate-y-1/2 w-5 h-5 text-lavender" />
             <input
               type="text"
               placeholder="Buscar en el grimorio..."
-              className="w-full pl-12 pr-4 py-3 sm:py-4 rounded-lg bg-black/40 backdrop-blur-sm border border-purple-500/30 text-gray-200 placeholder-purple-300 focus:outline-none focus:ring-2 focus:ring-purple-400 focus:border-transparent transition-all duration-300 text-sm sm:text-base"
+              className="w-full pl-12 pr-4 py-3 sm:py-4 rounded-lg bg-night/40 backdrop-blur-sm border border-lavender/30 text-moon-200 placeholder-purple-300 focus:outline-none focus:ring-2 focus:ring-lavender focus:border-transparent transition-all duration-300 text-sm sm:text-base"
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
             />
           </div>
           
-          <div className="mt-6 p-4 bg-purple-900/20 rounded-lg border border-purple-500/20">
-            <p className="text-center text-purple-200 text-sm leading-relaxed">
+          <div className="mt-6 p-4 bg-dusk-500/20 rounded-lg border border-lavender/20">
+            <p className="text-center text-moon-200 text-sm leading-relaxed">
               ¿No encuentras la sabiduría que buscas? Escríbenos a{' '}
-              <a href="mailto:elconejodelunaria@gmail.com" className="text-yellow-400 hover:text-yellow-300 underline transition-colors">
+              <a href="mailto:elconejodelunaria@gmail.com" className="text-gold hover:text-gold underline transition-colors">
                 elconejodelunaria@gmail.com
               </a>
             </p>
@@ -559,20 +561,20 @@ export default function BookshelfGrimorio() {
                   
                   <div className="flex-1">
                     {/* Nombre de la categoría RAÍZ */}
-                    <h3 className="text-2xl sm:text-3xl font-serif font-bold text-transparent bg-clip-text bg-gradient-to-r from-purple-300 via-pink-300 to-purple-300">
+                    <h3 className="text-2xl sm:text-3xl font-serif font-bold text-transparent bg-clip-text bg-gradient-to-r from-lavender via-gold-200 to-lavender">
                       {categoryGroup.name}
                     </h3>
                     
                     {/* Descripción si existe */}
                     {categoryGroup.description && (
-                      <p className="text-purple-200/80 font-serif italic text-sm sm:text-base mt-2">
+                      <p className="text-moon-200/80 font-serif italic text-sm sm:text-base mt-2">
                         {categoryGroup.description}
                       </p>
                     )}
                     
                     {/* Contador de libros */}
                     <div className="flex items-center gap-2 mt-2">
-                      <span className="text-xs text-purple-400/60 font-serif">
+                      <span className="text-xs text-lavender/60 font-serif">
                         {categoryGroup.articles.length} {categoryGroup.articles.length === 1 ? 'libro' : 'libros'}
                       </span>
                     </div>
@@ -581,7 +583,7 @@ export default function BookshelfGrimorio() {
                 
                 {/* Línea decorativa */}
                 <div 
-                  className="h-px bg-gradient-to-r from-purple-400 via-pink-400 to-transparent ml-8"
+                  className="h-px bg-gradient-to-r from-lavender via-gold-200 to-transparent ml-8"
                   style={{
                     boxShadow: `0 0 4px ${categoryGroup.color}40`
                   }}
@@ -618,8 +620,8 @@ export default function BookshelfGrimorio() {
 
                 {/* Soporte del estante */}
                 <div className="flex justify-between px-4 sm:px-8">
-                  <div className="w-2 h-8 sm:h-12 bg-gradient-to-r from-gray-700 to-gray-600 rounded-b"></div>
-                  <div className="w-2 h-8 sm:h-12 bg-gradient-to-r from-gray-700 to-gray-600 rounded-b"></div>
+                  <div className="w-2 h-8 sm:h-12 bg-gradient-to-r from-dusk-700 to-dusk-500 rounded-b"></div>
+                  <div className="w-2 h-8 sm:h-12 bg-gradient-to-r from-dusk-700 to-dusk-500 rounded-b"></div>
                 </div>
               </div>
             </div>
@@ -628,7 +630,7 @@ export default function BookshelfGrimorio() {
 
         {categoryGroups.length === 0 && (
           <div className="text-center py-12">
-            <p className="text-purple-300 font-serif italic text-lg">
+            <p className="text-lavender font-serif italic text-lg">
               {searchQuery 
                 ? `No se encontraron libros con "${searchQuery}"`
                 : "El estante está esperando sus primeros libros..."}
@@ -639,7 +641,7 @@ export default function BookshelfGrimorio() {
 
       {/* Footer */}
       <div className="mt-16 text-center">
-        <p className="text-purple-300 font-serif italic text-sm">
+        <p className="text-lavender font-serif italic text-sm">
           &ldquo;En cada lomo dorado yace un portal a mundos de conocimiento ancestral&rdquo;
         </p>
       </div>

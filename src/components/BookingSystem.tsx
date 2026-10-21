@@ -38,12 +38,12 @@ interface ReadingCardProps {
   formatPrice: (reading: TarotReading) => string;
 }
 const ReadingCard = ({ reading, onSelect, formatPrice }: ReadingCardProps) => {
-  const cardRef = useRef<HTMLDivElement>(null);
+  const cardRef = useRef<HTMLButtonElement>(null);
   useGSAP(() => {
     const card = cardRef.current;
     if (!card) return;
     gsap.fromTo(card, { y: 20, opacity: 0 }, { y: 0, opacity: 1, duration: 0.5, ease: "power2.out", scrollTrigger: card });
-    const onMouseEnter = () => gsap.to(card, { y: -10, scale: 1.03, boxShadow: "0px 15px 35px rgba(162, 89, 255, 0.4)", duration: 0.3, ease: "power2.out" });
+    const onMouseEnter = () => gsap.to(card, { y: -10, scale: 1.03, boxShadow: "0px 18px 60px rgba(123, 92, 255, 0.35)", duration: 0.3, ease: "power2.out" });
     const onMouseLeave = () => gsap.to(card, { y: 0, scale: 1, boxShadow: "0px 5px 15px rgba(0, 0, 0, 0.2)", duration: 0.3, ease: "power2.in" });
     card.addEventListener('mouseenter', onMouseEnter);
     card.addEventListener('mouseleave', onMouseLeave);
@@ -53,16 +53,16 @@ const ReadingCard = ({ reading, onSelect, formatPrice }: ReadingCardProps) => {
     };
   }, { scope: cardRef });
   return (
-    <div ref={cardRef} onClick={() => onSelect(reading)} className="reading-card group cursor-pointer bg-black/60 backdrop-blur-md p-6 rounded-lg border border-purple-400/30 h-full flex flex-col justify-between opacity-0">
-      <div>
-        <h3 className="text-2xl font-cinzel-decorative text-purple-200">{reading.title}</h3>
-        <p className="mt-2 text-gray-300 font-cormorant-garamond text-lg">{reading.description}</p>
-      </div>
-      <div className="mt-4 flex justify-between items-end">
-        <span className="text-2xl font-bold text-yellow-400">{formatPrice(reading)}</span>
-        <span className="text-yellow-300 opacity-0 group-hover:opacity-100 transition-opacity duration-300">Seleccionar →</span>
-      </div>
-    </div>
+    <button type="button" ref={cardRef} onClick={() => onSelect(reading)} className="reading-card group cursor-pointer text-left bg-dusk/85 backdrop-blur-md p-7 rounded-3xl border border-gold/35 h-full flex flex-col justify-between opacity-0 focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-gold">
+      <span className="block">
+        <span className="block font-display text-2xl leading-tight text-moon-50">{reading.title}</span>
+        <span className="mt-3 block text-moon-300 font-cormorant-garamond text-lg">{reading.description}</span>
+      </span>
+      <span className="mt-6 flex justify-between items-end">
+        <span className="font-label text-2xl text-gold">{formatPrice(reading)}</span>
+        <span className="font-label text-sm tracking-[0.15em] text-gold opacity-0 group-hover:opacity-100 group-focus-visible:opacity-100 transition-opacity duration-300">SELECCIONAR →</span>
+      </span>
+    </button>
   );
 };
 const LoadingSpinner = () => {
@@ -72,9 +72,9 @@ const LoadingSpinner = () => {
     }, { scope: spinnerRef });
     return (
         <div ref={spinnerRef} className="flex justify-center items-center gap-2 h-24">
-            <span className="dot w-3 h-3 bg-purple-400 rounded-full"></span>
-            <span className="dot w-3 h-3 bg-purple-400 rounded-full"></span>
-            <span className="dot w-3 h-3 bg-purple-400 rounded-full"></span>
+            <span className="dot w-3 h-3 bg-lavender rounded-full"></span>
+            <span className="dot w-3 h-3 bg-lavender rounded-full"></span>
+            <span className="dot w-3 h-3 bg-lavender rounded-full"></span>
         </div>
     );
 }
@@ -292,27 +292,27 @@ const BookingSystem = () => {
       {selectedReading && (
         <div ref={step2Ref} className="opacity-0">
           <div className="flex justify-between items-center mb-6 flex-wrap gap-4">
-            <button onClick={() => { setSelectedReading(null); resetBookingState(); }} className="text-purple-300 hover:text-white transition-colors">&larr; Cambiar de lectura</button>
+            <button onClick={() => { setSelectedReading(null); resetBookingState(); }} className="text-lavender hover:text-moon-50 transition-colors">&larr; Cambiar de lectura</button>
             <div className="text-right">
-              <p className="text-lg text-gray-300">{selectedReading.title}</p>
-              <p className="text-2xl font-bold text-yellow-400">{formatPrice(selectedReading)}</p>
+              <p className="text-lg text-moon-300">{selectedReading.title}</p>
+              <p className="text-2xl font-bold text-gold">{formatPrice(selectedReading)}</p>
             </div>
           </div>
-          <div className="bg-black/70 backdrop-blur-md p-4 sm:p-8 rounded-lg border border-purple-400/30 flex flex-col md:flex-row gap-8">
+          <div className="bg-dusk/90 backdrop-blur-md p-4 sm:p-8 rounded-3xl border border-lavender/20 flex flex-col md:flex-row gap-8">
             <div className="flex-grow flex justify-center">
               <DayPicker mode="single" selected={selectedDate} onSelect={handleDateSelect} locale={es} disabled={(date) => date < new Date(new Date().toDateString())} />
             </div>
             {selectedDate && (
-              <div ref={timePanelRef} className="md:w-1/3 md:border-l md:border-purple-400/20 md:pl-8 opacity-0">
-                <h3 className="text-xl font-cinzel-decorative text-center md:text-left mb-4">Horas para <br/> {format(selectedDate, 'PPP', { locale: es })}</h3>
+              <div ref={timePanelRef} className="md:w-1/3 md:border-l md:border-lavender/20 md:pl-8 opacity-0">
+                <h3 className="text-lg font-label font-semibold tracking-[0.05em] text-moon-50 text-center md:text-left mb-4">Horas para <br/> {format(selectedDate, 'PPP', { locale: es })}</h3>
                 {isLoading && <LoadingSpinner />}
                 {timeFetchError && <p className="text-center text-red-400">{timeFetchError}</p>}
                 {!isLoading && !timeFetchError && (
                   availableTimes.length > 0 ? (
                     <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-2 gap-3">
-                      {availableTimes.map(time => <button key={time} onClick={() => setSelectedTime(time)} className={`time-slot p-2 rounded-md text-center transition-colors ${selectedTime === time ? 'bg-purple-600 text-white ring-2 ring-white' : 'bg-purple-900/50 hover:bg-purple-600/80'}`}>{time}</button>)}
+                      {availableTimes.map(time => <button key={time} onClick={() => setSelectedTime(time)} aria-pressed={selectedTime === time} className={`time-slot min-h-11 rounded-full border font-label text-center transition-[background-color,box-shadow] ${selectedTime === time ? 'border-gold bg-gold text-night' : 'border-lavender/35 hover:shadow-[0_0_18px_rgba(233,196,106,0.45)]'}`}>{time}</button>)}
                     </div>
-                  ) : <p className="text-center text-gray-400">No hay horas disponibles.</p>
+                  ) : <p className="text-center text-moon-500">No hay horas disponibles.</p>
                 )}
               </div>
             )}
@@ -324,28 +324,28 @@ const BookingSystem = () => {
         <PayPalScriptProvider options={{ clientId: paypalClientId, currency: currency, intent: "capture", "disable-funding": "card" }}>
             <div ref={formRef} className="text-center mt-8 transition-all duration-300 flex flex-col items-center gap-6">
               <div className="form-field w-full max-w-md">
-                  <label htmlFor="name" className="block text-purple-200 mb-2 font-cormorant-garamond text-lg">Nombre:</label>
-                  <input type="text" id="name" value={userName} onChange={(e) => setUserName(e.target.value)} placeholder="Tu nombre" className="w-full px-4 py-2 rounded-md bg-purple-900/50 border border-purple-400/30 text-white focus:ring-2 focus:ring-yellow-400 focus:outline-none" required />
+                  <label htmlFor="name" className="block text-moon-200 mb-2 font-cormorant-garamond text-lg">Nombre:</label>
+                  <input type="text" id="name" value={userName} onChange={(e) => setUserName(e.target.value)} placeholder="Tu nombre" className="w-full min-h-12 px-4 rounded-xl bg-dusk border border-lavender/35 text-moon-50 focus:ring-2 focus:ring-gold focus:outline-none" required />
               </div>
               <div className="form-field w-full max-w-md">
-                  <label htmlFor="email" className="block text-purple-200 mb-2 font-cormorant-garamond text-lg">Correo para la confirmación:</label>
-                  <input type="email" id="email" value={userEmail} onChange={(e) => setUserEmail(e.target.value)} placeholder="tu.correo@ejemplo.com" className="w-full px-4 py-2 rounded-md bg-purple-900/50 border border-purple-400/30 text-white focus:ring-2 focus:ring-yellow-400 focus:outline-none" required />
+                  <label htmlFor="email" className="block text-moon-200 mb-2 font-cormorant-garamond text-lg">Correo para la confirmación:</label>
+                  <input type="email" id="email" value={userEmail} onChange={(e) => setUserEmail(e.target.value)} placeholder="tu.correo@ejemplo.com" className="w-full min-h-12 px-4 rounded-xl bg-dusk border border-lavender/35 text-moon-50 focus:ring-2 focus:ring-gold focus:outline-none" required />
               </div>
               <div className="form-field w-full max-w-md">
-                  <h3 className="text-xl font-cinzel-decorative text-purple-200 mb-3">Método de Pago:</h3>
+                  <h3 className="text-lg font-label font-semibold tracking-[0.05em] text-moon-200 mb-3">Método de Pago:</h3>
                   <div className="flex justify-center gap-4">
-                    <button onClick={() => setPaymentMethod('bankTransfer')} className={`px-6 py-3 rounded-lg transition-colors ${paymentMethod === 'bankTransfer' ? 'bg-yellow-500 text-black' : 'bg-purple-900/50 text-white hover:bg-purple-800/70'}`}>
+                    <button onClick={() => setPaymentMethod('bankTransfer')} className={`px-6 py-3 rounded-full font-label transition-colors ${paymentMethod === 'bankTransfer' ? 'bg-gold text-night' : 'border border-lavender/35 text-moon-50 hover:bg-dusk-500/70'}`}>
                         Transferencia
                     </button>
-                    <button onClick={() => setPaymentMethod('paypal')} className={`px-6 py-3 rounded-lg transition-colors ${paymentMethod === 'paypal' ? 'bg-yellow-500 text-black' : 'bg-purple-900/50 text-white hover:bg-purple-800/70'}`}>
+                    <button onClick={() => setPaymentMethod('paypal')} className={`px-6 py-3 rounded-full font-label transition-colors ${paymentMethod === 'paypal' ? 'bg-gold text-night' : 'border border-lavender/35 text-moon-50 hover:bg-dusk-500/70'}`}>
                         PayPal
                     </button>
                   </div>
               </div>
               {paymentMethod === 'bankTransfer' && (
                   <div className="form-field text-center">
-                    <p className="text-sm text-gray-400 mb-4">Recibirás los detalles para la transferencia en el correo de confirmación.</p>
-                    <button onClick={() => bookAppointmentInDB()} disabled={isBooking || !userName.trim() || !userEmail} className="font-semibold px-8 py-3 rounded-full bg-yellow-500 text-black ring-1 ring-yellow-200 hover:bg-yellow-400 transition-all shadow-[0_0_20px_rgba(234,179,8,0.6)] hover:shadow-[0_0_30px_rgba(234,179,8,0.8)] disabled:bg-gray-500 disabled:shadow-none disabled:cursor-not-allowed">
+                    <p className="text-sm text-moon-500 mb-4">Recibirás los detalles para la transferencia en el correo de confirmación.</p>
+                    <button onClick={() => bookAppointmentInDB()} disabled={isBooking || !userName.trim() || !userEmail} className="lun-btn-gold disabled:cursor-not-allowed disabled:opacity-45 disabled:shadow-none">
                         {isBooking ? 'Agendando...' : 'Confirmar Cita'}
                     </button>
                   </div>

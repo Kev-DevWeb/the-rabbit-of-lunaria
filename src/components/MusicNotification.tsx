@@ -49,7 +49,7 @@ const MusicNotificationItem: React.FC<MusicNotificationProps> = ({
     <div
       className={`
         fixed top-4 right-4 z-50 max-w-sm w-full
-        bg-black/90 backdrop-blur-md border border-purple-500/30
+        bg-night/90 backdrop-blur-md border border-lavender/30
         rounded-lg p-4 shadow-2xl
         transform transition-all duration-300 ease-out
         ${isVisible && !isExiting 
@@ -65,15 +65,15 @@ const MusicNotificationItem: React.FC<MusicNotificationProps> = ({
       {/* Header con botón cerrar */}
       <div className="flex items-center justify-between mb-2">
         <div className="flex items-center space-x-2">
-          <Music className="w-4 h-4 text-purple-400" />
-          <span className="text-xs text-purple-300 font-medium">Ahora suena</span>
+          <Music className="w-4 h-4 text-lavender" />
+          <span className="text-xs text-lavender font-medium">Ahora suena</span>
         </div>
         <button
           onClick={handleClose}
           className="p-1 hover:bg-white/10 rounded-full transition-colors"
           aria-label="Cerrar notificación"
         >
-          <X className="w-3 h-3 text-gray-400 hover:text-white" />
+          <X className="w-3 h-3 text-moon-500 hover:text-moon-50" />
         </button>
       </div>
 
@@ -87,7 +87,7 @@ const MusicNotificationItem: React.FC<MusicNotificationProps> = ({
               alt="Thumbnail"
               width={48}
               height={48}
-              className="w-12 h-12 rounded-md object-cover border border-purple-500/20"
+              className="w-12 h-12 rounded-md object-cover border border-lavender/20"
               onError={(e) => {
                 // Fallback si no carga la imagen
                 e.currentTarget.style.display = 'none';
@@ -98,19 +98,19 @@ const MusicNotificationItem: React.FC<MusicNotificationProps> = ({
 
         {/* Información de la canción */}
         <div className="flex-1 min-w-0">
-          <h4 className="text-white font-medium text-sm mb-1 truncate">
+          <h4 className="text-moon-50 font-medium text-sm mb-1 truncate">
             {notification.title}
           </h4>
-          <p className="text-gray-300 text-xs truncate">
+          <p className="text-moon-300 text-xs truncate">
             {notification.channel}
           </p>
         </div>
       </div>
 
       {/* Barra de progreso (opcional) */}
-      <div className="mt-3 w-full bg-gray-700 rounded-full h-1">
+      <div className="mt-3 w-full bg-dusk-700 rounded-full h-1">
         <div 
-          className="bg-purple-500 h-1 rounded-full transition-all duration-1000 ease-linear"
+          className="bg-violet-glow h-1 rounded-full transition-all duration-1000 ease-linear"
           style={{
             animation: `progress ${duration}ms linear forwards`,
           }}

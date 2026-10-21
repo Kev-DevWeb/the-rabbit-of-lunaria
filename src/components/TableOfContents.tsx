@@ -87,8 +87,8 @@ export default function TableOfContents({ body }: TableOfContentsProps) {
   }
 
   return (
-    <nav className="sticky top-24 bg-gray-900/80 backdrop-blur-sm border border-purple-500/30 rounded-lg p-4 shadow-lg shadow-purple-900/30">
-      <h3 className="text-sm font-semibold text-purple-300 mb-3 uppercase tracking-wider">
+    <nav className="sticky top-24 bg-night/80 backdrop-blur-sm border border-lavender/30 rounded-lg p-4 shadow-lg shadow-dusk-500/30">
+      <h3 className="text-sm font-semibold text-lavender mb-3 uppercase tracking-wider">
         Contenido
       </h3>
       <ul className="space-y-2">
@@ -101,10 +101,10 @@ export default function TableOfContents({ body }: TableOfContentsProps) {
           >
             <button
               onClick={() => scrollToHeading(heading.id)}
-              className={`text-left text-sm transition-colors duration-200 hover:text-purple-300 w-full ${
+              className={`text-left text-sm transition-colors duration-200 hover:text-lavender w-full ${
                 activeId === heading.id
-                  ? 'text-purple-400 font-semibold'
-                  : 'text-gray-400'
+                  ? 'text-lavender font-semibold'
+                  : 'text-moon-500'
               }`}
             >
               {heading.text}
