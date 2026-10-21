@@ -1,10 +1,11 @@
 import { NextResponse } from 'next/server';
 import { v4 as uuidv4 } from 'uuid';
 import { readingsData } from '@/lib/readings-data';
-import { availableTimes, googleCalendarLink, isValidDate, isValidTime, reserveSlot, SlotTakenError } from '@/lib/booking';
-import { captureOrder, priceFor } from '@/lib/paypal';
+import { availableTimes, googleCalendarLink, HOLD_MINUTES, isValidDate, isValidTime, reserveSlot, SlotTakenError } from '@/lib/booking';
+import { captureOrder, priceFor, validateOrderBeforeCapture, type CaptureOutcome } from '@/lib/paypal';
 import { sendMailSafe } from '@/lib/mailer';
 import {
+  escapeHtml,
   userConfirmedEmail,
   adminConfirmedEmail,
   userPendingEmail,
@@ -39,8 +40,24 @@ export async function POST(request: Request) {
   const cancelToken = uuidv4();
   const confirmToken = paymentMethod === 'bankTransfer' ? uuidv4() : null;
   const cleanName = name.trim().slice(0, 120);
+  const expected = priceFor(reading, currency === 'USD' ? 'USD' : 'MXN');
 
-  // 1. Apartar el horario (transacción). Con PayPal queda "processing" hasta cobrar.
+  // 0. Con PayPal, antes de apartar nada se revisa la orden: aprobada y por el monto correcto.
+  //    Si no cumple, no se cobra.
+  if (paymentMethod === 'paypal') {
+    try {
+      const check = await validateOrderBeforeCapture(orderId, expected);
+      if (!check.ok) {
+        console.error('Orden de PayPal no válida antes de cobrar:', { orderId, status: check.status });
+        return NextResponse.json({ error: 'La orden de PayPal no es válida. No se hizo ningún cobro.' }, { status: 402 });
+      }
+    } catch (error) {
+      console.error('No se pudo revisar la orden de PayPal:', error);
+      return NextResponse.json({ error: 'No se pudo verificar el pago. No se hizo ningún cobro; inténtalo de nuevo.' }, { status: 502 });
+    }
+  }
+
+  // 1. Apartar el horario (transacción). Con PayPal queda "processing" hasta cobrar, con vencimiento.
   let bookingRef;
   try {
     bookingRef = await reserveSlot(date, time, {
@@ -52,6 +69,7 @@ export async function POST(request: Request) {
       paymentMethod,
       paymentId: null,
       paypalOrderId: paymentMethod === 'paypal' ? orderId : null,
+      holdExpiresAt: paymentMethod === 'paypal' ? new Date(Date.now() + HOLD_MINUTES * 60_000).toISOString() : null,
       cancelToken,
       confirmToken,
       createdAt: new Date().toISOString(),
@@ -64,23 +82,47 @@ export async function POST(request: Request) {
     return NextResponse.json({ error: 'No se pudo agendar la cita. Inténtalo de nuevo.' }, { status: 500 });
   }
 
-  // 2. Con PayPal, el cobro se hace aquí en el servidor y se verifica el monto.
-  //    Si no se cobra bien, se libera el horario.
+  // 2. Cobro en el servidor. Solo se libera el horario si PayPal dijo claramente que no cobró;
+  //    si el resultado es dudoso, la cita queda "payment_review" y se avisa a la administradora.
   let paymentId: string | null = null;
   if (paymentMethod === 'paypal') {
+    let outcome: CaptureOutcome;
     try {
-      const capture = await captureOrder(orderId, priceFor(reading, currency === 'USD' ? 'USD' : 'MXN'));
-      if (!capture.ok) {
-        await bookingRef.delete();
-        console.error('Pago de PayPal no válido:', { orderId, reason: capture.reason, captureId: capture.captureId });
-        return NextResponse.json({ error: 'No se pudo completar el pago con PayPal. No se agendó la cita.' }, { status: 402 });
-      }
-      paymentId = capture.captureId ?? null;
-      await bookingRef.update({ status: 'confirmed', paymentId });
+      outcome = await captureOrder(orderId, expected);
     } catch (error) {
-      await bookingRef.delete().catch(() => undefined);
-      console.error('API Error al cobrar con PayPal:', error);
-      return NextResponse.json({ error: 'No se pudo procesar el pago. Inténtalo de nuevo.' }, { status: 500 });
+      outcome = { kind: 'review', reason: `TOKEN_OR_UNKNOWN: ${String(error)}` };
+    }
+
+    if (outcome.kind === 'declined') {
+      await bookingRef.delete().catch((error) => console.error('No se pudo liberar el horario:', error));
+      console.error('PayPal rechazó el cobro:', { orderId, reason: outcome.reason });
+      return NextResponse.json({ error: 'PayPal no pudo completar el pago. No se hizo ningún cobro.' }, { status: 402 });
+    }
+
+    if (outcome.kind === 'completed') {
+      paymentId = outcome.captureId;
+      try {
+        await bookingRef.update({ status: 'confirmed', paymentId, holdExpiresAt: null });
+      } catch (error) {
+        // El pago ya entró: no se borra nada. Al vencer el apartado, la conciliación lo detecta.
+        outcome = { kind: 'review', reason: `UPDATE_FAILED: ${String(error)}`, captureId: paymentId };
+      }
+    }
+
+    if (outcome.kind === 'review') {
+      console.error('Cobro de PayPal para revisión:', { orderId, reason: outcome.reason, captureId: outcome.captureId });
+      await bookingRef
+        .update({ status: 'payment_review', reviewReason: outcome.reason, paymentId: outcome.captureId ?? null, holdExpiresAt: null })
+        .catch((error) => console.error('No se pudo marcar la cita para revisión:', error));
+      await sendMailSafe(
+        process.env.ADMIN_EMAIL,
+        `Revisar pago de PayPal: ${reading.title} con ${cleanName}`,
+        `<p>Una cita quedó en <strong>revisión de pago</strong>. El horario sigue apartado.</p>
+         <p>Cliente: ${escapeHtml(cleanName)} (${escapeHtml(email)})<br>Fecha: ${date} ${time}<br>Lectura: ${escapeHtml(reading.title)}</p>
+         <p>Orden de PayPal: ${escapeHtml(orderId)}<br>Captura: ${escapeHtml(outcome.captureId ?? '—')}<br>Motivo: ${escapeHtml(outcome.reason)}</p>
+         <p>Revisa la orden en PayPal y confirma o reembolsa. Documento en Firestore: bookings/${bookingRef.id}</p>`,
+      );
+      return NextResponse.json({ success: true, status: 'review' }, { status: 202 });
     }
   }
 

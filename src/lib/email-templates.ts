@@ -144,7 +144,7 @@ export function adminPendingEmail(raw: BookingEmailData): string {
       <p class="p-strong"><strong>Lectura solicitada:</strong> ${data.readingTitle}</p>
       <p class="p-strong"><strong>Método de Pago:</strong> ${data.paymentMethod}</p>
       <hr class="hr">
-      <p>Cuando recibas el comprobante de la transferencia, confirma la cita aquí (se le avisa al cliente por correo):</p>
+      <p>Cuando recibas el comprobante de la transferencia, abre este enlace y presiona "Confirmar cita" (se le avisa al cliente por correo):</p>
       <p><a href="${data.appBaseUrl}/api/confirmAppointment?token=${encodeURIComponent(data.confirmToken ?? '')}" target="_blank" class="link">Confirmar cita</a></p>
       <p>Añade esta cita a tu calendario:</p>
       <p><a href="${data.calendarLink}" target="_blank" class="link">Añadir a Google Calendar</a></p>

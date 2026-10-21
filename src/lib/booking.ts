@@ -1,5 +1,6 @@
 import 'server-only';
 import { adminDb } from '@/lib/firebaseAdmin';
+import { getOrder } from '@/lib/paypal';
 
 /**
  * Reglas de agenda del lado del servidor. Todo se calcula en hora de Ciudad de México,
@@ -12,7 +13,10 @@ const MX_OFFSET = '-06:00';
 
 const WEEKEND_SLOTS = ['11:00', '12:00', '13:00', '14:00', '15:00', '16:00', '17:00', '18:00', '19:00'];
 const WEEKDAY_SLOTS = ['17:00', '18:00', '19:00', '20:00', '21:00', '22:00'];
-const ACTIVE_STATUSES = ['pending', 'confirmed', 'processing'];
+// processing: apartado mientras se cobra con PayPal · payment_review: cobro dudoso, revisar a mano
+const ACTIVE_STATUSES = ['pending', 'confirmed', 'processing', 'payment_review'];
+// Tiempo máximo de un apartado "processing"; después se concilia con PayPal
+export const HOLD_MINUTES = 15;
 
 export class SlotTakenError extends Error {
   constructor() {
@@ -38,8 +42,38 @@ export function baseSlotsFor(date: string, now = new Date()): string[] {
 /** Id del documento: uno por día y hora, así Firestore no deja guardar dos citas en el mismo horario */
 export const slotId = (date: string, time: string) => `${date}_${time.replace(':', '')}`;
 
+/**
+ * Apartados "processing" vencidos (el proceso se cortó entre apartar y cobrar).
+ * Se concilian con PayPal antes de soltarlos: si la orden sí se cobró, el horario se queda
+ * en revisión; si no se cobró, se libera. Si PayPal no responde, se deja como está.
+ */
+export async function reconcileExpiredHolds(date: string): Promise<void> {
+  const snapshot = await adminDb.collection('bookings').where('date', '==', date).where('status', '==', 'processing').get();
+  const now = Date.now();
+
+  await Promise.all(
+    snapshot.docs.map(async (doc) => {
+      const data = doc.data();
+      const expiresAt = Date.parse(data.holdExpiresAt ?? data.createdAt ?? '');
+      if (!Number.isFinite(expiresAt) || expiresAt > now) return;
+      try {
+        const order = data.paypalOrderId ? await getOrder(data.paypalOrderId) : null;
+        if (order?.status === 'COMPLETED') {
+          const captureId = order.purchase_units?.[0]?.payments?.captures?.[0]?.id ?? null;
+          await doc.ref.update({ status: 'payment_review', paymentId: captureId, reviewReason: 'HOLD_EXPIRED_BUT_PAID' });
+        } else {
+          await doc.ref.delete();
+        }
+      } catch (error) {
+        console.error('No se pudo conciliar el apartado vencido', doc.id, error);
+      }
+    }),
+  );
+}
+
 /** Horas ocupadas de un día. Solo regresa horas, nunca datos de clientes. */
 export async function takenTimes(date: string): Promise<Set<string>> {
+  await reconcileExpiredHolds(date);
   const snapshot = await adminDb
     .collection('bookings')
     .where('date', '==', date)

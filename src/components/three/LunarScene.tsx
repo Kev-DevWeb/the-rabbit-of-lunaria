@@ -218,26 +218,37 @@ export default function LunarScene({ className = '', portal = false }: { classNa
     };
   }, []);
 
-  // Pausar el render cuando el hero sale de pantalla
+  // Pausar el render cuando la escena no se ve: fuera de pantalla (modo normal)
+  // o con la pestaña en segundo plano. En modo portal es el fondo de todo el inicio,
+  // así que siempre está en la ventana y solo se pausa con la pestaña oculta.
   useEffect(() => {
     if (!wrapper.current) return;
-    const io = new IntersectionObserver(([entry]) => setInView(entry.isIntersecting), { threshold: 0 });
+    let onScreen = true;
+    const update = () => setInView(onScreen && document.visibilityState === 'visible');
+    const io = new IntersectionObserver(([entry]) => {
+      onScreen = entry.isIntersecting;
+      update();
+    }, { threshold: 0 });
     io.observe(wrapper.current);
-    return () => io.disconnect();
+    document.addEventListener('visibilitychange', update);
+    return () => {
+      io.disconnect();
+      document.removeEventListener('visibilitychange', update);
+    };
   }, []);
 
   const scene = (
     <div ref={wrapper} aria-hidden="true" className={`pointer-events-none ${className}`}>
       {supported && (
         <Canvas
-          dpr={[1, 1.5]}
+          dpr={portal ? [1, 1.25] : [1, 1.5]}
           camera={{ position: [0, 0, 6], fov: 55 }}
           gl={{ antialias: false, alpha: true, powerPreference: 'low-power' }}
           frameloop={reduced ? 'demand' : inView ? 'always' : 'never'}
         >
-          <StarLayer count={1300} depth={30} size={2.2} color="#fff8e1" seed={7} />
-          <StarLayer count={650} depth={18} size={2.8} color="#c9b8ff" seed={13} />
-          <StarLayer count={230} depth={9} size={3.4} color="#f6dc9a" seed={29} />
+          <StarLayer count={1100} depth={30} size={2.2} color="#fff8e1" seed={7} />
+          <StarLayer count={520} depth={18} size={2.8} color="#c9b8ff" seed={13} />
+          <StarLayer count={180} depth={9} size={3.4} color="#f6dc9a" seed={29} />
           <FogBank position={[-6, -5.5, -6]} scale={[26, 7]} seed={1.3} opacity={0.35} />
           <FogBank position={[7, -7, -4]} scale={[28, 8]} seed={4.1} opacity={0.28} />
           {!reduced && <Rig pointer={pointer} />}

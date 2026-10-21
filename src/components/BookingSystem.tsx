@@ -193,7 +193,10 @@ const BookingSystem = () => {
       const result = await response.json();
       if (!response.ok) throw new Error(result.error || 'Error en la API de booking');
       
-      if (paymentMethod === 'paypal') {
+      if (result.status === 'review') {
+        // Pago dudoso: el horario sigue apartado y la administradora lo revisa a mano
+        router.push('/confirmation/review');
+      } else if (paymentMethod === 'paypal') {
         router.push('/confirmation/success');
       } else if (paymentMethod === 'bankTransfer') {
         router.push('/confirmation/pending');
