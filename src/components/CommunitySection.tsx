@@ -49,13 +49,19 @@ const CommunitySection = () => {
         });
       });
 
-      const split = SplitText.create('.community-intro', { type: 'lines', mask: 'lines' });
       const tl = gsap.timeline({
         scrollTrigger: { trigger: sectionRef.current, start: 'top 70%', toggleActions: 'play none none none' },
       });
 
+      // autoSplit vuelve a partir las líneas si cambia el ancho o cargan las fuentes
+      const split = SplitText.create('.community-intro', {
+        type: 'lines',
+        mask: 'lines',
+        autoSplit: true,
+        onSplit: (self) => gsap.from(self.lines, { yPercent: 100, duration: 0.9, ease: 'power3.out', stagger: 0.1, scrollTrigger: { trigger: self.lines[0], start: 'top 85%' } }),
+      });
+
       tl.from('.community-title', { autoAlpha: 0, y: 50, duration: 1, ease: 'power3.out' })
-        .from(split.lines, { yPercent: 100, duration: 0.9, ease: 'power3.out', stagger: 0.1 }, '-=0.7')
         .from('.community-pillar', { autoAlpha: 0, y: 40, duration: 0.8, ease: 'power3.out', stagger: 0.15 }, '-=0.4')
         .from('.community-rune', { strokeDashoffset: 120, duration: 1.4, ease: 'power2.inOut', stagger: 0.15 }, '<')
         .from([potion1Ref.current, cauldronRef.current, potion2Ref.current], { autoAlpha: 0, scale: 0.5, stagger: 0.2, duration: 0.8, ease: 'back.out(1.7)' }, '-=0.6');
@@ -78,7 +84,8 @@ const CommunitySection = () => {
         La Madriguera de Lunaria
       </h2>
 
-      <p className="community-intro relative mx-auto mt-6 max-w-3xl text-moon-300">
+      {/* w-full: dentro del flex centrado el párrafo se encogía al ancho de una palabra al partirlo en líneas */}
+      <p className="community-intro relative mx-auto mt-6 w-full max-w-3xl text-moon-300">
         Únete a nuestra comunidad en Lunaria, la madriguera mágica de la luna. Un espacio seguro y lleno de encanto para brujit@s, personas curiosas y pequeños babywitches que desean iniciar su camino mágico.
       </p>
 
