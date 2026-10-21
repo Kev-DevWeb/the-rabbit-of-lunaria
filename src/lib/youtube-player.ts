@@ -25,13 +25,14 @@ interface YouTubePlayer {
   previousVideo: () => void;
   mute: () => void;
   unMute: () => void;
+  isMuted: () => boolean;
   setVolume: (volume: number) => void;
   getVolume: () => number;
   getPlayerState: () => number;
   getCurrentTime: () => number;
   getDuration: () => number;
   getVideoUrl: () => string;
-  getPlaylist: () => string[];
+  getPlaylist: () => string[] | null;
   getPlaylistIndex: () => number;
   destroy: () => void;
 }
@@ -55,19 +56,26 @@ declare global {
   }
 }
 
+// Errores de un video concreto (borrado, privado o sin permiso para insertarse): se salta al siguiente
+const SKIPPABLE_ERRORS = new Set([2, 5, 100, 101, 150]);
+
 class YouTubePlayerService {
   private player: YouTubePlayer | null = null;
   private playlistId: string;
   private onStateChangeCallback: ((state: YouTubePlayerState) => void) | null = null;
-  private fadeInterval: NodeJS.Timeout | null = null;
-  private targetVolume: number = 30; // Volumen objetivo (30%)
+  private fadeTimer: ReturnType<typeof setInterval> | null = null;
+  // Resuelve el desvanecido en curso cuando otro lo interrumpe, para que nadie se quede esperando
+  private finishFade: (() => void) | null = null;
+  private targetVolume = 30;
+  private isReady = false;
+  private consecutiveErrors = 0;
   private currentState: YouTubePlayerState = {
     isPlaying: false,
     currentTrack: null,
     playlist: [],
     currentIndex: 0,
     isLoaded: false,
-    isMuted: false
+    isMuted: true,
   };
 
   constructor(playlistId: string) {
@@ -77,8 +85,7 @@ class YouTubePlayerService {
   // Inicializar YouTube API
   async initialize(containerId: string): Promise<void> {
     return new Promise((resolve, reject) => {
-      // Cargar YouTube API si no está cargada
-      if (!window.YT) {
+      if (!window.YT?.Player) {
         const tag = document.createElement('script');
         tag.src = 'https://www.youtube.com/iframe_api';
         const firstScriptTag = document.getElementsByTagName('script')[0];
@@ -108,22 +115,27 @@ class YouTubePlayerService {
           iv_load_policy: 3,
           modestbranding: 1,
           rel: 0,
-          showinfo: 0,
           loop: 1,
           mute: 1 // Iniciar muteado para cumplir políticas de autoplay
         },
         events: {
           onReady: () => {
+            this.isReady = true;
             this.loadPlaylistInfo();
             this.currentState.isLoaded = true;
-            this.updateState();
+            this.syncFromPlayer();
             resolve();
           },
           onStateChange: (event: unknown) => {
-            this.handleStateChange(event as { data: number; target: YouTubePlayer });
+            this.handleStateChange((event as { data: number }).data);
           },
           onError: (event: unknown) => {
-            reject(new Error(`YouTube Player error: ${String(event)}`))
+            const code = (event as { data?: number }).data;
+            if (!this.isReady) {
+              reject(new Error(`YouTube Player error: ${String(code)}`));
+              return;
+            }
+            this.handlePlaybackError(code);
           }
         }
       });
@@ -132,74 +144,59 @@ class YouTubePlayerService {
     }
   }
 
-  // Cargar información de la playlist
-  private async loadPlaylistInfo(): Promise<void> {
-    try {
-      if (this.player && this.player.getPlaylist) {
-        const playlist = this.player.getPlaylist();
-        
-        // Primero cargar con placeholders para rapidez
-        this.currentState.playlist = playlist?.map((videoId: string, index: number) => ({
-          id: videoId,
-          title: `♫ Canción ${index + 1}`,
-          channelTitle: 'Playlist de Lunaria',
-          thumbnail: `https://img.youtube.com/vi/${videoId}/default.jpg`,
-          duration: '0:00'
-        })) || [];
-        
-        this.updateCurrentTrack();
-        
-        // Luego cargar información real de manera asíncrona
-        if (playlist && playlist.length > 0) {
-          this.loadRealVideoInfo(playlist);
-        }
-      }
-    } catch (error) {
-    }
+  private handlePlaybackError(code: number | undefined): void {
+    if (code === undefined || !SKIPPABLE_ERRORS.has(code)) return;
+    // Sin este tope, una playlist donde todo falla saltaría en bucle
+    const limit = Math.max(this.currentState.playlist.length, 1);
+    if (++this.consecutiveErrors > limit) return;
+    this.player?.nextVideo();
+  }
+
+  // Cargar información de la playlist. Se reintenta al reproducir si al principio YouTube aún no la tenía.
+  private loadPlaylistInfo(): void {
+    const playlist = this.player?.getPlaylist?.();
+    if (!playlist || playlist.length === 0) return;
+
+    this.currentState.playlist = playlist.map((videoId: string, index: number) => ({
+      id: videoId,
+      title: `♫ Canción ${index + 1}`,
+      channelTitle: 'Playlist de Lunaria',
+      thumbnail: `https://img.youtube.com/vi/${videoId}/default.jpg`,
+      duration: '0:00'
+    }));
+
+    this.updateCurrentTrack();
+    this.loadRealVideoInfo(playlist);
   }
 
   private async loadRealVideoInfo(videoIds: string[]): Promise<void> {
-    try {
-      
-      // Procesar videos uno por uno para evitar rate limiting
-      for (let i = 0; i < videoIds.length; i++) {
-        const videoId = videoIds[i];
-        
-        try {
-          // Usar oEmbed API de YouTube (gratuito, sin API key)
-          const oembedUrl = `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`;
-          
-          const response = await fetch(oembedUrl);
-          
-          if (response.ok) {
-            const data = await response.json();
-            
-            // Actualizar la información específica del video
-            if (this.currentState.playlist[i]) {
-              this.currentState.playlist[i] = {
-                ...this.currentState.playlist[i],
-                title: this.cleanTitle(data.title) || `♫ Canción ${i + 1}`,
-                channelTitle: data.author_name || 'Canal Musical',
-                thumbnail: data.thumbnail_url || `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`
-              };
-              
-              // Si es el video actual, actualizar inmediatamente
-              if (i === this.currentState.currentIndex) {
-                this.updateCurrentTrack();
-              }
-            }
-          } else {
+    // Uno por uno para evitar rate limiting
+    for (let i = 0; i < videoIds.length; i++) {
+      const videoId = videoIds[i];
+      try {
+        // oEmbed de YouTube (gratuito, sin API key)
+        const oembedUrl = `https://www.youtube.com/oembed?url=https://www.youtube.com/watch?v=${videoId}&format=json`;
+        const response = await fetch(oembedUrl);
+
+        if (response.ok && this.currentState.playlist[i]) {
+          const data = await response.json();
+          this.currentState.playlist[i] = {
+            ...this.currentState.playlist[i],
+            title: this.cleanTitle(data.title) || `♫ Canción ${i + 1}`,
+            channelTitle: data.author_name || 'Canal Musical',
+            thumbnail: data.thumbnail_url || `https://img.youtube.com/vi/${videoId}/maxresdefault.jpg`
+          };
+
+          if (i === this.currentState.currentIndex) {
+            this.updateCurrentTrack();
+            this.updateState();
           }
-          
-          // Pequeño delay para evitar rate limiting
-          await new Promise(resolve => setTimeout(resolve, 200));
-          
-        } catch (error) {
         }
+
+        await new Promise(resolve => setTimeout(resolve, 200));
+      } catch {
+        // Un video sin información se queda con su título provisional
       }
-      
-      
-    } catch (error) {
     }
   }
 
@@ -214,222 +211,134 @@ class YouTubePlayerService {
       .trim();
   }
 
-  private handleStateChange(event: { data: number; target: YouTubePlayer }): void {
+  private handleStateChange(playerState: number): void {
     const YT = window.YT;
-    
-    switch (event.data) {
-      case YT.PlayerState.PLAYING:
-        this.currentState.isPlaying = true;
+
+    if (playerState === YT.PlayerState.PLAYING) {
+      this.consecutiveErrors = 0;
+      if (this.currentState.playlist.length === 0) this.loadPlaylistInfo();
+      this.updateCurrentTrack();
+    } else if (playerState === YT.PlayerState.ENDED) {
+      // En modo playlist el player pasa solo a la siguiente canción
+      setTimeout(() => {
         this.updateCurrentTrack();
         this.updateState();
-        break;
-        
-      case YT.PlayerState.PAUSED:
-        this.currentState.isPlaying = false;
-        this.updateState();
-        break;
-        
-      case YT.PlayerState.ENDED:
-        // El player automáticamente pasa a la siguiente canción en playlist mode
-        setTimeout(() => {
-          this.updateCurrentTrack();
-          this.updateState();
-        }, 500);
-        break;
+      }, 500);
     }
-    
+
+    this.syncFromPlayer();
+  }
+
+  // El player es la fuente de verdad de si suena y si está en silencio
+  private syncFromPlayer(): void {
+    if (!this.player) return;
+    try {
+      this.currentState.isPlaying = this.player.getPlayerState() === window.YT.PlayerState.PLAYING;
+      this.currentState.isMuted = this.player.isMuted();
+    } catch {
+      // El iframe todavía no responde
+    }
     this.updateState();
   }
 
   private updateCurrentTrack(): void {
     try {
-      if (this.player && this.player.getPlaylistIndex) {
-        const currentIndex = this.player.getPlaylistIndex();
-        if (currentIndex !== -1 && this.currentState.playlist[currentIndex]) {
-          const previousTrack = this.currentState.currentTrack;
-          this.currentState.currentIndex = currentIndex;
-          this.currentState.currentTrack = this.currentState.playlist[currentIndex];
-          
-          
-          // Si cambió la canción O si se actualizó la información del track actual
-          const titleChanged = previousTrack?.title !== this.currentState.currentTrack.title;
-          const infoUpdated = previousTrack && previousTrack.id === this.currentState.currentTrack.id && 
-                             previousTrack.title !== this.currentState.currentTrack.title;
-          
-          if (titleChanged) {
-            this.updateState();
-          } else if (infoUpdated) {
-            this.updateState();
-          }
-        }
+      const currentIndex = this.player?.getPlaylistIndex?.() ?? -1;
+      if (currentIndex !== -1 && this.currentState.playlist[currentIndex]) {
+        this.currentState.currentIndex = currentIndex;
+        this.currentState.currentTrack = this.currentState.playlist[currentIndex];
       }
-    } catch (error) {
+    } catch {
+      // El iframe todavía no responde
     }
   }
 
   private updateState(): void {
-    if (this.onStateChangeCallback) {
-      this.onStateChangeCallback({ ...this.currentState });
-    }
+    this.onStateChangeCallback?.({ ...this.currentState });
   }
 
-  // Métodos públicos
-  play(): void {
-    if (this.player && this.player.playVideo) {
-      this.player.playVideo();
-    }
-  }
-
-  pause(): void {
-    if (this.player && this.player.pauseVideo) {
-      this.player.pauseVideo();
-    }
-  }
-
-  togglePlayPause(): void {
-    if (this.currentState.isPlaying) {
-      this.pause();
-    } else {
-      this.play();
+  // ¿Se oye algo ahora mismo? Reproduciendo, sin silencio y con volumen.
+  isAudible(): boolean {
+    if (!this.player) return false;
+    try {
+      return (
+        this.player.getPlayerState() === window.YT.PlayerState.PLAYING &&
+        !this.player.isMuted() &&
+        this.player.getVolume() > 0
+      );
+    } catch {
+      return false;
     }
   }
 
   nextTrack(): void {
-    if (this.player && this.player.nextVideo) {
-      this.player.nextVideo();
-    }
+    this.player?.nextVideo?.();
   }
 
   previousTrack(): void {
-    if (this.player && this.player.previousVideo) {
-      this.player.previousVideo();
-    }
+    this.player?.previousVideo?.();
   }
 
   setMuted(muted: boolean): void {
-    if (this.player) {
-      if (muted) {
-        this.player.mute();
-      } else {
-        this.player.unMute();
+    if (!this.player) return;
+    if (muted) this.player.mute();
+    else this.player.unMute();
+    this.currentState.isMuted = muted;
+    this.updateState();
+  }
+
+  // Corta el desvanecido en curso y resuelve su promesa
+  private cancelFade(): void {
+    if (this.fadeTimer) clearInterval(this.fadeTimer);
+    this.fadeTimer = null;
+    const finish = this.finishFade;
+    this.finishFade = null;
+    finish?.();
+  }
+
+  // Lleva el volumen de `from` a `to` en `duration` ms. Si otro desvanecido lo interrumpe, resuelve igual.
+  private fadeVolume(from: number, to: number, duration: number, onEnd?: () => void): Promise<void> {
+    this.cancelFade();
+    return new Promise((resolve) => {
+      if (!this.player) {
+        resolve();
+        return;
       }
-      this.currentState.isMuted = muted;
-      this.updateState();
-    }
+      this.finishFade = resolve;
+      const start = Date.now();
+      this.player.setVolume(from);
+
+      this.fadeTimer = setInterval(() => {
+        const t = Math.min(1, (Date.now() - start) / duration);
+        this.player?.setVolume(from + (to - from) * t);
+        if (t >= 1) {
+          if (this.fadeTimer) clearInterval(this.fadeTimer);
+          this.fadeTimer = null;
+          this.finishFade = null;
+          onEnd?.();
+          this.syncFromPlayer();
+          resolve();
+        }
+      }, 1000 / 30);
+    });
   }
 
-  toggleMute(): void {
-    this.setMuted(!this.currentState.isMuted);
-  }
-
-  setVolume(volume: number): void {
-    if (this.player && this.player.setVolume) {
-      this.player.setVolume(Math.max(0, Math.min(100, volume)));
-    }
-  }
-
-  // Fade In con duración personalizable
+  // Sube la música desde el silencio (también si estaba sonando en silencio por el autoplay)
   async fadeIn(duration: number = 2000): Promise<void> {
-    return new Promise((resolve) => {
-      if (!this.player) {
-        resolve();
-        return;
-      }
-
-      // Limpiar fade anterior si existe
-      if (this.fadeInterval) {
-        clearInterval(this.fadeInterval);
-      }
-
-      // Empezar desde volumen 0
-      this.player.setVolume(0);
-      this.player.unMute();
-      this.player.playVideo();
-      
-      const startTime = Date.now();
-      const steps = 60; // 60fps
-      const stepDuration = duration / steps;
-      const volumeStep = this.targetVolume / steps;
-      let currentVolume = 0;
-
-      this.fadeInterval = setInterval(() => {
-        const elapsed = Date.now() - startTime;
-        
-        if (elapsed >= duration) {
-          // Fade completado
-          this.player?.setVolume(this.targetVolume);
-          clearInterval(this.fadeInterval!);
-          this.fadeInterval = null;
-          this.currentState.isMuted = false;
-          this.currentState.isPlaying = true;
-          this.updateState();
-          resolve();
-        } else {
-          // Incrementar volumen gradualmente
-          currentVolume = Math.min(this.targetVolume, volumeStep * (elapsed / stepDuration));
-          this.player?.setVolume(currentVolume);
-        }
-      }, 1000 / 60); // 60fps
-    });
+    if (!this.player) return;
+    const from = this.isAudible() ? this.player.getVolume() : 0;
+    this.player.setVolume(from);
+    this.player.unMute();
+    this.player.playVideo();
+    this.currentState.isMuted = false;
+    await this.fadeVolume(from, this.targetVolume, duration);
   }
 
-  // Fade Out con duración personalizable
+  // Baja la música y la pausa al terminar
   async fadeOut(duration: number = 1500): Promise<void> {
-    return new Promise((resolve) => {
-      if (!this.player) {
-        resolve();
-        return;
-      }
-
-      // Limpiar fade anterior si existe
-      if (this.fadeInterval) {
-        clearInterval(this.fadeInterval);
-      }
-
-      const startVolume = this.player.getVolume() || this.targetVolume;
-      const startTime = Date.now();
-      const steps = 60;
-      const stepDuration = duration / steps;
-      const volumeStep = startVolume / steps;
-
-      this.fadeInterval = setInterval(() => {
-        const elapsed = Date.now() - startTime;
-        
-        if (elapsed >= duration) {
-          // Fade completado
-          this.player?.setVolume(0);
-          this.player?.pauseVideo();
-          clearInterval(this.fadeInterval!);
-          this.fadeInterval = null;
-          this.currentState.isMuted = true;
-          this.currentState.isPlaying = false;
-          this.updateState();
-          resolve();
-        } else {
-          // Decrementar volumen gradualmente
-          const currentVolume = Math.max(0, startVolume - (volumeStep * (elapsed / stepDuration)));
-          this.player?.setVolume(currentVolume);
-        }
-      }, 1000 / 60); // 60fps
-    });
-  }
-
-  // Toggle con fade automático
-  async togglePlayPauseWithFade(): Promise<void> {
-    if (!this.player) {
-      return;
-    }
-
-    // Usar el estado ACTUAL del player, no del cache
-    const playerState = this.player.getPlayerState();
-    const YT = window.YT;
-    const isCurrentlyPlaying = playerState === YT.PlayerState.PLAYING;
-    
-    if (isCurrentlyPlaying) {
-      await this.fadeOut(1500);
-    } else {
-      await this.fadeIn(2000);
-    }
+    if (!this.player) return;
+    const from = this.player.getVolume() || this.targetVolume;
+    await this.fadeVolume(from, 0, duration, () => this.player?.pauseVideo());
   }
 
   // Registrar callback para cambios de estado
@@ -444,9 +353,8 @@ class YouTubePlayerService {
 
   // Cleanup
   destroy(): void {
-    if (this.player && this.player.destroy) {
-      this.player.destroy();
-    }
+    this.cancelFade();
+    this.player?.destroy?.();
     this.onStateChangeCallback = null;
   }
 }

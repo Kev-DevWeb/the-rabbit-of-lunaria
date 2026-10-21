@@ -85,7 +85,7 @@ const Header = () => {
         onClick={previousTrack}
         className="flex h-11 w-11 items-center justify-center rounded-full text-moon-500 transition-colors hover:bg-dusk-500/60 hover:text-moon-50 disabled:opacity-40"
         aria-label="Canción anterior"
-        disabled={isMuted || isProcessing}
+        disabled={isMuted}
       >
         <SkipBack size={size} />
       </button>
@@ -93,7 +93,6 @@ const Header = () => {
         onClick={toggleMute}
         className={`flex h-11 w-11 items-center justify-center rounded-full border border-lavender/30 text-lavender transition-colors hover:bg-dusk-500/60 hover:text-moon-50 ${isProcessing ? 'animate-pulse' : ''}`}
         aria-label={!isMuted ? "Pausar música" : "Reproducir música"}
-        disabled={isProcessing}
       >
         {!isMuted ? <Pause size={size + 2} /> : <Play size={size + 2} />}
       </button>
@@ -101,7 +100,7 @@ const Header = () => {
         onClick={nextTrack}
         className="flex h-11 w-11 items-center justify-center rounded-full text-moon-500 transition-colors hover:bg-dusk-500/60 hover:text-moon-50 disabled:opacity-40"
         aria-label="Siguiente canción"
-        disabled={isMuted || isProcessing}
+        disabled={isMuted}
       >
         <SkipForward size={size} />
       </button>
