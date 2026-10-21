@@ -1,4 +1,14 @@
 import { Suspense } from 'react';
+import type { Metadata } from 'next';
+import { DEFAULT_OG_IMAGES } from '@/lib/site';
+
+export const metadata: Metadata = {
+  title: 'El grimorio de Lunaria: artículos de tarot, magia y espiritualidad',
+  description:
+    'Biblioteca de artículos sobre tarot, arcanos mayores, rituales, magia y espiritualidad, escritos por la comunidad de La Madriguera de Lunaria para brujit@s y personas curiosas.',
+  alternates: { canonical: '/articulos' },
+  openGraph: { url: '/articulos', type: 'website', images: DEFAULT_OG_IMAGES },
+};
 // import ArticulosContent from '@/components/ArticulosContent'; // Vista de índice tradicional
 import BookshelfGrimorio from '@/components/BookshelfGrimorio'; // Vista de estante de libros
 

@@ -3,6 +3,8 @@ import Link from 'next/link';
 import imageUrlBuilder from '@sanity/image-url';
 import { SanityImageSource } from '@sanity/image-url/lib/types/types';
 import Image from 'next/image';
+import type { Metadata } from 'next';
+import { DEFAULT_OG_IMAGES } from '@/lib/site';
 
 interface Article {
   _id: string;
@@ -40,6 +42,18 @@ async function getAuthorPosts(slug: string) {
   }`;
   const author = await client.fetch<Author>(query, { slug });
   return author;
+}
+
+export async function generateMetadata({ params }: { params: Promise<{ slug: string }> }): Promise<Metadata> {
+  const { slug } = await params;
+  const author = await getAuthorPosts(slug).catch(() => null);
+  if (!author) return { title: 'Autor no encontrado', robots: { index: false } };
+  return {
+    title: `Artículos de ${author.name}`,
+    description: `${author.posts?.length ?? 0} artículos de ${author.name} en el grimorio de La Madriguera de Lunaria: tarot, magia y espiritualidad.`,
+    alternates: { canonical: `/autores/${slug}` },
+    openGraph: { url: `/autores/${slug}`, type: 'profile', images: DEFAULT_OG_IMAGES },
+  };
 }
 
 export default async function AuthorPage({ params }: { params: Promise<{ slug: string }> }) {

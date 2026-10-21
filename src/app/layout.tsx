@@ -2,6 +2,8 @@ import { Cinzel, Cinzel_Decorative, Cormorant_Garamond } from "next/font/google"
 import "./globals.css";
 import Script from 'next/script';
 import LayoutClient from './LayoutClient';
+import { CONTACT_EMAIL, SITE_DESCRIPTION, SITE_NAME, SITE_URL, absoluteUrl } from '@/lib/site';
+import { readingsData } from '@/lib/readings-data';
 
 // Re-exportar metadata desde el archivo dedicado
 export { metadata } from './metadata';
@@ -25,31 +27,41 @@ const cormorantGaramond = Cormorant_Garamond({
   variable: "--font-cormorant-garamond",
 });
 
+// Identidad del sitio para Google y asistentes de IA. Las páginas enlazan a estos @id.
 const jsonLd = {
   "@context": "https://schema.org",
   "@graph": [
     {
       "@type": "WebSite",
-      "@id": "https://www.themadrigueradelunaria.com/#website",
-      "url": "https://www.themadrigueradelunaria.com",
-      "name": "La madriguera de Lunaria",
-      "description": "Lecturas de tarot y agendamiento de citas.",
-      "publisher": {
-        "@id": "https://www.themadrigueradelunaria.com/#organization",
-      },
+      "@id": absoluteUrl('/#website'),
+      "url": SITE_URL,
+      "name": SITE_NAME,
+      "alternateName": "The Rabbit of Lunaria",
+      "description": SITE_DESCRIPTION,
+      "publisher": { "@id": absoluteUrl('/#organization') },
       "inLanguage": "es-MX",
     },
     {
       "@type": "Organization",
-      "@id": "https://www.themadrigueradelunaria.com/#organization",
-      "name": "La madriguera de Lunaria",
-      "url": "https://www.themadrigueradelunaria.com",
+      "@id": absoluteUrl('/#organization'),
+      "name": SITE_NAME,
+      "url": SITE_URL,
+      "email": CONTACT_EMAIL,
+      "description": SITE_DESCRIPTION,
       "logo": {
         "@type": "ImageObject",
-        "url": "https://www.themadrigueradelunaria.com/logo.png",
-        "width": 200,
-        "height": 200,
+        "url": absoluteUrl('/icon.png'),
       },
+      "areaServed": "MX",
+      "knowsLanguage": "es",
+      "knowsAbout": ["Tarot", "Arcanos mayores", "Lectura de vidas pasadas", "Espiritualidad", "Brujería"],
+      "makesOffer": readingsData.map((reading) => ({
+        "@type": "Offer",
+        "price": reading.priceValue.toFixed(2),
+        "priceCurrency": "MXN",
+        "url": absoluteUrl('/citas'),
+        "itemOffered": { "@type": "Service", "name": reading.title, "description": reading.description },
+      })),
     },
   ],
 };
@@ -60,7 +72,7 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="es">
+    <html lang="es-MX">
       <head>
         <Script
           src="https://cdn.jsdelivr.net/gh/bigdatacloudapi/js-reverse-geocode-client@9ab66c35f7914b9d9a54b3e57fd465916d45ec65/bigdatacloud_reverse_geocode.min.js"
