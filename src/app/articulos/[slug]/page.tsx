@@ -144,7 +144,7 @@ export default async function ArticuloPage({ params }: { params: Promise<{ slug:
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(jsonLd) }}
       />
-      <MoonReadingProgress />
+      <MoonReadingProgress targetId="cuerpo-articulo" />
 
       <span className="lun-eyebrow block text-center">El grimorio de Lunaria</span>
 
@@ -182,7 +182,7 @@ export default async function ArticuloPage({ params }: { params: Promise<{ slug:
       </div>
 
       {/* Contenido del artículo */}
-      <div className="max-w-4xl mx-auto">
+      <div id="cuerpo-articulo" className="max-w-4xl mx-auto">
         <ArticleContent body={article.body} />
       </div>
     </div>

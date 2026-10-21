@@ -1,5 +1,5 @@
 'use client';
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useGSAP } from "@gsap/react";
@@ -26,6 +26,7 @@ const MoonMark = ({ size = 28 }: { size?: number }) => (
 const Header = () => {
   const [isOpen, setIsOpen] = useState(false);
   const headerRef = useRef<HTMLElement>(null);
+  const isOpenRef = useRef(false);
   const pathname = usePathname();
   const lenis = useLenis();
   const {
@@ -50,17 +51,33 @@ const Header = () => {
       scrollTrigger: { trigger: "body", start: "top top", end: "+=100", scrub: 1 },
     });
 
-    // Se esconde al bajar y vuelve al subir
-    if (!lenis) return;
+    // Se esconde al bajar y vuelve al subir, salvo que el menú móvil esté abierto
+    // o el foco del teclado esté dentro del header
+    const header = headerRef.current;
+    if (!lenis || !header) return;
+    const show = () => gsap.to(header, { yPercent: 0, duration: 0.4, ease: "power2.out", overwrite: "auto" });
     let lastScroll = 0;
     const onScroll = ({ scroll }: { scroll: number }) => {
-      const hide = scroll > 160 && scroll > lastScroll;
-      gsap.to(headerRef.current, { yPercent: hide ? -110 : 0, duration: 0.4, ease: "power2.out", overwrite: "auto" });
+      const pinned = isOpenRef.current || header.contains(document.activeElement);
+      const hide = !pinned && scroll > 160 && scroll > lastScroll;
+      gsap.to(header, { yPercent: hide ? -110 : 0, duration: 0.4, ease: "power2.out", overwrite: "auto" });
       lastScroll = scroll;
     };
     lenis.on("scroll", onScroll);
-    return () => lenis.off("scroll", onScroll);
+    header.addEventListener("focusin", show);
+    return () => {
+      lenis.off("scroll", onScroll);
+      header.removeEventListener("focusin", show);
+    };
   }, { scope: headerRef, dependencies: [lenis] });
+
+  // Al abrir el menú móvil el header vuelve a la vista
+  useEffect(() => {
+    isOpenRef.current = isOpen;
+    if (isOpen && headerRef.current) {
+      gsap.to(headerRef.current, { yPercent: 0, duration: 0.4, ease: "power2.out", overwrite: "auto" });
+    }
+  }, [isOpen]);
 
   const musicButtons = (size: number) => (
     <>

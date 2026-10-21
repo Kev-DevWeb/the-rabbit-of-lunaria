@@ -2,14 +2,23 @@
 
 import { useEffect, useState } from 'react';
 
-// Avance de lectura como una luna que se va llenando: de nueva a llena al terminar el artículo.
-export default function MoonReadingProgress() {
+/**
+ * Avance de lectura como una luna que se va llenando: de nueva a llena al terminar el artículo.
+ * Se mide contra el elemento con id `targetId` (el cuerpo del artículo), no contra toda la página,
+ * para que llegue a 100% al acabar el texto y no hasta el final del footer.
+ */
+export default function MoonReadingProgress({ targetId }: { targetId: string }) {
   const [progress, setProgress] = useState(0);
 
   useEffect(() => {
     const update = () => {
-      const max = document.documentElement.scrollHeight - window.innerHeight;
-      setProgress(max > 0 ? Math.min(100, Math.max(0, (window.scrollY / max) * 100)) : 0);
+      const target = document.getElementById(targetId);
+      if (!target) return;
+      const rect = target.getBoundingClientRect();
+      const start = rect.top + window.scrollY;
+      const end = start + rect.height - window.innerHeight;
+      const value = end > start ? ((window.scrollY - start) / (end - start)) * 100 : window.scrollY >= start ? 100 : 0;
+      setProgress(Math.min(100, Math.max(0, value)));
     };
     update();
     window.addEventListener('scroll', update, { passive: true });
@@ -18,7 +27,7 @@ export default function MoonReadingProgress() {
       window.removeEventListener('scroll', update);
       window.removeEventListener('resize', update);
     };
-  }, []);
+  }, [targetId]);
 
   // La sombra se corre de derecha a izquierda conforme avanza la lectura
   const shadowX = 17 + (progress / 100) * 30;

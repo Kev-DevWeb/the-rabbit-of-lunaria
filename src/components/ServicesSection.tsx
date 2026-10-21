@@ -1,5 +1,5 @@
 'use client';
-import React, { useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import Image from 'next/image';
 import Link from 'next/link';
 import { useGSAP } from '@gsap/react';
@@ -15,6 +15,20 @@ const NUMERALS = ['I', 'II', 'III'];
 const ServicesSection = () => {
   const sectionRef = useRef<HTMLElement>(null);
   const [flipped, setFlipped] = useState<Record<string, boolean>>({});
+  // Al voltear, el foco del teclado pasa a la cara visible (si no, queda en un botón oculto)
+  const faceRefs = useRef<Record<string, HTMLElement | null>>({});
+  const pendingFocus = useRef<string | null>(null);
+
+  const flip = (id: string, value: boolean) => {
+    pendingFocus.current = `${id}:${value ? 'back' : 'front'}`;
+    setFlipped((f) => ({ ...f, [id]: value }));
+  };
+
+  useEffect(() => {
+    if (!pendingFocus.current) return;
+    faceRefs.current[pendingFocus.current]?.focus({ preventScroll: true });
+    pendingFocus.current = null;
+  }, [flipped]);
 
   useGSAP(() => {
     const mm = gsap.matchMedia();
@@ -67,10 +81,11 @@ const ServicesSection = () => {
                 {/* Reverso de la carta */}
                 <button
                   type="button"
+                  ref={(el) => { faceRefs.current[`${reading.id}:front`] = el; }}
                   aria-label={`Revelar la carta ${NUMERALS[i]}: ${reading.title}`}
                   aria-hidden={isFlipped}
                   tabIndex={isFlipped ? -1 : 0}
-                  onClick={() => setFlipped((f) => ({ ...f, [reading.id]: true }))}
+                  onClick={() => flip(reading.id, true)}
                   className="absolute inset-0 flex cursor-pointer flex-col overflow-hidden rounded-[18px] border border-gold/55 bg-dusk p-3 transition-shadow duration-300 [backface-visibility:hidden] hover:shadow-[0_18px_60px_rgba(123,92,255,0.35)]"
                 >
                   <span className="relative block flex-1 overflow-hidden rounded-xl border border-gold/35">
@@ -93,6 +108,7 @@ const ServicesSection = () => {
                   </span>
                   <Link
                     href="/citas"
+                    ref={(el) => { faceRefs.current[`${reading.id}:back`] = el; }}
                     tabIndex={isFlipped ? 0 : -1}
                     className="lun-link mt-1 font-label text-sm tracking-[0.2em] text-lavender"
                   >
@@ -101,7 +117,7 @@ const ServicesSection = () => {
                   <button
                     type="button"
                     tabIndex={isFlipped ? 0 : -1}
-                    onClick={() => setFlipped((f) => ({ ...f, [reading.id]: false }))}
+                    onClick={() => flip(reading.id, false)}
                     className="min-h-11 font-label text-xs tracking-[0.2em] text-moon-500 hover:text-moon-100"
                   >
                     Volver a tapar

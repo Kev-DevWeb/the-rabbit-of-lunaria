@@ -70,6 +70,8 @@ h1, h2 {
 }
 
 /* ===== Piezas compartidas del tema ===== */
+/* En @layer components para que las utilidades de Tailwind (layer utilities) puedan sobrescribirlas */
+@layer components {
 .lun-eyebrow {
   font-family: var(--font-cinzel);
   font-size: 0.8rem;
@@ -196,6 +198,8 @@ h1, h2 {
     animation: none;
   }
 }
+
+} /* fin @layer components */
 
 /* React Day Picker v9 (clases .rdp-root / .rdp-day_button) */
 .rdp-root {

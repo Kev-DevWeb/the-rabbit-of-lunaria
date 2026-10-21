@@ -30,8 +30,9 @@ const MagicHeroSection = () => {
       gsap.from(split.chars, { autoAlpha: 0, y: 20, filter: 'blur(12px)', duration: 1.2, ease: 'power3.out', stagger: 0.03, delay: 0.6 });
       gsap.from('.hero-copy', { autoAlpha: 0, y: 24, duration: 1.2, ease: 'power3.out', stagger: 0.15, delay: 1.4 });
 
-      // Parallax: la luna se queda atrás, el bosque se adelanta
-      gsap.to('.hero-moon', { yPercent: 35, ease: 'none', scrollTrigger: { trigger: containerRef.current, start: 'top top', end: 'bottom top', scrub: true } });
+      // Parallax: la luna y el conejo se quedan atrás juntos, el bosque se adelanta.
+      // Va en un envoltorio propio para no pelear por yPercent con la entrada de .hero-moon.
+      gsap.to('.hero-hanging', { yPercent: 25, ease: 'none', scrollTrigger: { trigger: containerRef.current, start: 'top top', end: 'bottom top', scrub: true } });
       gsap.to('.hero-forest', { yPercent: -18, ease: 'none', scrollTrigger: { trigger: containerRef.current, start: 'top top', end: 'bottom top', scrub: true } });
 
       return () => split.revert();
@@ -58,12 +59,14 @@ const MagicHeroSection = () => {
       <div aria-hidden="true" className="pointer-events-none absolute inset-x-0 bottom-0 z-[5] h-40 bg-gradient-to-b from-transparent to-night" />
 
       <div className="relative z-10 flex flex-col items-center">
+        <div className="hero-hanging flex flex-col items-center">
         <div className="hero-moon relative aspect-square w-[min(340px,70vw)] drop-shadow-[0_0_40px_rgba(233,196,106,0.45)]">
           <Image src="/CELL_Luna.png" alt="" fill priority sizes="340px" className="object-contain" />
         </div>
         {/* El conejo cuelga justo debajo de la luna */}
         <div className="hero-rabbit -mt-[min(210px,43vw)]">
           <RabbitGrimoire />
+        </div>
         </div>
 
         <div className="mt-4 flex max-w-4xl flex-col items-center gap-5">

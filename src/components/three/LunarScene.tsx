@@ -175,13 +175,21 @@ function Rig({ pointer }: { pointer: React.RefObject<{ x: number; y: number }> }
   return null;
 }
 
+// Se prueba una sola vez por sesión y el contexto de prueba se libera:
+// el navegador limita los contextos WebGL activos (~16) y tiraría el de la escena real.
+let webglSupport: boolean | null = null;
+
 function hasWebGL() {
+  if (webglSupport !== null) return webglSupport;
   try {
     const canvas = document.createElement('canvas');
-    return !!(canvas.getContext('webgl2') || canvas.getContext('webgl'));
+    const ctx = canvas.getContext('webgl2') || canvas.getContext('webgl');
+    ctx?.getExtension('WEBGL_lose_context')?.loseContext();
+    webglSupport = !!ctx;
   } catch {
-    return false;
+    webglSupport = false;
   }
+  return webglSupport;
 }
 
 export default function LunarScene({ className = '' }: { className?: string }) {
